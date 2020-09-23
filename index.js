@@ -12,6 +12,10 @@ function ___fairysupport(){
     this.clazz = {};
     this.controllerMethodList = {};
 
+    this.componentControllerList = {};
+    this.componentControllerethodList = {};
+    this.componentViewList = {};
+
     this.init = function () {
         if (scriptObj) {
             let argRoot = scriptObj.dataset.root;
@@ -215,8 +219,8 @@ function ___fairysupport(){
     };
 
     this.getControllerMethod = function (fs, methodName, argList){
-        return function (){
-            fs.getExecMethod(fs, fs.clazz.obj, fs.controllerMethodList, methodName, argList);
+        return function(){
+            fs.execControllerMethod(methodName, argList);
         }
     };
 
@@ -316,6 +320,126 @@ function ___fairysupport(){
                 }
             }
         }
+    };
+
+    this.loadComponent = function (dom, componentPackeage){
+
+        let componentPath = '';
+        let componentNameList = componentPackeage.split('.');
+        for (let componentName of componentNameList) {
+            componentPath += (componentName + '/');
+        }
+        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+        let componentViewPath = componentRoot + componentPath + 'view.js';
+
+        import(componentViewPath)
+        .then(this.getComponentView(this, dom, componentPath, componentControllerPath));
+
+    };
+
+    this.getComponentView = function (fs, dom, componentPath, componentControllerPath){
+        return function (Module){
+            fs.componentViewList[componentPath] = Module.default;
+            import(componentControllerPath)
+            .then(fs.getComponentController(fs, componentPath))
+            .then(fs.getInsertComponent(fs, dom, componentPath))
+            .then(fs.getComponentMethod(fs, componentPath, 'init', null));
+        };
+    };
+
+    this.getComponentController = function (fs, componentPath){
+        return function (Module){
+            fs.componentControllerList[componentPath] = new Module.default();
+            fs.componentControllerethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
+        };
+    };
+
+    this.getInsertComponent = function (fs, dom, componentPath){
+        return function (){
+            dom.innerHTML = fs.componentViewList[componentPath].trim();
+            let childList = dom.childNodes;
+            let child = null;
+            if (childList != null && childList != undefined) {
+                for (let i = 0; i < childList.length; i++) {
+                    child = childList.item(i);
+                    fs.bindComponentNest(child, componentPath);
+                }
+            }
+        };
+    };
+
+    this.bindComponentNest = function (obj, componentPath){
+        if (obj == null || obj == undefined) {
+            return;
+        }
+        this.bindComponentSingle(obj, componentPath);
+        let childList = obj.childNodes;
+        let child = null;
+        if (childList != null && childList != undefined) {
+            for (let i = 0; i < childList.length; i++) {
+                child = childList.item(i);
+                this.bindComponentNest(child, componentPath);
+            }
+        }
+    };
+
+    this.bindComponentSingle = function (obj, componentPath){
+        let dataset = obj.dataset;
+        if (dataset !== null && dataset != undefined) {
+            let bindObj = dataset.compObj;
+            this.bindComponentSingleObj(obj, bindObj, componentPath);
+
+            let bindList = dataset.compList;
+            this.bindComponentSingleList(obj, bindList, componentPath);
+
+            let name = dataset.compName;
+            this.bindComponentSingleEvent(obj, name, componentPath);
+        }
+    };
+
+    this.bindComponentSingleObj = function (dom, bindStr, componentPath){
+        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined) {
+            this.execComponentMethod(componentPath, 'beforeBindObj', {'name': bindStr, 'value': dom});
+            this.componentControllerList[componentPath][bindStr] = dom;
+            this.execComponentMethod(componentPath, 'afterBindObj', {'name': bindStr, 'value': dom});
+        }
+    }
+
+    this.bindComponentSingleList = function (dom, bindList, componentPath){
+        if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
+            this.execComponentMethod(componentPath, 'beforeBindList', {'name': bindList, 'value': dom});
+            if (this.componentControllerList[componentPath][bindList] instanceof Array) {
+                this.componentControllerList[componentPath][bindList].push(dom);
+            } else {
+                this.componentControllerList[componentPath][bindList] = [];
+                this.componentControllerList[componentPath][bindList].push(dom);
+            }
+            this.execComponentMethod(componentPath, 'afterBindList', {'name': bindList, 'value': dom});
+        }
+    }
+
+    this.bindComponentSingleEvent = function (dom, name, componentPath){
+        if (dom !== null && dom != undefined && name !== null && name != undefined) {
+            for (let componentControllerMethod in this.componentControllerethodList[componentPath]) {
+                if (componentControllerMethod.indexOf(name) === 0) {
+                    let eventName = componentControllerMethod.substring(name.length);
+                    eventName = eventName.substring(0, 1).toLowerCase() + eventName.substring(1);
+                    this.execComponentMethod(componentPath, 'beforeName', {'name': name, 'event': eventName, 'value': dom});
+                    dom.addEventListener(eventName, this.componentControllerethodList[componentPath][componentControllerMethod]);
+                    this.execComponentMethod(componentPath, 'afterName', {'name': name, 'event': eventName, 'value': dom});
+                }
+            }
+        }
+    }
+
+    this.execComponentMethod = function (componentPath, methodName, argList){
+        this.execMethod(this.componentControllerList[componentPath], this.componentControllerethodList[componentPath], methodName, argList);
+    };
+
+    this.getComponentMethod = function (fs, componentPath, methodName, argList){
+        return function(){
+            fs.execComponentMethod(componentPath, methodName, argList);
+        };
     };
 
 }
