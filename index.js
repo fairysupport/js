@@ -116,8 +116,8 @@ function ___fairysupport(){
                 }
             });
             let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
-            fs.bindBody();
             observer.observe(bodyObj[0], config);
+            fs.bindBody();
         };
     };
 
@@ -241,7 +241,7 @@ function ___fairysupport(){
     };
 
     this.removeControllerSingleObj = function (dom, bindStr){
-        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined) {
+        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined && this.clazz.obj[bindStr] != undefined) {
             this.execControllerMethod('beforeRemoveObj', {'name': bindStr, 'value': dom});
             delete this.clazz.obj[bindStr];
             this.execControllerMethod('afterRemoveObj', {'name': bindStr, 'value': dom});
@@ -250,16 +250,16 @@ function ___fairysupport(){
 
     this.removeControllerSingleList = function (dom, bindList){
         if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
-            this.execControllerMethod('beforeRemoveList', {'name': bindList, 'value': dom});
-            if (this.clazz.obj[bindList] instanceof Array) {
+            if (this.clazz.obj[bindList] != undefined && this.clazz.obj[bindList] instanceof Array) {
                 for (let i in this.clazz.obj[bindList]) {
                     if (this.clazz.obj[bindList][i] === dom) {
+                        this.execControllerMethod('beforeRemoveList', {'name': bindList, 'value': dom});
                         this.clazz.obj[bindList].splice(i, 1);
+                        this.execControllerMethod('afterRemoveList', {'name': bindList, 'value': dom});
                         break;
                     }
                 }
             }
-            this.execControllerMethod('afterRemoveList', {'name': bindList, 'value': dom});
         }
     };
 
@@ -307,11 +307,7 @@ function ___fairysupport(){
 
             let name = dataset.name;
             if (name !== null && name != undefined) {
-                for (let controllerMethod in this.controllerMethodList) {
-                    if (controllerMethod.indexOf(name) === 0) {
-                        this.removeControllerSingleEvent(obj, name);
-                    }
-                }
+                this.removeControllerSingleEvent(obj, name);
             }
         }
     };
@@ -433,6 +429,50 @@ function ___fairysupport(){
     this.getComponentMethod = function (fs, componentPath, methodName, argList){
         return function(){
             fs.execComponentMethod(componentPath, methodName, argList);
+        };
+    };
+
+    this.componentBinder = function (fs, compDom, componentPath){
+        return function (){
+            let observer = new MutationObserver((records, obj) => {
+                for (let record of records) {
+                    if (record.type === 'attributes') {
+                        if (record.attributeName === 'data-comp-obj') {
+                            fs.removeControllerSingleObj(record.target, record.oldValue);
+                            let dataset = record.target.dataset;
+                            if (dataset !== null && dataset != undefined) {
+                                let compObj = dataset.compObj;
+                                fs.bindComponentSingleObj(record.target, compObj, componentPath);
+                            }
+                        }
+                        if (record.attributeName === 'data-comp-list') {
+                            fs.removeControllerSingleList(record.target, record.oldValue);
+                            let dataset = record.target.dataset;
+                            if (dataset !== null && dataset != undefined) {
+                                let compList = dataset.compList;
+                                fs.bindComponentSingleList(record.target, compList, componentPath);
+                            }
+                        }
+                        if (record.attributeName === 'data-comp-name') {
+                            fs.removeControllerSingleEvent(record.target, record.oldValue);
+                            let dataset = record.target.dataset;
+                            if (dataset !== null && dataset != undefined) {
+                                let compName = dataset.compName;
+                                fs.bindComponentSingleEvent(record.target, compName, componentPath);
+                            }
+                        }
+                    } else if (record.type === 'childList') {
+                        for (let i = 0; i < record.removedNodes.length; i++) {
+                            fs.removeControllerNest(record.removedNodes.item(i));
+                        }
+                        for (let i = 0; i < record.addedNodes.length; i++) {
+                            fs.bindControllerNest(record.addedNodes.item(i));
+                        }
+                    }
+                }
+            });
+            let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
+            observer.observe(compDom, config);
         };
     };
 
