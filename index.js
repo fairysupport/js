@@ -168,11 +168,11 @@ function ___fairysupport(){
     this.bindControllerSingleList = function (dom, bindList){
         if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
             this.execControllerMethod('beforeBindList', {'name': bindList, 'value': dom});
-            if (this.clazz.obj[bindList] instanceof Array) {
-                this.clazz.obj[bindList].push(dom);
+            if (this.clazz.obj[bindList] instanceof Set) {
+                this.clazz.obj[bindList].add(dom);
             } else {
-                this.clazz.obj[bindList] = [];
-                this.clazz.obj[bindList].push(dom);
+                this.clazz.obj[bindList] = new Set();
+                this.clazz.obj[bindList].add(dom);
             }
             this.execControllerMethod('afterBindList', {'name': bindList, 'value': dom});
         }
@@ -250,15 +250,10 @@ function ___fairysupport(){
 
     this.removeControllerSingleList = function (dom, bindList){
         if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
-            if (this.clazz.obj[bindList] != undefined && this.clazz.obj[bindList] instanceof Array) {
-                for (let i in this.clazz.obj[bindList]) {
-                    if (this.clazz.obj[bindList][i] === dom) {
-                        this.execControllerMethod('beforeRemoveList', {'name': bindList, 'value': dom});
-                        this.clazz.obj[bindList].splice(i, 1);
-                        this.execControllerMethod('afterRemoveList', {'name': bindList, 'value': dom});
-                        break;
-                    }
-                }
+            if (this.clazz.obj[bindList] != undefined && this.clazz.obj[bindList] instanceof Set && this.clazz.obj[bindList].has(dom)) {
+                this.execControllerMethod('beforeRemoveList', {'name': bindList, 'value': dom});
+                this.clazz.obj[bindList].delete(dom);
+                this.execControllerMethod('afterRemoveList', {'name': bindList, 'value': dom});
             }
         }
     };
@@ -398,11 +393,11 @@ function ___fairysupport(){
     this.bindComponentSingleList = function (dom, bindList, componentPath){
         if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
             this.execComponentMethod(componentPath, 'beforeBindList', {'name': bindList, 'value': dom});
-            if (this.componentControllerList[componentPath][bindList] instanceof Array) {
-                this.componentControllerList[componentPath][bindList].push(dom);
+            if (this.componentControllerList[componentPath][bindList] instanceof Set) {
+                this.componentControllerList[componentPath][bindList].add(dom);
             } else {
-                this.componentControllerList[componentPath][bindList] = [];
-                this.componentControllerList[componentPath][bindList].push(dom);
+                this.componentControllerList[componentPath][bindList] = new Set();
+                this.componentControllerList[componentPath][bindList].add(dom);
             }
             this.execComponentMethod(componentPath, 'afterBindList', {'name': bindList, 'value': dom});
         }
@@ -438,7 +433,7 @@ function ___fairysupport(){
                 for (let record of records) {
                     if (record.type === 'attributes') {
                         if (record.attributeName === 'data-comp-obj') {
-                            fs.removeControllerSingleObj(record.target, record.oldValue);
+                            fs.removeComponentSingleObj(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset != undefined) {
                                 let compObj = dataset.compObj;
@@ -446,7 +441,7 @@ function ___fairysupport(){
                             }
                         }
                         if (record.attributeName === 'data-comp-list') {
-                            fs.removeControllerSingleList(record.target, record.oldValue);
+                            fs.removeComponentSingleList(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset != undefined) {
                                 let compList = dataset.compList;
@@ -454,7 +449,7 @@ function ___fairysupport(){
                             }
                         }
                         if (record.attributeName === 'data-comp-name') {
-                            fs.removeControllerSingleEvent(record.target, record.oldValue);
+                            fs.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset != undefined) {
                                 let compName = dataset.compName;
@@ -463,10 +458,10 @@ function ___fairysupport(){
                         }
                     } else if (record.type === 'childList') {
                         for (let i = 0; i < record.removedNodes.length; i++) {
-                            fs.removeControllerNest(record.removedNodes.item(i));
+                            fs.removeComponentNest(record.removedNodes.item(i), componentPath);
                         }
                         for (let i = 0; i < record.addedNodes.length; i++) {
-                            fs.bindControllerNest(record.addedNodes.item(i));
+                            fs.bindComponentNest(record.addedNodes.item(i), componentPath);
                         }
                     }
                 }
@@ -474,6 +469,73 @@ function ___fairysupport(){
             let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
             observer.observe(compDom, config);
         };
+    };
+
+    this.removeComponentSingleObj = function (dom, bindStr, componentPath){
+        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined && this.componentControllerList[componentPath] != undefined && this.componentControllerList[componentPath][bindStr] != undefined) {
+            this.execComponentMethod(componentPath, 'beforeRemoveObj', {'name': bindStr, 'value': dom});
+            delete this.componentControllerList[componentPath][bindStr];
+            this.execComponentMethod(componentPath, 'afterRemoveObj', {'name': bindStr, 'value': dom});
+        }
+    };
+
+    this.removeComponentSingleList = function (dom, bindList, componentPath){
+        if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
+            if (this.componentControllerList[componentPath] != undefined && this.componentControllerList[componentPath][bindList] != undefined && this.componentControllerList[componentPath][bindList] instanceof Set && this.componentControllerList[componentPath][bindList].has(dom)) {
+                this.execComponentMethod(componentPath, 'beforeRemoveList', {'name': bindList, 'value': dom});
+                this.componentControllerList[componentPath][bindList].delete(dom);
+                this.execComponentMethod(componentPath, 'afterRemoveList', {'name': bindList, 'value': dom});
+            }
+        }
+    };
+
+    this.removeComponentSingleEvent = function (dom, name, componentPath){
+        if (dom !== null && dom != undefined && name !== null && name != undefined) {
+            for (let componentControllerMethod in this.componentControllerethodList[componentPath]) {
+                if (componentControllerMethod.indexOf(name) === 0) {
+                    let eventName = componentControllerMethod.substring(name.length);
+                    eventName = eventName.substring(0, 1).toLowerCase() + eventName.substring(1);
+                    this.execComponentMethod(componentPath, 'beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                    dom.removeEventListener(eventName, this.componentControllerethodList[componentPath][componentControllerMethod]);
+                    this.execComponentMethod(componentPath, 'afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                }
+            }
+        }
+    };
+
+    this.removeComponentNest = function (obj, componentPath){
+        if (obj == null || obj == undefined) {
+            return;
+        }
+        this.removeComponentSingle(obj, componentPath);
+        let childList = obj.childNodes;
+        let child = null;
+        if (childList != null && childList != undefined) {
+            for (let i = 0; i < childList.length; i++) {
+                child = childList.item(i);
+                this.removeComponentNest(child, componentPath);
+            }
+        }
+    };
+
+    this.removeComponentSingle = function (obj, componentPath){
+        let dataset = obj.dataset;
+        if (dataset !== null && dataset != undefined) {
+            let bindObj = dataset.obj;
+            if (bindObj !== null && bindObj != undefined) {
+                this.removeComponentSingleObj(obj, bindObj, componentPath);
+            }
+
+            let bindList = dataset.list;
+            if (bindList !== null && bindList != undefined) {
+                this.removeComponentSingleList(obj, bindList, componentPath);
+            }
+
+            let name = dataset.name;
+            if (name !== null && name != undefined) {
+                this.removeComponentSingleEvent(obj, name, componentPath);
+            }
+        }
     };
 
 }
