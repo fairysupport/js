@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>
+sample
+</title>
+<script src="http://localhost/sample/js/index.js" id="fs-js" data-root="http://localhost/sample"></script>
+<style type="text/css">
+    DIV {margin: 10px;}
+    LI {margin: 10px;}
+</style>
+</head>
+<body>
+    <div data-obj="obj1">obj1</div>
+    <ol data-obj="obj2">
+        <li data-list="dataList">obj2-dataList</li>
+        <li data-list="dataList">obj2-dataList</li>
+    </ol>
+    <div data-obj="obj3">
+        obj3
+	    <div data-obj="obj4">
+	        obj4
+	        <div data-obj="obj5">
+                obj5
+	        </div>
+	    </div>
+    </div>
+
+    <div data-name="consoleLog">output to console</div>
+    <div data-name="removeObj1">remove obj1</div>
+    <div data-name="removeDataList">remove dataList</div>
+    <div data-name="removeObj3">remove obj3</div>
+</body>
+</html>

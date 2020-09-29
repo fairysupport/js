@@ -9,8 +9,8 @@ function ___fairysupport(){
     let root = reqUrl.origin + '/';
     let reqPath = reqUrl.origin + reqUrl.pathname.trim();
     if (reqUrl.port != null && reqUrl.port != undefined && reqUrl.port != '') {
-    	root = reqUrl.origin + ':' + reqUrl.port + '/';
-    	reqPath = reqUrl.origin + ':' + reqUrl.port + reqUrl.pathname.trim();
+        root = reqUrl.origin + ':' + reqUrl.port + '/';
+        reqPath = reqUrl.origin + ':' + reqUrl.port + reqUrl.pathname.trim();
     }
 
     this.clazz = {};
@@ -311,8 +311,9 @@ function ___fairysupport(){
         }
     };
 
-    this.loadComponent = function (dom, componentPackeage, argObj){
+    this.loadComponent = function (dom, componentPackeage, argObj, cb){
 
+        componentPackeage = componentPackeage.trim();
         let componentPath = '';
         let componentNameList = componentPackeage.split('.');
         for (let componentName of componentNameList) {
@@ -322,17 +323,25 @@ function ___fairysupport(){
         let componentViewPath = componentRoot + componentPath + 'view.js';
 
         import(componentViewPath)
-        .then(this.getComponentView(this, dom, componentPath, componentControllerPath, argObj));
+        .then(this.getComponentView(this, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb));
 
     };
 
-    this.getComponentView = function (fs, dom, componentPath, componentControllerPath, argObj){
+    this.getComponentView = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb){
         return function (Module){
+
+            let func = function () {
+            };
+            if (cb !== null && cb != undefined && typeof cb === 'function') {
+                func = cb;
+            }
+
             fs.componentViewList[componentPath] = Module.default;
             import(componentControllerPath)
             .then(fs.getComponentController(fs, componentPath))
-            .then(fs.getInsertComponent(fs, dom, componentPath))
-            .then(fs.getComponentMethod(fs, componentPath, 'init', argObj));
+            .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage))
+            .then(fs.getComponentMethod(fs, componentPath, 'init', argObj))
+            .then(func);
         };
     };
 
@@ -343,7 +352,7 @@ function ___fairysupport(){
         };
     };
 
-    this.getInsertComponent = function (fs, dom, componentPath){
+    this.getInsertComponent = function (fs, dom, componentPath, componentPackeage){
         return function (){
             dom.innerHTML = fs.componentViewList[componentPath].trim();
             let childList = dom.childNodes;
@@ -351,38 +360,38 @@ function ___fairysupport(){
             if (childList != null && childList != undefined) {
                 for (let i = 0; i < childList.length; i++) {
                     child = childList.item(i);
-                    fs.componentBinder(child, componentPath);
-                    fs.bindComponentNest(child, componentPath);
+                    fs.componentBinder(child, componentPath, componentPackeage);
+                    fs.bindComponentNest(child, componentPath, componentPackeage);
                 }
             }
         };
     };
 
-    this.bindComponentNest = function (obj, componentPath){
+    this.bindComponentNest = function (obj, componentPath, componentPackeage){
         if (obj == null || obj == undefined) {
             return;
         }
-        this.bindComponentSingle(obj, componentPath);
+        this.bindComponentSingle(obj, componentPath, componentPackeage);
         let childList = obj.childNodes;
         let child = null;
         if (childList != null && childList != undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
-                this.bindComponentNest(child, componentPath);
+                this.bindComponentNest(child, componentPath, componentPackeage);
             }
         }
     };
 
-    this.bindComponentSingle = function (obj, componentPath){
+    this.bindComponentSingle = function (obj, componentPath, componentPackeage){
         let dataset = obj.dataset;
         if (dataset !== null && dataset != undefined) {
-            let bindObj = dataset.compObj;
+            let bindObj = dataset[componentPackeage + 'Obj'];
             this.bindComponentSingleObj(obj, bindObj, componentPath);
 
-            let bindList = dataset.compList;
+            let bindList = dataset[componentPackeage + 'List'];
             this.bindComponentSingleList(obj, bindList, componentPath);
 
-            let name = dataset.compName;
+            let name = dataset[componentPackeage + 'Name'];
             this.bindComponentSingleEvent(obj, name, componentPath);
         }
     };
@@ -432,40 +441,40 @@ function ___fairysupport(){
         };
     };
 
-    this.componentBinder = function (compDom, componentPath){
+    this.componentBinder = function (compDom, componentPath, componentPackeage){
         let observer = new MutationObserver((records, obj) => {
             for (let record of records) {
                 if (record.type === 'attributes') {
-                    if (record.attributeName === 'data-comp-obj') {
-                    	this.removeComponentSingleObj(record.target, record.oldValue, componentPath);
+                    if (record.attributeName === 'data-' + componentPackeage + '-obj') {
+                        this.removeComponentSingleObj(record.target, record.oldValue, componentPath);
                         let dataset = record.target.dataset;
                         if (dataset !== null && dataset != undefined) {
-                            let compObj = dataset.compObj;
+                            let compObj = dataset[componentPackeage + 'Obj'];
                             this.bindComponentSingleObj(record.target, compObj, componentPath);
                         }
                     }
-                    if (record.attributeName === 'data-comp-list') {
-                    	this.removeComponentSingleList(record.target, record.oldValue, componentPath);
+                    if (record.attributeName === 'data-' + componentPackeage + '-list') {
+                        this.removeComponentSingleList(record.target, record.oldValue, componentPath);
                         let dataset = record.target.dataset;
                         if (dataset !== null && dataset != undefined) {
-                            let compList = dataset.compList;
+                            let compList = dataset[componentPackeage + 'List'];
                             this.bindComponentSingleList(record.target, compList, componentPath);
                         }
                     }
-                    if (record.attributeName === 'data-comp-name') {
-                    	this.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
+                    if (record.attributeName === 'data-' + componentPackeage + '-name') {
+                        this.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
                         let dataset = record.target.dataset;
                         if (dataset !== null && dataset != undefined) {
-                            let compName = dataset.compName;
+                            let compName = dataset[componentPackeage + 'Name'];
                             this.bindComponentSingleEvent(record.target, compName, componentPath);
                         }
                     }
                 } else if (record.type === 'childList') {
                     for (let i = 0; i < record.removedNodes.length; i++) {
-                    	this.removeComponentNest(record.removedNodes.item(i), componentPath);
+                        this.removeComponentNest(record.removedNodes.item(i), componentPath);
                     }
                     for (let i = 0; i < record.addedNodes.length; i++) {
-                    	this.bindComponentNest(record.addedNodes.item(i), componentPath);
+                        this.bindComponentNest(record.addedNodes.item(i), componentPath, componentPackeage);
                     }
                 }
             }
