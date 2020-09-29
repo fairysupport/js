@@ -5,17 +5,22 @@
 <title>
 sample
 </title>
-<script src="./js/index.js" id="fs-js" data-root="js_sample"></script>
+<script src="http://localhost/sample/js/index.js" id="fs-js" data-root="http://localhost/sample"></script>
+<style type="text/css">
+    DIV {margin: 10px;}
+    LI {margin: 10px;}
+</style>
 </head>
 <body>
-    <div data-obj="obj1">text1</div>
-    <ol>
-        <li data-list="dataList">list1</li>
-        <li data-list="dataList">list2</li>
-    </ol>
+    <div data-obj="obj1">This object is bound to obj1 of /js/modules/add.js</div>
     <div data-obj="obj2"></div>
-    <div data-name="consoleLog">consoleLog</div>
-    <div data-name="addObj">addObj</div>
-    <div data-name="addList">addList</div>
+    <ol data-obj="obj3">
+        <li data-list="dataList">This object is bound to dataList of /js/modules/add.js</li>
+        <li data-list="dataList">This object is bound to dataList of /js/modules/add.js</li>
+    </ol>
+
+    <div data-name="consoleLog">output to console</div>
+    <div data-name="addObj">add new DIV with data-name objX in obj2</div>
+    <div data-name="addList">add new DIV with data-name dataList in obj3</div>
 </body>
 </html>

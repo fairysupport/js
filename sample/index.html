@@ -5,14 +5,18 @@
 <title>
 sample
 </title>
-<script src="./js/index.js" id="fs-js" data-root="js_sample"></script>
+<script src="http://localhost/sample/js/index.js" id="fs-js" data-root="http://localhost/sample"></script>
+<style type="text/css">
+    DIV {margin: 10px;}
+    LI {margin: 10px;}
+</style>
 </head>
 <body>
-    <div data-obj="bind1">text1</div>
+    <div data-obj="bind1">This object is bound to bind1 of /js/modules/index.js</div>
     <ol>
-        <li data-list="bind2">list1</li>
-        <li data-list="bind2">list2</li>
+        <li data-list="bind2">This object is bound to bind2 of /js/modules/index.js</li>
+        <li data-list="bind2">This object is bound to bind2 of /js/modules/index.js</li>
     </ol>
-    <div data-name="sample">sample</div>
+    <div data-name="log">This object is bound to log[Evevt] of /js/modules/index.js</div>
 </body>
 </html>

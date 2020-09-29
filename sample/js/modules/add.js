@@ -4,6 +4,7 @@ export default class extends Base {
 
 	obj1
 	obj2
+	obj3
 	dataList
 
 	objCnt = 1;
@@ -24,8 +25,9 @@ export default class extends Base {
     }
 
     consoleLogClick(event) {
-        console.log("sampleClick");
-        console.log(this.obj2.textContent);
+        for (let i = 4 ; i < this.objCnt; i++) {
+        	console.log(this['obj' + i].textContent);
+        }
         this.dataList.forEach(item => console.log(item.textContent));
     }
 
@@ -40,7 +42,7 @@ export default class extends Base {
     	var divObj = document.createElement("DIV");
     	divObj.appendChild(document.createTextNode('list' + this.listCnt));
     	divObj.dataset.list = 'dataList';
-    	this.obj2.appendChild(divObj);
+    	this.obj3.appendChild(divObj);
     }
 
 }

@@ -3,11 +3,15 @@ function ___fairysupport(){
     let moduleRoot = '/js/modules/';
     let componentRoot = '/js/components/';
     let scriptObj = document.getElementById("fs-js");
-    let root = '/';
 
     let modulePath = 'index';
     let reqUrl = new URL(window.location.href);
-    let reqPath = reqUrl.pathname.trim();
+    let root = reqUrl.origin + '/';
+    let reqPath = reqUrl.origin + reqUrl.pathname.trim();
+    if (reqUrl.port != null && reqUrl.port != undefined && reqUrl.port != '') {
+    	root = reqUrl.origin + ':' + reqUrl.port + '/';
+    	reqPath = reqUrl.origin + ':' + reqUrl.port + reqUrl.pathname.trim();
+    }
 
     this.clazz = {};
     this.controllerMethodList = {};
@@ -22,7 +26,7 @@ function ___fairysupport(){
             if (argRoot !== null && argRoot !== undefined) {
                 argRoot = argRoot.trim();
                 if (argRoot !== '') {
-                    root = '/' + argRoot;
+                    root = argRoot;
                     moduleRoot = root + '/js/modules/';
                     componentRoot = root + '/js/components/';
                 }
@@ -307,7 +311,7 @@ function ___fairysupport(){
         }
     };
 
-    this.loadComponent = function (dom, componentPackeage){
+    this.loadComponent = function (dom, componentPackeage, argObj){
 
         let componentPath = '';
         let componentNameList = componentPackeage.split('.');
@@ -318,17 +322,17 @@ function ___fairysupport(){
         let componentViewPath = componentRoot + componentPath + 'view.js';
 
         import(componentViewPath)
-        .then(this.getComponentView(this, dom, componentPath, componentControllerPath));
+        .then(this.getComponentView(this, dom, componentPath, componentControllerPath, argObj));
 
     };
 
-    this.getComponentView = function (fs, dom, componentPath, componentControllerPath){
+    this.getComponentView = function (fs, dom, componentPath, componentControllerPath, argObj){
         return function (Module){
             fs.componentViewList[componentPath] = Module.default;
             import(componentControllerPath)
             .then(fs.getComponentController(fs, componentPath))
             .then(fs.getInsertComponent(fs, dom, componentPath))
-            .then(fs.getComponentMethod(fs, componentPath, 'init', null));
+            .then(fs.getComponentMethod(fs, componentPath, 'init', argObj));
         };
     };
 
@@ -347,6 +351,7 @@ function ___fairysupport(){
             if (childList != null && childList != undefined) {
                 for (let i = 0; i < childList.length; i++) {
                     child = childList.item(i);
+                    fs.componentBinder(child, componentPath);
                     fs.bindComponentNest(child, componentPath);
                 }
             }
@@ -427,48 +432,46 @@ function ___fairysupport(){
         };
     };
 
-    this.componentBinder = function (fs, compDom, componentPath){
-        return function (){
-            let observer = new MutationObserver((records, obj) => {
-                for (let record of records) {
-                    if (record.type === 'attributes') {
-                        if (record.attributeName === 'data-comp-obj') {
-                            fs.removeComponentSingleObj(record.target, record.oldValue, componentPath);
-                            let dataset = record.target.dataset;
-                            if (dataset !== null && dataset != undefined) {
-                                let compObj = dataset.compObj;
-                                fs.bindComponentSingleObj(record.target, compObj, componentPath);
-                            }
-                        }
-                        if (record.attributeName === 'data-comp-list') {
-                            fs.removeComponentSingleList(record.target, record.oldValue, componentPath);
-                            let dataset = record.target.dataset;
-                            if (dataset !== null && dataset != undefined) {
-                                let compList = dataset.compList;
-                                fs.bindComponentSingleList(record.target, compList, componentPath);
-                            }
-                        }
-                        if (record.attributeName === 'data-comp-name') {
-                            fs.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
-                            let dataset = record.target.dataset;
-                            if (dataset !== null && dataset != undefined) {
-                                let compName = dataset.compName;
-                                fs.bindComponentSingleEvent(record.target, compName, componentPath);
-                            }
-                        }
-                    } else if (record.type === 'childList') {
-                        for (let i = 0; i < record.removedNodes.length; i++) {
-                            fs.removeComponentNest(record.removedNodes.item(i), componentPath);
-                        }
-                        for (let i = 0; i < record.addedNodes.length; i++) {
-                            fs.bindComponentNest(record.addedNodes.item(i), componentPath);
+    this.componentBinder = function (compDom, componentPath){
+        let observer = new MutationObserver((records, obj) => {
+            for (let record of records) {
+                if (record.type === 'attributes') {
+                    if (record.attributeName === 'data-comp-obj') {
+                    	this.removeComponentSingleObj(record.target, record.oldValue, componentPath);
+                        let dataset = record.target.dataset;
+                        if (dataset !== null && dataset != undefined) {
+                            let compObj = dataset.compObj;
+                            this.bindComponentSingleObj(record.target, compObj, componentPath);
                         }
                     }
+                    if (record.attributeName === 'data-comp-list') {
+                    	this.removeComponentSingleList(record.target, record.oldValue, componentPath);
+                        let dataset = record.target.dataset;
+                        if (dataset !== null && dataset != undefined) {
+                            let compList = dataset.compList;
+                            this.bindComponentSingleList(record.target, compList, componentPath);
+                        }
+                    }
+                    if (record.attributeName === 'data-comp-name') {
+                    	this.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
+                        let dataset = record.target.dataset;
+                        if (dataset !== null && dataset != undefined) {
+                            let compName = dataset.compName;
+                            this.bindComponentSingleEvent(record.target, compName, componentPath);
+                        }
+                    }
+                } else if (record.type === 'childList') {
+                    for (let i = 0; i < record.removedNodes.length; i++) {
+                    	this.removeComponentNest(record.removedNodes.item(i), componentPath);
+                    }
+                    for (let i = 0; i < record.addedNodes.length; i++) {
+                    	this.bindComponentNest(record.addedNodes.item(i), componentPath);
+                    }
                 }
-            });
-            let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
-            observer.observe(compDom, config);
-        };
+            }
+        });
+        let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
+        observer.observe(compDom, config);
     };
 
     this.removeComponentSingleObj = function (dom, bindStr, componentPath){
