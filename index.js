@@ -18,7 +18,10 @@ function ___fairysupport(){
 
     this.componentControllerList = {};
     this.componentControllerethodList = {};
-    this.componentViewList = {};
+    this.targetDomMap = new WeakMap();
+    this.componentDomInitFuncMap = new Map();
+    this.componentDomInitCntMap = new Map();
+    this.componentDomInitTotalMap = new Map();
 
     this.init = function () {
         if (scriptObj) {
@@ -109,12 +112,62 @@ function ___fairysupport(){
                                 fs.bindControllerSingleEvent(record.target, name);
                             }
                         }
+
+                        let targetDom = record.target;
+                        if (targetDom !== null && targetDom != undefined) {
+                            continue;
+                        }
+                        if (!this.targetDomMap.has(targetDom)) {
+                            continue;
+                        }
+                        let targetInfo = this.targetDomMap.get(targetDom);
+
+                        for (let targetInfoKey in targetInfo) {
+
+                            let targetInfoValue = targetInfo[targetInfoKey];
+
+                            let componentPath = targetInfoValue['componentPath'];
+                            let componentPackeage = targetInfoValue['componentPackeage'];
+
+                            if (record.attributeName === 'data-' + componentPackeage + '-obj') {
+                                this.removeComponentSingleObj(record.target, record.oldValue, componentPath);
+                                let dataset = record.target.dataset;
+                                if (dataset !== null && dataset != undefined) {
+                                    let compObj = dataset[componentPackeage + 'Obj'];
+                                    this.bindComponentSingleObj(record.target, compObj, componentPath);
+                                }
+                            }
+                            if (record.attributeName === 'data-' + componentPackeage + '-list') {
+                                this.removeComponentSingleList(record.target, record.oldValue, componentPath);
+                                let dataset = record.target.dataset;
+                                if (dataset !== null && dataset != undefined) {
+                                    let compList = dataset[componentPackeage + 'List'];
+                                    this.bindComponentSingleList(record.target, compList, componentPath);
+                                }
+                            }
+                            if (record.attributeName === 'data-' + componentPackeage + '-name') {
+                                this.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
+                                let dataset = record.target.dataset;
+                                if (dataset !== null && dataset != undefined) {
+                                    let compName = dataset[componentPackeage + 'Name'];
+                                    this.bindComponentSingleEvent(record.target, compName, componentPath);
+                                }
+                            }
+
+                        }
+
                     } else if (record.type === 'childList') {
+                        let initFunc = null;
                         for (let i = 0; i < record.removedNodes.length; i++) {
                             fs.removeControllerNest(record.removedNodes.item(i));
                         }
                         for (let i = 0; i < record.addedNodes.length; i++) {
                             fs.bindControllerNest(record.addedNodes.item(i));
+                            initFunc = fs.componentDomInitFuncMap.get(record.addedNodes.item(i));
+                            fs.componentDomInitCntMap.set(record.addedNodes.item(i), fs.componentDomInitCntMap.get(record.addedNodes.item(i)) + 1);
+                            if (fs.componentDomInitCntMap.get(record.addedNodes.item(i)) === fs.componentDomInitTotalMap.get(record.addedNodes.item(i))) {
+                                initFunc();
+                            }
                         }
                     }
                 }
@@ -151,13 +204,48 @@ function ___fairysupport(){
         let dataset = obj.dataset;
         if (dataset !== null && dataset != undefined) {
             let bindObj = dataset.obj;
-            this.bindControllerSingleObj(obj, bindObj);
-
             let bindList = dataset.list;
-            this.bindControllerSingleList(obj, bindList);
-
             let name = dataset.name;
+
+            if (obj !== null && obj != undefined) {
+                if ((bindObj !== null && bindObj != undefined) || (bindList !== null && bindList != undefined) || (name !== null && name != undefined)) {
+                    this.addTargetDom(obj, null, null);
+                }
+            }
+
+            this.bindControllerSingleObj(obj, bindObj);
+            this.bindControllerSingleList(obj, bindList);
             this.bindControllerSingleEvent(obj, name);
+
+
+            if (!this.targetDomMap.has(obj)) {
+                return;
+            }
+            let targetInfo = this.targetDomMap.get(obj);
+            for (let targetInfoKey in targetInfo) {
+
+                let targetInfoValue = targetInfo[targetInfoKey];
+                let componentPath = targetInfoValue['componentPath'];
+                let componentPackeage = targetInfoValue['componentPackeage'];
+
+                bindObj = dataset[componentPackeage + 'Obj'];
+                bindList = dataset[componentPackeage + 'List'];
+                name = dataset[componentPackeage + 'Name'];
+
+                if (bindObj !== null && bindObj != undefined) {
+                    this.bindComponentSingleObj(obj, bindObj, componentPath);
+                }
+
+                if (bindList !== null && bindList != undefined) {
+                    this.bindComponentSingleList(obj, bindList, componentPath);
+                }
+
+                if (name !== null && name != undefined) {
+                    this.bindComponentSingleEvent(obj, name, componentPath);
+                }
+
+            }
+
         }
     };
 
@@ -295,19 +383,47 @@ function ___fairysupport(){
         let dataset = obj.dataset;
         if (dataset !== null && dataset != undefined) {
             let bindObj = dataset.obj;
+            let bindList = dataset.list;
+            let name = dataset.name;
+
             if (bindObj !== null && bindObj != undefined) {
                 this.removeControllerSingleObj(obj, bindObj);
             }
-
-            let bindList = dataset.list;
             if (bindList !== null && bindList != undefined) {
                 this.removeControllerSingleList(obj, bindList);
             }
-
-            let name = dataset.name;
             if (name !== null && name != undefined) {
                 this.removeControllerSingleEvent(obj, name);
             }
+
+            if (!this.targetDomMap.has(obj)) {
+                return;
+            }
+            let targetInfo = this.targetDomMap.get(obj);
+            for (let targetInfoKey in targetInfo) {
+
+                let targetInfoValue = targetInfo[targetInfoKey];
+                let componentPath = targetInfoValue['componentPath'];
+                let componentPackeage = targetInfoValue['componentPackeage'];
+
+                bindObj = dataset[componentPackeage + 'Obj'];
+                bindList = dataset[componentPackeage + 'List'];
+                name = dataset[componentPackeage + 'Name'];
+
+                if (bindObj !== null && bindObj != undefined) {
+                    this.removeComponentSingleObj(obj, bindObj, componentPath);
+                }
+
+                if (bindList !== null && bindList != undefined) {
+                    this.removeComponentSingleList(obj, bindList, componentPath);
+                }
+
+                if (name !== null && name != undefined) {
+                    this.removeComponentSingleEvent(obj, name, componentPath);
+                }
+
+            }
+
         }
     };
 
@@ -336,12 +452,11 @@ function ___fairysupport(){
                 func = cb;
             }
 
-            fs.componentViewList[componentPath] = Module.default;
+            let viewStr = Module.default;
+
             import(componentControllerPath)
             .then(fs.getComponentController(fs, componentPath))
-            .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage))
-            .then(fs.getComponentMethod(fs, componentPath, 'init', argObj))
-            .then(func);
+            .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func))
         };
     };
 
@@ -352,47 +467,54 @@ function ___fairysupport(){
         };
     };
 
-    this.getInsertComponent = function (fs, dom, componentPath, componentPackeage){
+    this.getInsertComponent = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func){
         return function (){
-            dom.innerHTML = fs.componentViewList[componentPath].trim();
-            let childList = dom.childNodes;
+
+            let template = document.createElement('template');
+            template.innerHTML = viewStr;
+            let viewDom = template.content;
+
+            let initFunc = fs.getComponentMethod(fs, componentPath, 'init', argObj, func);
+
+            let childList = viewDom.childNodes;
             let child = null;
             if (childList != null && childList != undefined) {
+                fs.componentDomInitCntMap.set(initFunc, 0);
+                fs.componentDomInitTotalMap.set(initFunc, childList.length);
                 for (let i = 0; i < childList.length; i++) {
                     child = childList.item(i);
-                    fs.componentBinder(child, componentPath, componentPackeage);
-                    fs.bindComponentNest(child, componentPath, componentPackeage);
+                    fs.addComponentTargetDomNest(child, componentPath, componentPackeage);
+                    fs.componentDomInitFuncMap.set(child, initFunc);
                 }
             }
+
+            dom.innerHTML = "";
+            dom.appendChild(viewDom);
         };
     };
 
-    this.bindComponentNest = function (obj, componentPath, componentPackeage){
+    this.addComponentTargetDomNest = function (obj, componentPath, componentPackeage){
         if (obj == null || obj == undefined) {
             return;
         }
-        this.bindComponentSingle(obj, componentPath, componentPackeage);
+
+        let dataset = obj.dataset;
+        if (dataset !== null && dataset != undefined) {
+            let bindObj = dataset[componentPackeage + 'Obj'];
+            let bindList = dataset[componentPackeage + 'List'];
+            let name = dataset[componentPackeage + 'Name'];
+            if ((bindObj !== null && bindObj != undefined) || (bindList !== null && bindList != undefined) || (name !== null && name != undefined)) {
+                this.addTargetDom(obj, componentPath, componentPackeage);
+            }
+        }
+
         let childList = obj.childNodes;
         let child = null;
         if (childList != null && childList != undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
-                this.bindComponentNest(child, componentPath, componentPackeage);
+                this.addComponentTargetDomNest(child, componentPath, componentPackeage);
             }
-        }
-    };
-
-    this.bindComponentSingle = function (obj, componentPath, componentPackeage){
-        let dataset = obj.dataset;
-        if (dataset !== null && dataset != undefined) {
-            let bindObj = dataset[componentPackeage + 'Obj'];
-            this.bindComponentSingleObj(obj, bindObj, componentPath);
-
-            let bindList = dataset[componentPackeage + 'List'];
-            this.bindComponentSingleList(obj, bindList, componentPath);
-
-            let name = dataset[componentPackeage + 'Name'];
-            this.bindComponentSingleEvent(obj, name, componentPath);
         }
     };
 
@@ -435,52 +557,11 @@ function ___fairysupport(){
         this.execMethod(this.componentControllerList[componentPath], this.componentControllerethodList[componentPath], methodName, argList);
     };
 
-    this.getComponentMethod = function (fs, componentPath, methodName, argList){
+    this.getComponentMethod = function (fs, componentPath, methodName, argList, func){
         return function(){
             fs.execComponentMethod(componentPath, methodName, argList);
+            func();
         };
-    };
-
-    this.componentBinder = function (compDom, componentPath, componentPackeage){
-        let observer = new MutationObserver((records, obj) => {
-            for (let record of records) {
-                if (record.type === 'attributes') {
-                    if (record.attributeName === 'data-' + componentPackeage + '-obj') {
-                        this.removeComponentSingleObj(record.target, record.oldValue, componentPath);
-                        let dataset = record.target.dataset;
-                        if (dataset !== null && dataset != undefined) {
-                            let compObj = dataset[componentPackeage + 'Obj'];
-                            this.bindComponentSingleObj(record.target, compObj, componentPath);
-                        }
-                    }
-                    if (record.attributeName === 'data-' + componentPackeage + '-list') {
-                        this.removeComponentSingleList(record.target, record.oldValue, componentPath);
-                        let dataset = record.target.dataset;
-                        if (dataset !== null && dataset != undefined) {
-                            let compList = dataset[componentPackeage + 'List'];
-                            this.bindComponentSingleList(record.target, compList, componentPath);
-                        }
-                    }
-                    if (record.attributeName === 'data-' + componentPackeage + '-name') {
-                        this.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
-                        let dataset = record.target.dataset;
-                        if (dataset !== null && dataset != undefined) {
-                            let compName = dataset[componentPackeage + 'Name'];
-                            this.bindComponentSingleEvent(record.target, compName, componentPath);
-                        }
-                    }
-                } else if (record.type === 'childList') {
-                    for (let i = 0; i < record.removedNodes.length; i++) {
-                        this.removeComponentNest(record.removedNodes.item(i), componentPath);
-                    }
-                    for (let i = 0; i < record.addedNodes.length; i++) {
-                        this.bindComponentNest(record.addedNodes.item(i), componentPath, componentPackeage);
-                    }
-                }
-            }
-        });
-        let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
-        observer.observe(compDom, config);
     };
 
     this.removeComponentSingleObj = function (dom, bindStr, componentPath){
@@ -515,40 +596,36 @@ function ___fairysupport(){
         }
     };
 
-    this.removeComponentNest = function (obj, componentPath){
-        if (obj == null || obj == undefined) {
-            return;
-        }
-        this.removeComponentSingle(obj, componentPath);
-        let childList = obj.childNodes;
-        let child = null;
-        if (childList != null && childList != undefined) {
-            for (let i = 0; i < childList.length; i++) {
-                child = childList.item(i);
-                this.removeComponentNest(child, componentPath);
-            }
-        }
-    };
-
-    this.removeComponentSingle = function (obj, componentPath){
+    this.removeComponentSingle = function (obj, componentPath, componentPackeage){
         let dataset = obj.dataset;
         if (dataset !== null && dataset != undefined) {
-            let bindObj = dataset.obj;
+            let bindObj = dataset[componentPackeage + 'Obj'];
+            let bindList = dataset[componentPackeage + 'List'];
+            let name = dataset[componentPackeage + 'Name'];
+
             if (bindObj !== null && bindObj != undefined) {
                 this.removeComponentSingleObj(obj, bindObj, componentPath);
             }
 
-            let bindList = dataset.list;
             if (bindList !== null && bindList != undefined) {
                 this.removeComponentSingleList(obj, bindList, componentPath);
             }
 
-            let name = dataset.name;
             if (name !== null && name != undefined) {
                 this.removeComponentSingleEvent(obj, name, componentPath);
             }
         }
     };
+
+    this.addTargetDom = function (dom, componentPath, componentPackeage) {
+        if (!this.targetDomMap.has(dom)) {
+            this.targetDomMap.set(dom, {});
+        }
+        let targetInfo = this.targetDomMap.get(dom)
+        if ((componentPath !== null && componentPath != undefined) || (componentPackeage !== null && componentPackeage != undefined)) {
+            targetInfo[componentPackeage] = {'componentPath':componentPath, 'componentPackeage':componentPackeage};
+        }
+    }
 
 }
 const $f = new ___fairysupport();

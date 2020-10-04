@@ -12,4 +12,12 @@ export default class extends Base {
 		$f.loadComponent(this.bind1, 'sample', {'key1': 'value1'});
     }
 
+    removeSampleComponentClick(event) {
+        this.bind1.outerHTML = '';
+    }
+
+    removeSampleComponent2Click(event) {
+        this.bind1.innerHTML = '';
+    }
+
 }
