@@ -164,8 +164,11 @@ function ___fairysupport(){
                         for (let i = 0; i < record.addedNodes.length; i++) {
                             fs.bindControllerNest(record.addedNodes.item(i));
                             initFunc = fs.componentDomInitFuncMap.get(record.addedNodes.item(i));
-                            fs.componentDomInitCntMap.set(record.addedNodes.item(i), fs.componentDomInitCntMap.get(record.addedNodes.item(i)) + 1);
-                            if (fs.componentDomInitCntMap.get(record.addedNodes.item(i)) === fs.componentDomInitTotalMap.get(record.addedNodes.item(i))) {
+                            fs.componentDomInitFuncMap.delete(record.addedNodes.item(i));
+                            fs.componentDomInitCntMap.set(initFunc, fs.componentDomInitCntMap.get(initFunc) + 1);
+                            if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
+                                fs.componentDomInitCntMap.delete(initFunc);
+                                fs.componentDomInitTotalMap.delete(initFunc);
                                 initFunc();
                             }
                         }
