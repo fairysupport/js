@@ -22,6 +22,7 @@ function ___fairysupport(){
     this.componentDomInitFuncMap = new Map();
     this.componentDomInitCntMap = new Map();
     this.componentDomInitTotalMap = new Map();
+    this.componentPackageList = {};
 
     this.init = function () {
         if (scriptObj) {
@@ -88,6 +89,7 @@ function ___fairysupport(){
             let observer = new MutationObserver((records, obj) => {
                 for (let record of records) {
                     if (record.type === 'attributes') {
+
                         if (record.attributeName === 'data-obj') {
                             fs.removeControllerSingleObj(record.target, record.oldValue);
                             let dataset = record.target.dataset;
@@ -113,16 +115,7 @@ function ___fairysupport(){
                             }
                         }
 
-                        let targetDom = record.target;
-                        if (targetDom !== null && targetDom != undefined) {
-                            continue;
-                        }
-                        if (!this.targetDomMap.has(targetDom)) {
-                            continue;
-                        }
-                        let targetInfo = this.targetDomMap.get(targetDom);
-
-                        for (let targetInfoKey in targetInfo) {
+                        for (let targetInfoKey in this.componentPackageList) {
 
                             let targetInfoValue = targetInfo[targetInfoKey];
 
@@ -627,6 +620,7 @@ function ___fairysupport(){
         let targetInfo = this.targetDomMap.get(dom)
         if ((componentPath !== null && componentPath != undefined) || (componentPackeage !== null && componentPackeage != undefined)) {
             targetInfo[componentPackeage] = {'componentPath':componentPath, 'componentPackeage':componentPackeage};
+            this.componentPackageList[componentPackeage] = {'componentPath':componentPath, 'componentPackeage':componentPackeage};
         }
     }
 
