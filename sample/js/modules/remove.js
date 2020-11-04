@@ -18,27 +18,36 @@ export default class extends Base {
 
     consoleLogClick(event) {
         for (let i = 1 ; i < 9; i++) {
-        	console.log(this['obj' + i].textContent);
+            if (this['obj' + i]) {
+                console.log(this['obj' + i].textContent);
+            }
         }
         this.dataList.forEach(item => console.log(item.textContent));
     }
 
     removeObj1Click(event) {
-        this.obj1.parentNode.removeChild(this.obj1);
+        if (this.obj1) {
+            this.obj1.parentNode.removeChild(this.obj1);
+        }
     }
 
     removeDataListClick(event) {
-        if (this.dataList.size > 0) {
-            this.dataList[0].parentNode.removeChild(this.dataList[0]);
+        for(let value of this.dataList){
+            value.parentNode.removeChild(value);
+            break;
         }
     }
 
     removeObj3Click(event) {
-        this.obj3.innerHTML = '';
+        if (this.obj3) {
+            this.obj3.innerHTML = '';
+        }
     }
 
     removeObj7Click(event) {
-        this.obj7.parentNode.removeChild(this.obj7);
+        if (this.obj7) {
+            this.obj7.parentNode.removeChild(this.obj7);
+        }
     }
 
 }

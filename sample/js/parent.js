@@ -11,6 +11,7 @@ export default class {
     beforeBindObj(data) {
         console.log("beforeBindObj");
         console.log(data);
+        return data.value;
     }
     afterBindObj(data) {
         console.log("afterBindObj");
@@ -20,6 +21,7 @@ export default class {
     beforeBindList(data) {
         console.log("beforeBindList");
         console.log(data);
+        return data.value;
     }
     afterBindList(data) {
         console.log("afterBindList");

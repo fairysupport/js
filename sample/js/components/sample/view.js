@@ -4,7 +4,7 @@ export default `
         <li data-sample-list="bind2">This object is bound to bind2 of /js/components/sample/controller.js</li>
         <li data-sample-list="bind2">This object is bound to bind2 of /js/components/sample/controller.js</li>
     </ol>
-    <div data-sample-name="log">This object is bound to log[Evevt] of /js/components/sample/controller.js</div>
+    <button data-sample-name="log">This object is bound to log[Evevt] of /js/components/sample/controller.js</button>
 
 
     <div data-sample-obj="obj"></div>
@@ -13,7 +13,7 @@ export default `
         <li data-sample-list="dataList">list2</li>
     </ol>
 
-    <div data-sample-name="consoleLog">output obj1 and obj2 to console</div>
-    <div data-sample-name="addObj">add new DIV with data-name objX in obj</div>
-    <div data-sample-name="addList">add new DIV with data-name dataList in list</div>
+    <button data-sample-name="consoleLog">This object is bound to consoleLog[Evevt] of /js/components/sample/controller.js</button>
+    <button data-sample-name="addObj">add new DIV with data-name objX in obj</button>
+    <button data-sample-name="addList">add new DIV with data-name dataList in list</button>
 `

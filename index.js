@@ -117,7 +117,7 @@ function ___fairysupport(){
 
                         for (let targetInfoKey in this.componentPackageList) {
 
-                            let targetInfoValue = targetInfo[targetInfoKey];
+                            let targetInfoValue = this.componentPackageList[targetInfoKey];
 
                             let componentPath = targetInfoValue['componentPath'];
                             let componentPackeage = targetInfoValue['componentPackeage'];
@@ -211,20 +211,22 @@ function ___fairysupport(){
                 }
             }
 
-            if (!this.targetDomMap.has(obj)) {
-                return;
+            if (this.targetDomMap.has(obj)) {
+                this.bindControllerSingleObj(obj, bindObj);
+                this.bindControllerSingleList(obj, bindList);
+                this.bindControllerSingleEvent(obj, name);
             }
 
-            this.bindControllerSingleObj(obj, bindObj);
-            this.bindControllerSingleList(obj, bindList);
-            this.bindControllerSingleEvent(obj, name);
+            for (let targetInfoKey in this.componentPackageList) {
 
-            let targetInfo = this.targetDomMap.get(obj);
-            for (let targetInfoKey in targetInfo) {
-
-                let targetInfoValue = targetInfo[targetInfoKey];
+                let targetInfoValue = this.componentPackageList[targetInfoKey];
                 let componentPath = targetInfoValue['componentPath'];
                 let componentPackeage = targetInfoValue['componentPackeage'];
+
+                this.addTargetDomForComponent(obj, componentPath, componentPackeage);
+                if (!this.targetDomMap.has(obj)) {
+                    continue;
+                }
 
                 bindObj = dataset[componentPackeage + 'Obj'];
                 bindList = dataset[componentPackeage + 'List'];
@@ -498,11 +500,7 @@ function ___fairysupport(){
         };
     };
 
-    this.addComponentTargetDomNest = function (obj, componentPath, componentPackeage){
-        if (obj == null || obj == undefined) {
-            return;
-        }
-
+    this.addTargetDomForComponent = function (obj, componentPath, componentPackeage){
         let dataset = obj.dataset;
         if (dataset !== null && dataset != undefined) {
             let bindObj = dataset[componentPackeage + 'Obj'];
@@ -512,6 +510,14 @@ function ___fairysupport(){
                 this.addTargetDom(obj, componentPath, componentPackeage);
             }
         }
+    };
+
+    this.addComponentTargetDomNest = function (obj, componentPath, componentPackeage){
+        if (obj == null || obj == undefined) {
+            return;
+        }
+
+        this.addTargetDomForComponent(obj, componentPath, componentPackeage);
 
         let childList = obj.childNodes;
         let child = null;
@@ -604,27 +610,6 @@ function ___fairysupport(){
                     dom.removeEventListener(eventName, this.componentControllerethodList[componentPath][componentControllerMethod]);
                     this.execComponentMethod(componentPath, 'afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
                 }
-            }
-        }
-    };
-
-    this.removeComponentSingle = function (obj, componentPath, componentPackeage){
-        let dataset = obj.dataset;
-        if (dataset !== null && dataset != undefined) {
-            let bindObj = dataset[componentPackeage + 'Obj'];
-            let bindList = dataset[componentPackeage + 'List'];
-            let name = dataset[componentPackeage + 'Name'];
-
-            if (bindObj !== null && bindObj != undefined) {
-                this.removeComponentSingleObj(obj, bindObj, componentPath);
-            }
-
-            if (bindList !== null && bindList != undefined) {
-                this.removeComponentSingleList(obj, bindList, componentPath);
-            }
-
-            if (name !== null && name != undefined) {
-                this.removeComponentSingleEvent(obj, name, componentPath);
             }
         }
     };

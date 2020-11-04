@@ -13,10 +13,6 @@ export default class extends Base {
     }
 
     removeSampleComponentClick(event) {
-        this.bind1.outerHTML = '';
-    }
-
-    removeSampleComponent2Click(event) {
         this.bind1.innerHTML = '';
     }
 
