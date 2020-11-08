@@ -2,16 +2,18 @@ import Base from '../parent.js';
 
 export default class extends Base {
 
-	bind1
-	bind2
+    bind1
+    bind2
 
     constructor() {
-		super();
+        super();
     }
 
     logClick(event) {
         console.log(this.bind1.textContent);
-        this.bind2.forEach(item => console.log(item.textContent));
+        for (let value of this.bind2.values()) {
+            console.log(value.textContent);
+        }
     }
 
 }

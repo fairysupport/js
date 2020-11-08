@@ -32,14 +32,18 @@ export default class extends Base {
 
     logClick(event) {
         console.log(this.bind1.textContent);
-        this.bind2.forEach(item => console.log(item.textContent));
+        for (let value of this.bind2.values()) {
+            console.log(value.textContent);
+        }
     }
 
     consoleLogClick(event) {
         for (let i = 1 ; i < this.objCnt; i++) {
             console.log(this['obj' + i].textContent);
         }
-        this.dataList.forEach(item => console.log(item.textContent));
+        for (let value of this.dataList.values()) {
+            console.log(value.textContent);
+        }
     }
 
     addObjClick(event) {
