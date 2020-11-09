@@ -2,8 +2,8 @@ import Base from '../parent.js';
 
 export default class extends Base {
 
-    bind1
-    bind2
+    bind1;
+    bind2;
 
     constructor() {
         super();

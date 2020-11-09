@@ -2,49 +2,39 @@ import Base from '../parent.js';
 
 export default class extends Base {
 
-    obj1
-    obj2
-    obj3
-    dataList
+    div1;
+    div2;
 
     objCnt = 1;
-    listCnt = 1;
 
     constructor() {
         super();
     }
 
-    afterBindObj(data) {
-        super.afterBindObj(data);
-        this.objCnt++;
-    }
-
-    afterBindList(data) {
-        super.afterBindList(data);
-        this.listCnt++;
-    }
-
-    consoleLogClick(event) {
-        for (let i = 4 ; i < this.objCnt; i++) {
+    logClick(event) {
+        for (let i = 1; i <= this.div1.childNodes.length; i++) {
             console.log(this['obj' + i].textContent);
         }
-        for (let value of this.dataList.values()) {
-            console.log(value.textContent);
+        if (this.dataList) {
+            for (let value of this.dataList.values()) {
+                console.log(value.textContent);
+            }
         }
     }
 
     addObjClick(event) {
         var divObj = document.createElement("DIV");
-        divObj.appendChild(document.createTextNode('obj' + this.objCnt));
+        divObj.textContent = 'obj' + this.objCnt;
         divObj.dataset.obj = 'obj' + this.objCnt;
-        this.obj2.appendChild(divObj);
+        this.div1.appendChild(divObj);
+        this.objCnt++;
     }
 
     addListClick(event) {
         var divObj = document.createElement("DIV");
-        divObj.appendChild(document.createTextNode('list' + this.listCnt));
+        divObj.textContent = 'dataList';
         divObj.dataset.list = 'dataList';
-        this.obj3.appendChild(divObj);
+        this.div2.appendChild(divObj);
     }
 
 }

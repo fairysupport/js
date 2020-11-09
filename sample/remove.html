@@ -12,34 +12,14 @@ sample
 </style>
 </head>
 <body>
-    <div data-obj="obj1">obj1</div>
-    <ol data-obj="obj2">
-        <li data-list="dataList">obj2-dataList</li>
-        <li data-list="dataList">obj2-dataList</li>
+    <div data-obj="bind1">This object is bound to bind1 of /js/modules/index.js</div>
+    <ol>
+        <li data-list="bind2">This object is bound to bind2 of /js/modules/index.js</li>
+        <li data-list="bind2">This object is bound to bind2 of /js/modules/index.js</li>
     </ol>
-    <div data-obj="obj3">
-        obj3
-	    <div data-obj="obj4">
-	        obj4
-	        <div data-obj="obj5">
-                obj5
-	        </div>
-	    </div>
-    </div>
-    <div data-obj="obj6">
-        obj6
-        <div data-obj="obj7">
-            obj7
-            <div data-obj="obj8">
-                obj8
-            </div>
-        </div>
-    </div>
 
-    <button data-name="consoleLog">output to console</button>
-    <button data-name="removeObj1">remove obj1</button>
-    <button data-name="removeDataList">remove dataList</button>
-    <button data-name="removeObj3">remove obj3inner</button>
-    <button data-name="removeObj7">remove obj7</button>
+    <button data-name="log">output to console</button>
+    <button data-name="removeBind1">remove bind1</button>
+    <button data-name="removeBind2">remove bind2</button>
 </body>
 </html>

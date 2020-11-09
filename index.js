@@ -252,20 +252,40 @@ function ___fairysupport(){
     this.bindControllerSingleObj = function (dom, bindStr){
         if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined) {
             this.execControllerMethod('beforeBindObj', {'name': bindStr, 'value': dom});
+            let s = new Set();
+            s.add(dom);
+            let getFunc = (function(s){
+                                            return function(){
+                                                for (let value of s.values()) {
+                                                    return value;
+                                                }
+                                                return null;
+                                            };
+                                        }
+                           )(s);
+            let setFunc = (function(s){
+                                            return function(newElement){
+                                                currentElement = null;
+                                                for (let value of s.values()) {
+                                                    currentElement = value;
+                                                    break;
+                                                }
+                                                if (currentElement && currentElement.parentNode) {
+                                                    s.clear();
+                                                    if (newElement === null || newElement=== undefined) {
+                                                        currentElement.parentNode.removeChild(currentElement);
+                                                    } else if (newElement instanceof Node) {
+                                                        currentElement.parentNode.replaceChild(newElement, currentElement);
+                                                    }
+                                                }
+                                            };
+                                        }
+                            )(s);
             Object.defineProperty(this.clazz.obj, bindStr, {
                 enumerable: true,
-                get() {
-                    return dom;
-                },
-                set(newElement) {
-                    if (dom && dom.parentNode) {
-                        if (newElement === null || newElement=== undefined) {
-                            dom.parentNode.removeChild(dom);
-                        } else if (newElement instanceof Node) {
-                            dom.parentNode.replaceChild(newElement, dom);
-                        }
-                    }
-                }
+                configurable: true,
+                get: getFunc,
+                set : setFunc
             });
             this.execControllerMethod('afterBindObj', {'name': bindStr, 'value': dom});
         }
@@ -274,7 +294,7 @@ function ___fairysupport(){
     this.bindControllerSingleList = function (dom, bindList){
         if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
             this.execControllerMethod('beforeBindList', {'name': bindList, 'value': dom});
-            if (this.clazz.obj[bindList] === null || this.clazz.obj[bindList] === undefined || !this.clazz.obj[bindList] instanceof this.elementList) {
+            if (this.clazz.obj[bindList] === null || this.clazz.obj[bindList] === undefined) {
                 this.clazz.obj[bindList] = new this.elementList();
             }
             this.clazz.obj[bindList].add(dom);
@@ -538,20 +558,40 @@ function ___fairysupport(){
     this.bindComponentSingleObj = function (dom, bindStr, componentPath){
         if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined) {
             this.execComponentMethod(componentPath, 'beforeBindObj', {'name': bindStr, 'value': dom});
+            let s = new Set();
+            s.add(dom);
+            let getFunc = (function(s){
+                                            return function(){
+                                                for (let value of s.values()) {
+                                                    return value;
+                                                }
+                                                return null;
+                                            };
+                                        }
+                           )(s);
+            let setFunc = (function(s){
+                                            return function(newElement){
+                                                currentElement = null;
+                                                for (let value of s.values()) {
+                                                    currentElement = value;
+                                                    break;
+                                                }
+                                                if (currentElement && currentElement.parentNode) {
+                                                    s.clear();
+                                                    if (newElement === null || newElement=== undefined) {
+                                                        currentElement.parentNode.removeChild(currentElement);
+                                                    } else if (newElement instanceof Node) {
+                                                        currentElement.parentNode.replaceChild(newElement, currentElement);
+                                                    }
+                                                }
+                                            };
+                                        }
+                            )(s);
             Object.defineProperty(this.componentControllerList[componentPath], bindStr, {
                 enumerable: true,
-                get() {
-                    return dom;
-                },
-                set(newElement) {
-                    if (dom && dom.parentNode) {
-                        if (newElement === null || newElement=== undefined) {
-                            dom.parentNode.removeChild(dom);
-                        } else if (newElement instanceof Node) {
-                            dom.parentNode.replaceChild(newElement, dom);
-                        }
-                    }
-                }
+                configurable: true,
+                get: getFunc,
+                set : setFunc
             });
             this.execComponentMethod(componentPath, 'afterBindObj', {'name': bindStr, 'value': dom});
         }
@@ -560,7 +600,7 @@ function ___fairysupport(){
     this.bindComponentSingleList = function (dom, bindList, componentPath){
         if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
             this.execComponentMethod(componentPath, 'beforeBindList', {'name': bindList, 'value': dom});
-            if (this.componentControllerList[componentPath][bindList] === null || this.componentControllerList[componentPath][bindList] === undefined || !this.componentControllerList[componentPath][bindList] instanceof this.elementList) {
+            if (this.componentControllerList[componentPath][bindList] === null || this.componentControllerList[componentPath][bindList] === undefined) {
                 this.componentControllerList[componentPath][bindList] = new this.elementList();
             }
             this.componentControllerList[componentPath][bindList].add(dom);
@@ -651,7 +691,6 @@ function ___fairysupport(){
         }
         replace(oldElement, newElement) {
             this.objMap.delete(oldElement);
-            this.objMap.set(newElement, newElement);
             if (oldElement && oldElement.parentNode) {
                 if (newElement === null || newElement=== undefined) {
                     oldElement.parentNode.removeChild(oldElement);

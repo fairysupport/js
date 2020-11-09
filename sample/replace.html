@@ -8,14 +8,18 @@ sample
 <script src="http://localhost/sample/js/index.js" id="fs-js" data-root="http://localhost/sample"></script>
 <style type="text/css">
     DIV {margin: 10px;}
+    LI {margin: 10px;}
 </style>
 </head>
 <body>
-    <div data-obj="div1"></div>
-    <div data-obj="div2"></div>
+    <div data-obj="dataObj">div1</div>
+    <ol>
+        <li data-list="dataList">dataList1</li>
+        <li data-list="dataList">dataList2</li>
+    </ol>
 
     <button data-name="log">output to console</button>
-    <button data-name="addObj">add new DIV with data-name objX in div1</button>
-    <button data-name="addList">add new DIV with data-name dataList in div2</button>
+    <button data-name="replaceObj">replaceObj</button>
+    <button data-name="replaceList">replaceList</button>
 </body>
 </html>
