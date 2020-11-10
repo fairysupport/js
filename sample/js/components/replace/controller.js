@@ -1,4 +1,4 @@
-import Base from '../parent.js';
+import Base from '../../parent.js';
 
 export default class extends Base {
 
@@ -18,16 +18,16 @@ export default class extends Base {
     replaceObjClick(event) {
         this.objCnt++;
         var divObj = document.createElement("DIV");
-        divObj.textContent = 'div' + this.objCnt;
-        divObj.dataset.obj = 'dataObj';
+        divObj.textContent = 'component div' + this.objCnt;
+        divObj.dataset.replaceObj = 'dataObj';
         this.dataObj = divObj;
     }
 
     replaceListClick(event) {
         this.listCnt++;
         var liObj = document.createElement("LI");
-        liObj.textContent = 'dataList' + this.listCnt;
-        liObj.dataset.list = 'dataList';
+        liObj.textContent = 'component dataList' + this.listCnt;
+        liObj.dataset.replaceList = 'dataList';
         for (let value of this.dataList.values()) {
             this.dataList.replace(value, liObj);
             break;

@@ -8,7 +8,7 @@ function ___fairysupport(){
     let reqUrl = new URL(window.location.href);
     let root = reqUrl.origin + '/';
     let reqPath = reqUrl.origin + reqUrl.pathname.trim();
-    if (reqUrl.port != null && reqUrl.port != undefined && reqUrl.port != '') {
+    if (reqUrl.port !== null && reqUrl.port !== undefined && reqUrl.port !== '') {
         root = reqUrl.origin + ':' + reqUrl.port + '/';
         reqPath = reqUrl.origin + ':' + reqUrl.port + reqUrl.pathname.trim();
     }
@@ -17,7 +17,7 @@ function ___fairysupport(){
     this.controllerMethodList = {};
 
     this.componentControllerList = {};
-    this.componentControllerethodList = {};
+    this.componentControllerMethodList = {};
     this.targetDomMap = new WeakMap();
     this.componentDomInitFuncMap = new Map();
     this.componentDomInitCntMap = new Map();
@@ -93,7 +93,7 @@ function ___fairysupport(){
                         if (record.attributeName === 'data-obj') {
                             fs.removeControllerSingleObj(record.target, record.oldValue);
                             let dataset = record.target.dataset;
-                            if (dataset !== null && dataset != undefined) {
+                            if (dataset !== null && dataset !== undefined) {
                                 let bindObj = dataset.obj;
                                 fs.bindControllerSingleObj(record.target, bindObj);
                             }
@@ -101,7 +101,7 @@ function ___fairysupport(){
                         if (record.attributeName === 'data-list') {
                             fs.removeControllerSingleList(record.target, record.oldValue);
                             let dataset = record.target.dataset;
-                            if (dataset !== null && dataset != undefined) {
+                            if (dataset !== null && dataset !== undefined) {
                                 let bindList = dataset.list;
                                 fs.bindControllerSingleList(record.target, bindList);
                             }
@@ -109,7 +109,7 @@ function ___fairysupport(){
                         if (record.attributeName === 'data-name') {
                             fs.removeControllerSingleEvent(record.target, record.oldValue);
                             let dataset = record.target.dataset;
-                            if (dataset !== null && dataset != undefined) {
+                            if (dataset !== null && dataset !== undefined) {
                                 let name = dataset.name;
                                 fs.bindControllerSingleEvent(record.target, name);
                             }
@@ -125,7 +125,7 @@ function ___fairysupport(){
                             if (record.attributeName === 'data-' + componentPackeage + '-obj') {
                                 this.removeComponentSingleObj(record.target, record.oldValue, componentPath);
                                 let dataset = record.target.dataset;
-                                if (dataset !== null && dataset != undefined) {
+                                if (dataset !== null && dataset !== undefined) {
                                     let compObj = dataset[componentPackeage + 'Obj'];
                                     this.bindComponentSingleObj(record.target, compObj, componentPath);
                                 }
@@ -133,7 +133,7 @@ function ___fairysupport(){
                             if (record.attributeName === 'data-' + componentPackeage + '-list') {
                                 this.removeComponentSingleList(record.target, record.oldValue, componentPath);
                                 let dataset = record.target.dataset;
-                                if (dataset !== null && dataset != undefined) {
+                                if (dataset !== null && dataset !== undefined) {
                                     let compList = dataset[componentPackeage + 'List'];
                                     this.bindComponentSingleList(record.target, compList, componentPath);
                                 }
@@ -141,7 +141,7 @@ function ___fairysupport(){
                             if (record.attributeName === 'data-' + componentPackeage + '-name') {
                                 this.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
                                 let dataset = record.target.dataset;
-                                if (dataset !== null && dataset != undefined) {
+                                if (dataset !== null && dataset !== undefined) {
                                     let compName = dataset[componentPackeage + 'Name'];
                                     this.bindComponentSingleEvent(record.target, compName, componentPath);
                                 }
@@ -184,13 +184,13 @@ function ___fairysupport(){
     };
 
     this.bindAllNest = function (obj){
-        if (obj == null || obj == undefined) {
+        if (obj === null || obj === undefined) {
             return;
         }
         this.bindAllSingle(obj);
         let childList = obj.childNodes;
         let child = null;
-        if (childList != null && childList != undefined) {
+        if (childList !== null && childList !== undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
                 this.bindAllNest(child);
@@ -200,13 +200,13 @@ function ___fairysupport(){
 
     this.bindAllSingle = function (obj){
         let dataset = obj.dataset;
-        if (dataset !== null && dataset != undefined) {
+        if (dataset !== null && dataset !== undefined) {
             let bindObj = dataset.obj;
             let bindList = dataset.list;
             let name = dataset.name;
 
-            if (obj !== null && obj != undefined) {
-                if ((bindObj !== null && bindObj != undefined) || (bindList !== null && bindList != undefined) || (name !== null && name != undefined)) {
+            if (obj !== null && obj !== undefined) {
+                if ((bindObj !== null && bindObj !== undefined) || (bindList !== null && bindList !== undefined) || (name !== null && name !== undefined)) {
                     this.addTargetDom(obj, null, null);
                 }
             }
@@ -232,15 +232,15 @@ function ___fairysupport(){
                 bindList = dataset[componentPackeage + 'List'];
                 name = dataset[componentPackeage + 'Name'];
 
-                if (bindObj !== null && bindObj != undefined) {
+                if (bindObj !== null && bindObj !== undefined) {
                     this.bindComponentSingleObj(obj, bindObj, componentPath);
                 }
 
-                if (bindList !== null && bindList != undefined) {
+                if (bindList !== null && bindList !== undefined) {
                     this.bindComponentSingleList(obj, bindList, componentPath);
                 }
 
-                if (name !== null && name != undefined) {
+                if (name !== null && name !== undefined) {
                     this.bindComponentSingleEvent(obj, name, componentPath);
                 }
 
@@ -250,10 +250,12 @@ function ___fairysupport(){
     };
 
     this.bindControllerSingleObj = function (dom, bindStr){
-        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined) {
+        if (dom !== null && dom !== undefined && bindStr !== null && bindStr !== undefined) {
             this.execControllerMethod('beforeBindObj', {'name': bindStr, 'value': dom});
             let s = new Set();
             s.add(dom);
+            let beforeMet = this.getControllerMethodInputArgs(this, 'beforeRemoveObj');
+            let afterMet = this.getControllerMethodInputArgs(this, 'afterRemoveObj');
             let getFunc = (function(s){
                                             return function(){
                                                 for (let value of s.values()) {
@@ -263,24 +265,28 @@ function ___fairysupport(){
                                             };
                                         }
                            )(s);
-            let setFunc = (function(s){
+            let setFunc = (function(s, bindStr, beforeMet, afterMet){
                                             return function(newElement){
                                                 currentElement = null;
                                                 for (let value of s.values()) {
                                                     currentElement = value;
                                                     break;
                                                 }
-                                                if (currentElement && currentElement.parentNode) {
+                                                if (currentElement) {
+                                                    beforeMet({'name': bindStr, 'value': currentElement});
                                                     s.clear();
-                                                    if (newElement === null || newElement=== undefined) {
-                                                        currentElement.parentNode.removeChild(currentElement);
-                                                    } else if (newElement instanceof Node) {
-                                                        currentElement.parentNode.replaceChild(newElement, currentElement);
+                                                    if (currentElement.parentNode) {
+                                                        if (newElement === null || newElement=== undefined) {
+                                                            currentElement.parentNode.removeChild(currentElement);
+                                                        } else {
+                                                            currentElement.parentNode.replaceChild(newElement, currentElement);
+                                                        }
                                                     }
+                                                    afterMet({'name': bindStr, 'value': currentElement});
                                                 }
                                             };
                                         }
-                            )(s);
+                            )(s, bindStr, beforeMet, afterMet);
             Object.defineProperty(this.clazz.obj, bindStr, {
                 enumerable: true,
                 configurable: true,
@@ -292,7 +298,7 @@ function ___fairysupport(){
     }
 
     this.bindControllerSingleList = function (dom, bindList){
-        if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
+        if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
             this.execControllerMethod('beforeBindList', {'name': bindList, 'value': dom});
             if (this.clazz.obj[bindList] === null || this.clazz.obj[bindList] === undefined) {
                 this.clazz.obj[bindList] = new this.elementList();
@@ -303,7 +309,7 @@ function ___fairysupport(){
     }
 
     this.bindControllerSingleEvent = function (dom, name){
-        if (dom !== null && dom != undefined && name !== null && name != undefined) {
+        if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
             for (let controllerMethod in this.controllerMethodList) {
                 if (controllerMethod.indexOf(name) === 0) {
                     let eventName = controllerMethod.substring(name.length);
@@ -318,7 +324,7 @@ function ___fairysupport(){
 
     this.execMethod = function (obj, methodList, methodName, argList){
         if (methodList[methodName]) {
-            if (argList == null || argList == undefined) {
+            if (argList === null || argList === undefined) {
                 return obj[methodName]();
             } else {
                 return obj[methodName](argList);
@@ -343,13 +349,19 @@ function ___fairysupport(){
         }
     };
 
+    this.getControllerMethodInputArgs = function (fs, methodName){
+        return function(argList){
+            return fs.execControllerMethod(methodName, argList);
+        }
+    };
+
     this.getMethodList = function (obj){
         let methodNameList = {};
         let protoObj = Object.getPrototypeOf(obj);
         let parentProtoObj = null;
-        while (protoObj !== null && protoObj != undefined) {
+        while (protoObj !== null && protoObj !== undefined) {
             parentProtoObj = Object.getPrototypeOf(protoObj);
-            if (parentProtoObj == null || parentProtoObj == undefined) {
+            if (parentProtoObj === null || parentProtoObj === undefined) {
                 break;
             }
             let protoNameList = Object.getOwnPropertyNames(protoObj)
@@ -366,13 +378,13 @@ function ___fairysupport(){
     };
 
     this.removeAllNest = function (obj){
-        if (obj == null || obj == undefined) {
+        if (obj === null || obj === undefined) {
             return;
         }
         this.removeAllSingle(obj);
         let childList = obj.childNodes;
         let child = null;
-        if (childList != null && childList != undefined) {
+        if (childList !== null && childList !== undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
                 this.removeAllNest(child);
@@ -382,7 +394,7 @@ function ___fairysupport(){
 
     this.removeAllSingle = function (obj){
         let dataset = obj.dataset;
-        if (dataset !== null && dataset != undefined) {
+        if (dataset !== null && dataset !== undefined) {
             let bindObj = dataset.obj;
             let bindList = dataset.list;
             let name = dataset.name;
@@ -391,13 +403,13 @@ function ___fairysupport(){
                 return;
             }
 
-            if (bindObj !== null && bindObj != undefined) {
+            if (bindObj !== null && bindObj !== undefined) {
                 this.removeControllerSingleObj(obj, bindObj);
             }
-            if (bindList !== null && bindList != undefined) {
+            if (bindList !== null && bindList !== undefined) {
                 this.removeControllerSingleList(obj, bindList);
             }
-            if (name !== null && name != undefined) {
+            if (name !== null && name !== undefined) {
                 this.removeControllerSingleEvent(obj, name);
             }
 
@@ -412,15 +424,15 @@ function ___fairysupport(){
                 bindList = dataset[componentPackeage + 'List'];
                 name = dataset[componentPackeage + 'Name'];
 
-                if (bindObj !== null && bindObj != undefined) {
+                if (bindObj !== null && bindObj !== undefined) {
                     this.removeComponentSingleObj(obj, bindObj, componentPath);
                 }
 
-                if (bindList !== null && bindList != undefined) {
+                if (bindList !== null && bindList !== undefined) {
                     this.removeComponentSingleList(obj, bindList, componentPath);
                 }
 
-                if (name !== null && name != undefined) {
+                if (name !== null && name !== undefined) {
                     this.removeComponentSingleEvent(obj, name, componentPath);
                 }
 
@@ -430,16 +442,14 @@ function ___fairysupport(){
     };
 
     this.removeControllerSingleObj = function (dom, bindStr){
-        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined && this.clazz.obj[bindStr] != undefined) {
-            this.execControllerMethod('beforeRemoveObj', {'name': bindStr, 'value': dom});
+        if (dom !== null && dom !== undefined && bindStr !== null && bindStr !== undefined && this.clazz.obj[bindStr] === dom) {
             this.clazz.obj[bindStr] = null;
-            this.execControllerMethod('afterRemoveObj', {'name': bindStr, 'value': dom});
         }
     };
 
     this.removeControllerSingleList = function (dom, bindList){
-        if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
-            if (this.clazz.obj[bindList] != undefined && this.clazz.obj[bindList] instanceof Set && this.clazz.obj[bindList].has(dom)) {
+        if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
+            if (this.clazz.obj[bindList] !== undefined && this.clazz.obj[bindList].has && this.clazz.obj[bindList].has(dom)) {
                 this.execControllerMethod('beforeRemoveList', {'name': bindList, 'value': dom});
                 this.clazz.obj[bindList].remove(dom);
                 this.execControllerMethod('afterRemoveList', {'name': bindList, 'value': dom});
@@ -448,7 +458,7 @@ function ___fairysupport(){
     };
 
     this.removeControllerSingleEvent = function (dom, name){
-        if (dom !== null && dom != undefined && name !== null && name != undefined) {
+        if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
             for (let controllerMethod in this.controllerMethodList) {
                 if (controllerMethod.indexOf(name) === 0) {
                     let eventName = controllerMethod.substring(name.length);
@@ -481,7 +491,7 @@ function ___fairysupport(){
         return function (Module){
 
             let func = function () {};
-            if (cb !== null && cb != undefined && typeof cb === 'function') {
+            if (cb !== null && cb !== undefined && typeof cb === 'function') {
                 func = cb;
             }
 
@@ -496,7 +506,7 @@ function ___fairysupport(){
     this.getComponentController = function (fs, componentPath){
         return function (Module){
             fs.componentControllerList[componentPath] = new Module.default();
-            fs.componentControllerethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
+            fs.componentControllerMethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
         };
     };
 
@@ -511,7 +521,7 @@ function ___fairysupport(){
 
             let childList = viewDom.childNodes;
             let child = null;
-            if (childList != null && childList != undefined) {
+            if (childList !== null && childList !== undefined) {
                 fs.componentDomInitCntMap.set(initFunc, 0);
                 fs.componentDomInitTotalMap.set(initFunc, childList.length);
                 for (let i = 0; i < childList.length; i++) {
@@ -528,18 +538,18 @@ function ___fairysupport(){
 
     this.addTargetDomForComponent = function (obj, componentPath, componentPackeage){
         let dataset = obj.dataset;
-        if (dataset !== null && dataset != undefined) {
+        if (dataset !== null && dataset !== undefined) {
             let bindObj = dataset[componentPackeage + 'Obj'];
             let bindList = dataset[componentPackeage + 'List'];
             let name = dataset[componentPackeage + 'Name'];
-            if ((bindObj !== null && bindObj != undefined) || (bindList !== null && bindList != undefined) || (name !== null && name != undefined)) {
+            if ((bindObj !== null && bindObj !== undefined) || (bindList !== null && bindList !== undefined) || (name !== null && name !== undefined)) {
                 this.addTargetDom(obj, componentPath, componentPackeage);
             }
         }
     };
 
     this.addComponentTargetDomNest = function (obj, componentPath, componentPackeage){
-        if (obj == null || obj == undefined) {
+        if (obj === null || obj === undefined) {
             return;
         }
 
@@ -547,7 +557,7 @@ function ___fairysupport(){
 
         let childList = obj.childNodes;
         let child = null;
-        if (childList != null && childList != undefined) {
+        if (childList !== null && childList !== undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
                 this.addComponentTargetDomNest(child, componentPath, componentPackeage);
@@ -556,10 +566,12 @@ function ___fairysupport(){
     };
 
     this.bindComponentSingleObj = function (dom, bindStr, componentPath){
-        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined) {
+        if (dom !== null && dom !== undefined && bindStr !== null && bindStr !== undefined) {
             this.execComponentMethod(componentPath, 'beforeBindObj', {'name': bindStr, 'value': dom});
             let s = new Set();
             s.add(dom);
+            let beforeMet = this.getComponentMethodInputArgs(this, componentPath, 'beforeRemoveObj');
+            let afterMet = this.getComponentMethodInputArgs(this, componentPath, 'afterRemoveObj');
             let getFunc = (function(s){
                                             return function(){
                                                 for (let value of s.values()) {
@@ -569,24 +581,28 @@ function ___fairysupport(){
                                             };
                                         }
                            )(s);
-            let setFunc = (function(s){
+            let setFunc = (function(s, bindStr, beforeMet, afterMet){
                                             return function(newElement){
                                                 currentElement = null;
                                                 for (let value of s.values()) {
                                                     currentElement = value;
                                                     break;
                                                 }
-                                                if (currentElement && currentElement.parentNode) {
+                                                if (currentElement) {
+                                                    beforeMet({'name': bindStr, 'value': currentElement});
                                                     s.clear();
-                                                    if (newElement === null || newElement=== undefined) {
-                                                        currentElement.parentNode.removeChild(currentElement);
-                                                    } else if (newElement instanceof Node) {
-                                                        currentElement.parentNode.replaceChild(newElement, currentElement);
+                                                    if (currentElement.parentNode) {
+                                                        if (newElement === null || newElement=== undefined) {
+                                                            currentElement.parentNode.removeChild(currentElement);
+                                                        } else if (newElement instanceof Node) {
+                                                            currentElement.parentNode.replaceChild(newElement, currentElement);
+                                                        }
                                                     }
+                                                    afterMet({'name': bindStr, 'value': currentElement});
                                                 }
                                             };
                                         }
-                            )(s);
+                            )(s, bindStr, beforeMet, afterMet);
             Object.defineProperty(this.componentControllerList[componentPath], bindStr, {
                 enumerable: true,
                 configurable: true,
@@ -598,7 +614,7 @@ function ___fairysupport(){
     }
 
     this.bindComponentSingleList = function (dom, bindList, componentPath){
-        if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
+        if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
             this.execComponentMethod(componentPath, 'beforeBindList', {'name': bindList, 'value': dom});
             if (this.componentControllerList[componentPath][bindList] === null || this.componentControllerList[componentPath][bindList] === undefined) {
                 this.componentControllerList[componentPath][bindList] = new this.elementList();
@@ -609,13 +625,13 @@ function ___fairysupport(){
     }
 
     this.bindComponentSingleEvent = function (dom, name, componentPath){
-        if (dom !== null && dom != undefined && name !== null && name != undefined) {
-            for (let componentControllerMethod in this.componentControllerethodList[componentPath]) {
+        if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
+            for (let componentControllerMethod in this.componentControllerMethodList[componentPath]) {
                 if (componentControllerMethod.indexOf(name) === 0) {
                     let eventName = componentControllerMethod.substring(name.length);
                     eventName = eventName.substring(0, 1).toLowerCase() + eventName.substring(1);
                     this.execComponentMethod(componentPath, 'beforeName', {'name': name, 'event': eventName, 'value': dom});
-                    dom.addEventListener(eventName, this.componentControllerethodList[componentPath][componentControllerMethod]);
+                    dom.addEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
                     this.execComponentMethod(componentPath, 'afterName', {'name': name, 'event': eventName, 'value': dom});
                 }
             }
@@ -623,7 +639,7 @@ function ___fairysupport(){
     }
 
     this.execComponentMethod = function (componentPath, methodName, argList){
-        return this.execMethod(this.componentControllerList[componentPath], this.componentControllerethodList[componentPath], methodName, argList);
+        return this.execMethod(this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], methodName, argList);
     };
 
     this.getComponentMethod = function (fs, componentPath, methodName, argList, func){
@@ -634,17 +650,21 @@ function ___fairysupport(){
         };
     };
 
+    this.getComponentMethodInputArgs = function (fs, componentPath, methodName){
+        return function(argList){
+            return fs.execComponentMethod(componentPath, methodName, argList);
+        };
+    };
+
     this.removeComponentSingleObj = function (dom, bindStr, componentPath){
-        if (dom !== null && dom != undefined && bindStr !== null && bindStr != undefined && this.componentControllerList[componentPath] != undefined && this.componentControllerList[componentPath][bindStr] != undefined) {
-            this.execComponentMethod(componentPath, 'beforeRemoveObj', {'name': bindStr, 'value': dom});
+        if (dom !== null && dom !== undefined && bindStr !== null && bindStr !== undefined && this.componentControllerList[componentPath] !== undefined && this.componentControllerList[componentPath][bindStr] === dom) {
             this.componentControllerList[componentPath][bindStr] = null;
-            this.execComponentMethod(componentPath, 'afterRemoveObj', {'name': bindStr, 'value': dom});
         }
     };
 
     this.removeComponentSingleList = function (dom, bindList, componentPath){
-        if (dom !== null && dom != undefined && bindList !== null && bindList != undefined) {
-            if (this.componentControllerList[componentPath] != undefined && this.componentControllerList[componentPath][bindList] != undefined && this.componentControllerList[componentPath][bindList] instanceof Set && this.componentControllerList[componentPath][bindList].has(dom)) {
+        if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
+            if (this.componentControllerList[componentPath] !== undefined && this.componentControllerList[componentPath][bindList] !== undefined && this.componentControllerList[componentPath][bindList].has && this.componentControllerList[componentPath][bindList].has(dom)) {
                 this.execComponentMethod(componentPath, 'beforeRemoveList', {'name': bindList, 'value': dom});
                 this.componentControllerList[componentPath][bindList].remove(dom);
                 this.execComponentMethod(componentPath, 'afterRemoveList', {'name': bindList, 'value': dom});
@@ -653,13 +673,13 @@ function ___fairysupport(){
     };
 
     this.removeComponentSingleEvent = function (dom, name, componentPath){
-        if (dom !== null && dom != undefined && name !== null && name != undefined) {
-            for (let componentControllerMethod in this.componentControllerethodList[componentPath]) {
+        if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
+            for (let componentControllerMethod in this.componentControllerMethodList[componentPath]) {
                 if (componentControllerMethod.indexOf(name) === 0) {
                     let eventName = componentControllerMethod.substring(name.length);
                     eventName = eventName.substring(0, 1).toLowerCase() + eventName.substring(1);
                     this.execComponentMethod(componentPath, 'beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
-                    dom.removeEventListener(eventName, this.componentControllerethodList[componentPath][componentControllerMethod]);
+                    dom.removeEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
                     this.execComponentMethod(componentPath, 'afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
                 }
             }
@@ -670,7 +690,7 @@ function ___fairysupport(){
         if (!this.targetDomMap.has(dom)) {
             this.targetDomMap.set(dom, {});
         }
-        if ((componentPath !== null && componentPath != undefined) || (componentPackeage !== null && componentPackeage != undefined)) {
+        if ((componentPath !== null && componentPath !== undefined) || (componentPackeage !== null && componentPackeage !== undefined)) {
             let targetInfo = this.targetDomMap.get(dom)
             targetInfo[componentPackeage] = {'componentPath':componentPath, 'componentPackeage':componentPackeage};
             this.componentPackageList[componentPackeage] = {'componentPath':componentPath, 'componentPackeage':componentPackeage};
@@ -678,12 +698,14 @@ function ___fairysupport(){
     };
 
     this.elementList = class FairysupportObjList {
-        objMap = null;
         constructor() {
             this.objMap = new Map();
         }
         size() {
             return this.objMap.size;
+        }
+        has(element) {
+            return this.objMap.has(element);
         }
         add(element) {
             this.objMap.set(element, element);
@@ -709,6 +731,17 @@ function ___fairysupport(){
         }
         values() {
             return this.objMap.values();
+        }
+        forEach(fn, arg = null){
+            if (arg === null) {
+                for (let value of this.objMap.values()) {
+                    fn(value);
+                }
+            } else {
+                for (let value of this.objMap.values()) {
+                    fn(value, arg);
+                }
+            }
         }
     };
 

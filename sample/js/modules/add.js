@@ -2,13 +2,11 @@ import Base from '../parent.js';
 
 export default class extends Base {
 
-    div1;
-    div2;
-
-    objCnt = 1;
-
     constructor() {
         super();
+        this.div1 = null;
+        this.div2 = null;
+        this.objCnt = 1;
     }
 
     logClick(event) {
@@ -16,9 +14,7 @@ export default class extends Base {
             console.log(this['obj' + i].textContent);
         }
         if (this.dataList) {
-            for (let value of this.dataList.values()) {
-                console.log(value.textContent);
-            }
+            this.dataList.forEach(item => console.log(item.textContent));
         }
     }
 

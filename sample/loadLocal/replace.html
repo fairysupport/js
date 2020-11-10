@@ -9,24 +9,24 @@ sample
 <style type="text/css">
     DIV {margin: 10px;}
     LI {margin: 10px;}
-    .border {border: solid black 1px;}
-    .component {border: solid black 1px;}
 </style>
 </head>
 <body>
-    <div>div1</div>
-    <div data-obj="div1" class="border"></div>
-    <div>div2</div>
-    <div data-obj="div2" class="border"></div>
+    <div data-obj="dataObj">div1</div>
+    <ol>
+        <li data-list="dataList">dataList1</li>
+        <li data-list="dataList">dataList2</li>
+    </ol>
 
     <button data-name="log">output to console</button>
-    <button data-name="addObj">add new DIV with data-name objX in div1</button>
-    <button data-name="addList">add new DIV with data-name dataList in div2</button>
+    <button data-name="replaceObj">replaceObj</button>
+    <button data-name="replaceList">replaceList</button>
 
     <br>
 
     <button data-name="loadComponent">load component</button>
     <button data-name="removeComponent">remove component</button>
-    <div data-obj="div3" class="component"></div>
+    <div data-obj="div" class="component"></div>
+
 </body>
 </html>

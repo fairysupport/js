@@ -1,4 +1,4 @@
-import Base from '../parent.js';
+import Base from '../../parent.js';
 
 export default class extends Base {
 
@@ -6,6 +6,7 @@ export default class extends Base {
         super();
         this.bind1 = null;
         this.bind2 = null;
+        this.div = null;
     }
 
     logClick(event) {
@@ -24,6 +25,14 @@ export default class extends Base {
             this.bind2.remove(value);
             break;
         }
+    }
+
+    loadComponentClick(event) {
+        $f.loadComponent(this.div, 'remove', {'key1': 'value1', 'key2': 'value2'});
+    }
+
+    removeComponentClick(event) {
+        this.div.innerHTML = '';
     }
 
 }

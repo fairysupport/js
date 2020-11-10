@@ -1,4 +1,4 @@
-import Base from '../parent.js';
+import Base from '../../parent.js';
 
 export default class extends Base {
 

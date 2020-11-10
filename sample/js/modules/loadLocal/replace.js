@@ -1,4 +1,4 @@
-import Base from '../parent.js';
+import Base from '../../parent.js';
 
 export default class extends Base {
 
@@ -6,6 +6,7 @@ export default class extends Base {
         super();
         this.dataObj = null;
         this.dataList = null;
+        this.div = null;
         this.objCnt = 1;
         this.listCnt = 2;
     }
@@ -32,6 +33,14 @@ export default class extends Base {
             this.dataList.replace(value, liObj);
             break;
         }
+    }
+
+    loadComponentClick(event) {
+        $f.loadComponent(this.div, 'replace', {'key1': 'value1', 'key2': 'value2'});
+    }
+
+    removeComponentClick(event) {
+        this.div.innerHTML = '';
     }
 
 }

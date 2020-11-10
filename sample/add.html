@@ -8,11 +8,14 @@ sample
 <script src="http://localhost/sample/js/index.js" id="fs-js" data-root="http://localhost/sample"></script>
 <style type="text/css">
     DIV {margin: 10px;}
+    .border {border: solid black 1px;}
 </style>
 </head>
 <body>
-    <div data-obj="div1"></div>
-    <div data-obj="div2"></div>
+    <div>div1</div>
+    <div data-obj="div1" class="border"></div>
+    <div>div2</div>
+    <div data-obj="div2" class="border"></div>
 
     <button data-name="log">output to console</button>
     <button data-name="addObj">add new DIV with data-name objX in div1</button>
