@@ -26,4 +26,15 @@ export default class extends Base {
         }
     }
 
+    removeBind3Click(event) {
+        this.removeObj1.innerHTML = "";
+    }
+
+    removeBind4Click(event) {
+        for (let value of this.removeList.values()) {
+            value.innerHTML = "";
+            break;
+        }
+    }
+
 }

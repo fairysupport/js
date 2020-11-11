@@ -33,4 +33,15 @@ export default class extends Base {
         this.div2.appendChild(divObj);
     }
 
+    add1Click(event) {
+        this.obj1.innerHTML = '<div data-add-obj="obj2"><div data-add-obj="obj13">add data-obj</div></div>';
+    }
+
+    add2Click(event) {
+        for (let value of this.list.values()) {
+            value.innerHTML = '<div data-add-list="list"><div data-add-list="list">add data-list</div></div>';
+            break;
+        }
+    }
+
 }

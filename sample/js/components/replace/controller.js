@@ -34,4 +34,15 @@ export default class extends Base {
         }
     }
 
+    replaceDataObjClick(event) {
+        this.replace1.innerHTML = '<div data-replace-obj="replace4"><div data-replace-obj="replace5">replace data-obj</div></div>';
+    }
+
+    replaceDataListClick(event) {
+        for (let value of this.replaceList.values()) {
+            value.innerHTML = '<div data-replace-list="replaceList"><div data-replace-list="replaceList">replace data-list</div></div>';
+            break;
+        }
+    }
+
 }
