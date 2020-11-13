@@ -10,7 +10,7 @@ export default class extends Base {
         this.objCnt = 1;
     }
 
-    logClick(event) {
+    log_click(event) {
         for (let i = 1; i <= this.div1.childNodes.length; i++) {
             console.log(this['obj' + i].textContent);
         }
@@ -19,7 +19,7 @@ export default class extends Base {
         }
     }
 
-    addObjClick(event) {
+    addObj_click(event) {
         var divObj = document.createElement("DIV");
         divObj.textContent = 'obj' + this.objCnt;
         divObj.dataset.obj = 'obj' + this.objCnt;
@@ -27,18 +27,18 @@ export default class extends Base {
         this.objCnt++;
     }
 
-    addListClick(event) {
+    addList_click(event) {
         var divObj = document.createElement("DIV");
         divObj.textContent = 'dataList';
         divObj.dataset.list = 'dataList';
         this.div2.appendChild(divObj);
     }
 
-    loadComponentClick(event) {
+    loadComponent_click(event) {
         $f.loadComponent(this.div3, 'add', {'key1': 'value1', 'key2': 'value2'});
     }
 
-    removeComponentClick(event) {
+    removeComponent_click(event) {
         this.div3.innerHTML = '';
     }
 

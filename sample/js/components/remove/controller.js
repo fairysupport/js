@@ -8,29 +8,29 @@ export default class extends Base {
         this.bind2 = null;
     }
 
-    logClick(event) {
+    log_click(event) {
         if (this.bind1){
             console.log(this.bind1.textContent);
         }
         this.bind2.forEach(item => console.log(item.textContent));
     }
 
-    removeBind1Click(event) {
+    removeBind1_click(event) {
         this.bind1 = null;
     }
 
-    removeBind2Click(event) {
+    removeBind2_click(event) {
         for (let value of this.bind2.values()) {
             this.bind2.remove(value);
             break;
         }
     }
 
-    removeBind3Click(event) {
+    removeBind3_click(event) {
         this.removeObj1.innerHTML = "";
     }
 
-    removeBind4Click(event) {
+    removeBind4_click(event) {
         for (let value of this.removeList.values()) {
             value.innerHTML = "";
             break;

@@ -10,12 +10,12 @@ export default class extends Base {
         this.listCnt = 2;
     }
 
-    logClick(event) {
+    log_click(event) {
         console.log(this.dataObj.textContent);
         this.dataList.forEach(item => console.log(item.textContent));
     }
 
-    replaceObjClick(event) {
+    replaceObj_click(event) {
         this.objCnt++;
         var divObj = document.createElement("DIV");
         divObj.textContent = 'div' + this.objCnt;
@@ -23,7 +23,7 @@ export default class extends Base {
         this.dataObj = divObj;
     }
 
-    replaceListClick(event) {
+    replaceList_click(event) {
         this.listCnt++;
         var liObj = document.createElement("LI");
         liObj.textContent = 'dataList' + this.listCnt;
@@ -34,11 +34,11 @@ export default class extends Base {
         }
     }
 
-    replaceDataObjClick(event) {
+    replaceDataObj_click(event) {
         this.replace1.innerHTML = '<div data-obj="replace4"><div data-obj="replace5">replace data-obj</div></div>';
     }
 
-    replaceDataListClick(event) {
+    replaceDataList_click(event) {
         for (let value of this.replaceList.values()) {
             value.innerHTML = '<div data-list="replaceList"><div data-list="replaceList">replace data-list</div></div>';
             break;

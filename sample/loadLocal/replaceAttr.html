@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>
+sample
+</title>
+<script src="http://localhost/sample/js/index.js" id="fs-js" data-root="http://localhost/sample"></script>
+<style type="text/css">
+    DIV {margin: 10px;}
+    LI {margin: 10px;}
+</style>
+</head>
+<body>
+    <div data-obj="dataObj">div</div>
+    <ol>
+        <li data-list="dataList">dataList</li>
+        <li data-list="dataList">dataList</li>
+    </ol>
+
+    <div data-obj="replace1">
+        <div data-obj="replace2">
+            <div data-obj="replace3">data-obj</div>
+        </div>
+    </div>
+
+    <div data-list="replaceList">
+        <div data-list="replaceList">
+            <div data-list="replaceList">data-list</div>
+        </div>
+    </div>
+
+    <button data-name="log" data-obj="log">output to console</button>
+    <button data-name="replaceObj">replaceObj</button>
+    <button data-name="replaceList">replaceList</button>
+    <button data-name="replaceDataObj">replace data-obj</button>
+    <button data-name="replaceDataList">replace data-list</button>
+    <button data-name="replaceLog">replace data-name</button>
+
+    <br>
+
+    <button data-name="loadComponent">load component</button>
+    <button data-name="removeComponent">remove component</button>
+    <div data-obj="div" class="component"></div>
+
+
+</body>
+</html>
