@@ -1,4 +1,4 @@
-import Base from '../parent.js';
+import Base from '../../parent.js';
 
 export default class extends Base {
 
@@ -33,14 +33,14 @@ export default class extends Base {
     replaceObj_click(event) {
         if (this.dataObj) {
             this.dataObj.textContent = 'changeDataObj';
-            this.dataObj.dataset.obj = 'changeDataObj';
+            this.dataObj.dataset.replaceAttrObj = 'changeDataObj';
         }
     }
 
     replaceList_click(event) {
         for (let value of this.dataList.values()) {
             value.textContent = 'changeDataList';
-            value.dataset.list = 'changeDataList';
+            value.dataset.replaceAttrList = 'changeDataList';
         }
     }
 
@@ -58,7 +58,7 @@ export default class extends Base {
     }
 
     replaceLog_click(event) {
-        this.log.dataset.name = 'log2';
+        this.log.dataset.replaceAttrName = 'log2';
     }
 
 }

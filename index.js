@@ -120,35 +120,38 @@ function ___fairysupport(){
                             }
                         }
 
-                        for (let targetInfoKey in this.componentPackageList) {
+                        for (let targetInfoKey in fs.componentPackageList) {
 
-                            let targetInfoValue = this.componentPackageList[targetInfoKey];
+                            let targetInfoValue = fs.componentPackageList[targetInfoKey];
 
                             let componentPath = targetInfoValue['componentPath'];
                             let componentPackeage = targetInfoValue['componentPackeage'];
+                            let componentPackeageHyphen = componentPackeage.replace(/[A-Z]/g, function(match, offset){
+                                                              return (offset > 0 ? '-' : '') + match.toLowerCase();
+                                                          });
 
-                            if (record.attributeName === 'data-' + componentPackeage + '-obj') {
-                                this.removeComponentSingleObjOnlyValue(record.target, record.oldValue, componentPath);
+                            if (record.attributeName === 'data-' + componentPackeageHyphen + '-obj') {
+                                fs.removeComponentSingleObjOnlyValue(record.target, record.oldValue, componentPath);
                                 let dataset = record.target.dataset;
                                 if (dataset !== null && dataset !== undefined) {
                                     let compObj = dataset[componentPackeage + 'Obj'];
-                                    this.bindComponentSingleObj(record.target, compObj, componentPath);
+                                    fs.bindComponentSingleObj(record.target, compObj, componentPath);
                                 }
                             }
-                            if (record.attributeName === 'data-' + componentPackeage + '-list') {
-                                this.removeComponentSingleListOnlyValue(record.target, record.oldValue, componentPath);
+                            if (record.attributeName === 'data-' + componentPackeageHyphen + '-list') {
+                                fs.removeComponentSingleListOnlyValue(record.target, record.oldValue, componentPath);
                                 let dataset = record.target.dataset;
                                 if (dataset !== null && dataset !== undefined) {
                                     let compList = dataset[componentPackeage + 'List'];
-                                    this.bindComponentSingleList(record.target, compList, componentPath);
+                                    fs.bindComponentSingleList(record.target, compList, componentPath);
                                 }
                             }
-                            if (record.attributeName === 'data-' + componentPackeage + '-name') {
-                                this.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
+                            if (record.attributeName === 'data-' + componentPackeageHyphen + '-name') {
+                                fs.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
                                 let dataset = record.target.dataset;
                                 if (dataset !== null && dataset !== undefined) {
                                     let compName = dataset[componentPackeage + 'Name'];
-                                    this.bindComponentSingleEvent(record.target, compName, componentPath);
+                                    fs.bindComponentSingleEvent(record.target, compName, componentPath);
                                 }
                             }
 
