@@ -320,13 +320,19 @@ function ___fairysupport(){
 
     this.bindControllerSingleEvent = function (dom, name){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            let metPrefix = name + '_';
             for (let controllerMethod in this.controllerMethodList) {
-                if (controllerMethod.indexOf(metPrefix) === 0) {
-                    let eventName = controllerMethod.substring(metPrefix.length);
-                    this.execControllerMethod('beforeName', {'name': name, 'event': eventName, 'value': dom});
-                    dom.addEventListener(eventName, this.controllerMethodList[controllerMethod]);
-                    this.execControllerMethod('afterName', {'name': name, 'event': eventName, 'value': dom});
+                let controllerMethodSplit = controllerMethod.split('_');
+                if (controllerMethodSplit.length > 1) {
+                    let metPrefix = '';
+                    for (let i = 0; i < (controllerMethodSplit.length - 1); i++) {
+                        metPrefix += controllerMethodSplit[i] + '_';
+                    }
+                    if (metPrefix === name + '_') {
+                        let eventName = controllerMethodSplit[controllerMethodSplit.length - 1];
+                        this.execControllerMethod('beforeName', {'name': name, 'event': eventName, 'value': dom});
+                        dom.addEventListener(eventName, this.controllerMethodList[controllerMethod]);
+                        this.execControllerMethod('afterName', {'name': name, 'event': eventName, 'value': dom});
+                    }
                 }
             }
         }
@@ -481,13 +487,19 @@ function ___fairysupport(){
 
     this.removeControllerSingleEvent = function (dom, name){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            let metPrefix = name + '_';
             for (let controllerMethod in this.controllerMethodList) {
-                if (controllerMethod.indexOf(metPrefix) === 0) {
-                    let eventName = controllerMethod.substring(metPrefix.length);
-                    this.execControllerMethod('beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
-                    dom.removeEventListener(eventName, this.controllerMethodList[controllerMethod]);
-                    this.execControllerMethod('afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                let controllerMethodSplit = controllerMethod.split('_');
+                if (controllerMethodSplit.length > 1) {
+                    let metPrefix = '';
+                    for (let i = 0; i < (controllerMethodSplit.length - 1); i++) {
+                        metPrefix += controllerMethodSplit[i] + '_';
+                    }
+                    if (metPrefix === name + '_') {
+                        let eventName = controllerMethodSplit[controllerMethodSplit.length - 1];
+                        this.execControllerMethod('beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                        dom.removeEventListener(eventName, this.controllerMethodList[controllerMethod]);
+                        this.execControllerMethod('afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                    }
                 }
             }
         }
@@ -650,13 +662,19 @@ function ___fairysupport(){
 
     this.bindComponentSingleEvent = function (dom, name, componentPath){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            let metPrefix = name + '_';
             for (let componentControllerMethod in this.componentControllerMethodList[componentPath]) {
-                if (componentControllerMethod.indexOf(metPrefix) === 0) {
-                    let eventName = componentControllerMethod.substring(metPrefix.length);
-                    this.execComponentMethod(componentPath, 'beforeName', {'name': name, 'event': eventName, 'value': dom});
-                    dom.addEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
-                    this.execComponentMethod(componentPath, 'afterName', {'name': name, 'event': eventName, 'value': dom});
+                let componentControllerMethodSplit = componentControllerMethod.split('_');
+                if (componentControllerMethodSplit.length > 1) {
+                    let metPrefix = '';
+                    for (let i = 0; i < (componentControllerMethodSplit.length - 1); i++) {
+                        metPrefix += componentControllerMethodSplit[i] + '_';
+                    }
+                    if (metPrefix === name + '_') {
+                        let eventName = componentControllerMethodSplit[componentControllerMethodSplit.length - 1];
+                        this.execComponentMethod(componentPath, 'beforeName', {'name': name, 'event': eventName, 'value': dom});
+                        dom.addEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
+                        this.execComponentMethod(componentPath, 'afterName', {'name': name, 'event': eventName, 'value': dom});
+                    }
                 }
             }
         }
@@ -710,13 +728,19 @@ function ___fairysupport(){
 
     this.removeComponentSingleEvent = function (dom, name, componentPath){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            let metPrefix = name + '_';
             for (let componentControllerMethod in this.componentControllerMethodList[componentPath]) {
-                if (componentControllerMethod.indexOf(metPrefix) === 0) {
-                    let eventName = componentControllerMethod.substring(metPrefix.length);
-                    this.execComponentMethod(componentPath, 'beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
-                    dom.removeEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
-                    this.execComponentMethod(componentPath, 'afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                let componentControllerMethodSplit = componentControllerMethod.split('_');
+                if (componentControllerMethodSplit.length > 1) {
+                    let metPrefix = '';
+                    for (let i = 0; i < (componentControllerMethodSplit.length - 1); i++) {
+                        metPrefix += componentControllerMethodSplit[i] + '_';
+                    }
+                    if (metPrefix === name + '_') {
+                        let eventName = componentControllerMethodSplit[componentControllerMethodSplit.length - 1];
+                        this.execComponentMethod(componentPath, 'beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                        dom.removeEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
+                        this.execComponentMethod(componentPath, 'afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
+                    }
                 }
             }
         }
