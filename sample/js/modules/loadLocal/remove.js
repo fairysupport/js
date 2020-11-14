@@ -16,6 +16,10 @@ export default class extends Base {
         this.bind2.forEach(item => console.log(item.textContent));
     }
 
+    bind3_click(event) {
+        console.log('bind3');
+    }
+
     removeBind1_click(event) {
         this.bind1 = null;
     }
@@ -25,6 +29,10 @@ export default class extends Base {
             this.bind2.remove(value);
             break;
         }
+    }
+
+    removeBind3_click(event) {
+        delete this.bind3.dataset.name;
     }
 
     loadComponent_click(event) {

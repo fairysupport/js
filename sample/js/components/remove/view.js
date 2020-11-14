@@ -4,6 +4,7 @@ export default `
         <li data-remove-list="bind2">This object is bound to bind2 of /js/components/remove/controller.js</li>
         <li data-remove-list="bind2">This object is bound to bind2 of /js/components/remove/controller.js</li>
     </ol>
+    <div><button data-remove-obj="bind3" data-remove-name="bind3">This object is bound to bind3 of /js/components/remove/controller.js</button></div>
 
     <div data-remove-obj="removeObj1">
         <div data-remove-obj="removeObj2">
@@ -20,6 +21,7 @@ export default `
     <button data-remove-name="log">output content of component to console</button>
     <button data-remove-name="removeBind1">remove bind1 of component</button>
     <button data-remove-name="removeBind2">remove bind2 of component</button>
-    <button data-remove-name="removeBind3">remove removeObj</button>
-    <button data-remove-name="removeBind4">remove removeList</button>
+    <button data-remove-name="removeBind3">remove data-name of bind3 of component</button>
+    <button data-remove-name="removeBind4">remove removeObj</button>
+    <button data-remove-name="removeBind5">remove removeList</button>
 `

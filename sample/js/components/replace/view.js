@@ -4,6 +4,7 @@ export default `
         <li data-replace-list="dataList">component dataList1</li>
         <li data-replace-list="dataList">component dataList2</li>
     </ol>
+    <div><button data-replace-obj="dataName" data-replace-name="dataName">component dataName</button></div>
 
     <div data-replace-obj="replace1">
         <div data-replace-obj="replace2">
@@ -20,6 +21,7 @@ export default `
     <button data-replace-name="log">output content of component to console</button>
     <button data-replace-name="replaceObj">replaceObj of component</button>
     <button data-replace-name="replaceList">replaceList of component</button>
+    <button data-replace-name="replaceName">replaceName of component</button>
     <button data-replace-name="replaceDataObj">replace data-obj</button>
     <button data-replace-name="replaceDataList">replace data-list</button>
 `

@@ -16,6 +16,14 @@ export default class extends Base {
         this.dataList.forEach(item => console.log(item.textContent));
     }
 
+    dataName_click(event) {
+        console.log('dataName');
+    }
+
+    dataName1_click(event) {
+        console.log('dataName1');
+    }
+
     replaceObj_click(event) {
         this.objCnt++;
         var divObj = document.createElement("DIV");
@@ -33,6 +41,10 @@ export default class extends Base {
             this.dataList.replace(value, liObj);
             break;
         }
+    }
+
+    replaceName_click(event) {
+        this.dataName.dataset.name = 'dataName1';
     }
 
     loadComponent_click(event) {
