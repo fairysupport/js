@@ -18,6 +18,10 @@ export default class extends Base {
         }
     }
 
+    dataName_click(event) {
+        console.log('component dataName_click');
+    }
+
     addObj_click(event) {
         var divObj = document.createElement("DIV");
         divObj.textContent = 'component obj' + this.objCnt;
@@ -33,13 +37,20 @@ export default class extends Base {
         this.div2.appendChild(divObj);
     }
 
+    addName_click(event) {
+        var divObj = document.createElement("BUTTON");
+        divObj.textContent = 'dataName';
+        divObj.dataset.addName = 'dataName';
+        this.div3.appendChild(divObj);
+    }
+
     add1_click(event) {
-        this.obj1.innerHTML = '<div data-add-obj="obj2"><div data-add-obj="obj13">add data-obj</div></div>';
+        this.a.innerHTML = '<div data-add-obj="a2"><div data-add-obj="a3">add data-add-obj</div></div>';
     }
 
     add2_click(event) {
-        for (let value of this.list.values()) {
-            value.innerHTML = '<div data-add-list="list"><div data-add-list="list">add data-list</div></div>';
+        for (let value of this.b.values()) {
+            value.innerHTML = '<div data-add-list="b"><div data-add-list="b">add data-list</div></div>';
             break;
         }
     }

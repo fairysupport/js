@@ -19,6 +19,10 @@ export default class extends Base {
         }
     }
 
+    dataName_click(event) {
+        console.log('dataName_click');
+    }
+
     addObj_click(event) {
         var divObj = document.createElement("DIV");
         divObj.textContent = 'obj' + this.objCnt;
@@ -34,8 +38,15 @@ export default class extends Base {
         this.div2.appendChild(divObj);
     }
 
+    addName_click(event) {
+        var divObj = document.createElement("BUTTON");
+        divObj.textContent = 'dataName';
+        divObj.dataset.name = 'dataName';
+        this.div3.appendChild(divObj);
+    }
+
     loadComponent_click(event) {
-        $f.loadComponent(this.div3, 'add', {'key1': 'value1', 'key2': 'value2'});
+        $f.loadComponent(this.div4, 'add', {'key1': 'value1', 'key2': 'value2'});
     }
 
     removeComponent_click(event) {
