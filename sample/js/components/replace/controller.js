@@ -25,7 +25,7 @@ export default class extends Base {
 
     replaceObj_click(event) {
         this.objCnt++;
-        var divObj = document.createElement("DIV");
+        let divObj = document.createElement("DIV");
         divObj.textContent = 'component div' + this.objCnt;
         divObj.dataset.replaceObj = 'dataObj';
         this.dataObj = divObj;
@@ -33,7 +33,7 @@ export default class extends Base {
 
     replaceList_click(event) {
         this.listCnt++;
-        var liObj = document.createElement("LI");
+        let liObj = document.createElement("LI");
         liObj.textContent = 'component dataList' + this.listCnt;
         liObj.dataset.replaceList = 'dataList';
         for (let value of this.dataList.values()) {

@@ -23,7 +23,7 @@ export default class extends Base {
     }
 
     addObj_click(event) {
-        var divObj = document.createElement("DIV");
+        let divObj = document.createElement("DIV");
         divObj.textContent = 'obj' + this.objCnt;
         divObj.dataset.obj = 'obj' + this.objCnt;
         this.div1.appendChild(divObj);
@@ -31,14 +31,14 @@ export default class extends Base {
     }
 
     addList_click(event) {
-        var divObj = document.createElement("DIV");
+        let divObj = document.createElement("DIV");
         divObj.textContent = 'dataList';
         divObj.dataset.list = 'dataList';
         this.div2.appendChild(divObj);
     }
 
     addName_click(event) {
-        var divObj = document.createElement("BUTTON");
+        let divObj = document.createElement("BUTTON");
         divObj.textContent = 'dataName';
         divObj.dataset.name = 'dataName';
         this.div3.appendChild(divObj);
