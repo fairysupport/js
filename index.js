@@ -23,6 +23,8 @@ function ___fairysupport(){
     this.componentDomInitCntMap = new Map();
     this.componentDomInitTotalMap = new Map();
     this.componentPackageList = {};
+    this.eventMap = new Map();
+    this.eventNameDataNameMap = new Map();
 
     let fairysupportClear = class FairysupportClear {
         constructor() {
@@ -320,21 +322,7 @@ function ___fairysupport(){
 
     this.bindControllerSingleEvent = function (dom, name){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            for (let controllerMethod in this.controllerMethodList) {
-                let controllerMethodSplit = controllerMethod.split('_');
-                if (controllerMethodSplit.length > 1) {
-                    let metPrefix = '';
-                    for (let i = 0; i < (controllerMethodSplit.length - 1); i++) {
-                        metPrefix += controllerMethodSplit[i] + '_';
-                    }
-                    if (metPrefix === name + '_') {
-                        let eventName = controllerMethodSplit[controllerMethodSplit.length - 1];
-                        this.execControllerMethod('beforeName', {'name': name, 'event': eventName, 'value': dom});
-                        dom.addEventListener(eventName, this.controllerMethodList[controllerMethod]);
-                        this.execControllerMethod('afterName', {'name': name, 'event': eventName, 'value': dom});
-                    }
-                }
-            }
+            this.setEventFunction(name, this.clazz.obj, this.controllerMethodList, dom);
         }
     }
 
@@ -487,21 +475,7 @@ function ___fairysupport(){
 
     this.removeControllerSingleEvent = function (dom, name){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            for (let controllerMethod in this.controllerMethodList) {
-                let controllerMethodSplit = controllerMethod.split('_');
-                if (controllerMethodSplit.length > 1) {
-                    let metPrefix = '';
-                    for (let i = 0; i < (controllerMethodSplit.length - 1); i++) {
-                        metPrefix += controllerMethodSplit[i] + '_';
-                    }
-                    if (metPrefix === name + '_') {
-                        let eventName = controllerMethodSplit[controllerMethodSplit.length - 1];
-                        this.execControllerMethod('beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
-                        dom.removeEventListener(eventName, this.controllerMethodList[controllerMethod]);
-                        this.execControllerMethod('afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
-                    }
-                }
-            }
+            this.removeEventFunction(name, this.clazz.obj, this.controllerMethodList, dom);
         }
     };
 
@@ -662,21 +636,7 @@ function ___fairysupport(){
 
     this.bindComponentSingleEvent = function (dom, name, componentPath){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            for (let componentControllerMethod in this.componentControllerMethodList[componentPath]) {
-                let componentControllerMethodSplit = componentControllerMethod.split('_');
-                if (componentControllerMethodSplit.length > 1) {
-                    let metPrefix = '';
-                    for (let i = 0; i < (componentControllerMethodSplit.length - 1); i++) {
-                        metPrefix += componentControllerMethodSplit[i] + '_';
-                    }
-                    if (metPrefix === name + '_') {
-                        let eventName = componentControllerMethodSplit[componentControllerMethodSplit.length - 1];
-                        this.execComponentMethod(componentPath, 'beforeName', {'name': name, 'event': eventName, 'value': dom});
-                        dom.addEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
-                        this.execComponentMethod(componentPath, 'afterName', {'name': name, 'event': eventName, 'value': dom});
-                    }
-                }
-            }
+            this.setEventFunction(name, this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], dom);
         }
     }
 
@@ -728,21 +688,7 @@ function ___fairysupport(){
 
     this.removeComponentSingleEvent = function (dom, name, componentPath){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            for (let componentControllerMethod in this.componentControllerMethodList[componentPath]) {
-                let componentControllerMethodSplit = componentControllerMethod.split('_');
-                if (componentControllerMethodSplit.length > 1) {
-                    let metPrefix = '';
-                    for (let i = 0; i < (componentControllerMethodSplit.length - 1); i++) {
-                        metPrefix += componentControllerMethodSplit[i] + '_';
-                    }
-                    if (metPrefix === name + '_') {
-                        let eventName = componentControllerMethodSplit[componentControllerMethodSplit.length - 1];
-                        this.execComponentMethod(componentPath, 'beforeRemoveName', {'name': name, 'event': eventName, 'value': dom});
-                        dom.removeEventListener(eventName, this.componentControllerMethodList[componentPath][componentControllerMethod]);
-                        this.execComponentMethod(componentPath, 'afterRemoveName', {'name': name, 'event': eventName, 'value': dom});
-                    }
-                }
-            }
+            this.removeEventFunction(name, this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], dom);
         }
     };
 
@@ -816,6 +762,119 @@ function ___fairysupport(){
                     fn(value, arg);
                 }
             }
+        }
+    };
+
+    this.setEventFunction = function(dataFullName, classObj, methodList, dom){
+        let trimDataFullName = '';
+        let trimDataNameList = [];
+        let dataFullNameSplit = dataFullName.split(',');
+        for (let i = 0; i < dataFullNameSplit.length; i++) {
+            let trimDataName = dataFullNameSplit[i].trim();
+            trimDataNameList.push(trimDataName);
+            trimDataFullName += trimDataName + ',';
+        }
+        if (this.eventMap.has(classObj) && this.eventMap.get(classObj).has(trimDataFullName)) {
+
+            let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
+            for (let eventName of eventNameDataNameMapOfClass.keys()) {
+                let dataNameList = eventNameDataNameMapOfClass.get(eventName);
+                for (let dataName of dataNameList) {
+                    this.execMethod(classObj, methodList, 'beforeName', {'name': dataName, 'event': eventName, 'value': dom});
+                }
+                let eventFn = this.eventMap.get(classObj).get(trimDataFullName);
+                dom.addEventListener(eventName, eventFn);
+                for (let dataName of dataNameList) {
+                    this.execMethod(classObj, methodList, 'afterName', {'name': dataName, 'event': eventName, 'value': dom});
+                }
+            }
+
+        } else {
+
+            for (let trimDataName of trimDataNameList) {
+
+                for (let met in methodList) {
+                    let metSplit = met.split('_');
+                    if (metSplit.length > 1) {
+                        let metPrefix = '';
+                        for (let i = 0; i < (metSplit.length - 1); i++) {
+                            metPrefix += metSplit[i] + '_';
+                        }
+                        if (metPrefix === trimDataName + '_') {
+                            let eventName = metSplit[metSplit.length - 1];
+                            if (!this.eventNameDataNameMap.has(classObj)) {
+                                this.eventNameDataNameMap.set(classObj, new Map());
+                            }
+                            let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
+                            if (!eventNameDataNameMapOfClass.has(eventName)) {
+                                eventNameDataNameMapOfClass.set(eventName, []);
+                            }
+                            let dataNameList = eventNameDataNameMapOfClass.get(eventName);
+                            dataNameList.push(trimDataName);
+                        }
+                    }
+                }
+
+            }
+
+            if (this.eventNameDataNameMap.has(classObj)) {
+                let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
+                for (let eventName of eventNameDataNameMapOfClass.keys()) {
+                    let dataNameList = eventNameDataNameMapOfClass.get(eventName);
+                    let fnList = [];
+                    for (let dataName of dataNameList) {
+                        this.execMethod(classObj, methodList, 'beforeName', {'name': dataName, 'event': eventName, 'value': dom});
+                        fnList.push(methodList[dataName + '_' + eventName]);
+                    }
+                    let eventFn = (function(fnList){
+                        return function(e){
+                            for (let func of fnList) {
+                                let ret = func(e);
+                                if (ret === false) {
+                                    return;
+                                }
+                            }
+                        };
+                    })(fnList);
+                    dom.addEventListener(eventName, eventFn);
+                    if (!this.eventMap.has(classObj)) {
+                        this.eventMap.set(classObj, new Map());
+                    }
+                    let eventMapOfClass = this.eventMap.get(classObj);
+                    eventMapOfClass.set(trimDataFullName, eventFn);
+                    for (let dataName of dataNameList) {
+                        this.execMethod(classObj, methodList, 'afterName', {'name': dataName, 'event': eventName, 'value': dom});
+                    }
+                }
+            }
+
+        }
+    };
+
+    this.removeEventFunction = function(dataFullName, classObj, methodList, dom){
+        let trimDataFullName = '';
+        let trimDataNameList = [];
+        let dataFullNameSplit = dataFullName.split(',');
+        for (let i = 0; i < dataFullNameSplit.length; i++) {
+            let trimDataName = dataFullNameSplit[i].trim();
+            trimDataNameList.push(trimDataName);
+            trimDataFullName += trimDataName + ',';
+        }
+        if (this.eventMap.has(classObj) && this.eventMap.get(classObj).has(trimDataFullName)) {
+
+            let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
+            for (let eventName of eventNameDataNameMapOfClass.keys()) {
+                let dataNameList = eventNameDataNameMapOfClass.get(eventName);
+                for (let dataName of dataNameList) {
+                    this.execMethod(classObj, methodList, 'beforeRemoveName', {'name': dataName, 'event': eventName, 'value': dom});
+                }
+                let eventFn = this.eventMap.get(classObj).get(trimDataFullName);
+                dom.removeEventListener(eventName, eventFn);
+                for (let dataName of dataNameList) {
+                    this.execMethod(classObj, methodList, 'afterRemoveName', {'name': dataName, 'event': eventName, 'value': dom});
+                }
+            }
+
         }
     };
 
