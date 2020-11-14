@@ -15,9 +15,11 @@ function ___fairysupport(){
 
     this.clazz = {};
     this.controllerMethodList = {};
+    this.controllerEventMethodList = {};
 
     this.componentControllerList = {};
     this.componentControllerMethodList = {};
+    this.componentControllerEventMethodList = {};
     this.targetDomMap = new WeakMap();
     this.componentDomInitFuncMap = new Map();
     this.componentDomInitCntMap = new Map();
@@ -87,6 +89,22 @@ function ___fairysupport(){
         return function (Module){
             fs.clazz.obj = new Module.default();
             fs.controllerMethodList = fs.getMethodList(fs.clazz.obj);
+
+            for (let met in fs.controllerMethodList) {
+                let metSplit = met.split('_');
+                if (metSplit.length > 1) {
+                    let metPrefix = '';
+                    for (let i = 0; i < (metSplit.length - 1); i++) {
+                        metPrefix += metSplit[i] + '_';
+                    }
+                    metPrefix = metPrefix.substring(0, metPrefix.length - 1);
+                    if (!(fs.controllerEventMethodList[metPrefix])) {
+                        fs.controllerEventMethodList[metPrefix] = [];
+                    }
+                    fs.controllerEventMethodList[metPrefix].push(metSplit[metSplit.length - 1]);
+                }
+            }
+
         };
     };
 
@@ -322,7 +340,7 @@ function ___fairysupport(){
 
     this.bindControllerSingleEvent = function (dom, name){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            this.setEventFunction(name, this.clazz.obj, this.controllerMethodList, dom);
+            this.setEventFunction(name, this.clazz.obj, this.controllerMethodList, dom, this.controllerEventMethodList);
         }
     }
 
@@ -515,6 +533,25 @@ function ___fairysupport(){
         return function (Module){
             fs.componentControllerList[componentPath] = new Module.default();
             fs.componentControllerMethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
+
+            if (!(fs.componentControllerEventMethodList[componentPath])) {
+                fs.componentControllerEventMethodList[componentPath] = {};
+            }
+            for (let met in fs.componentControllerMethodList[componentPath]) {
+                let metSplit = met.split('_');
+                if (metSplit.length > 1) {
+                    let metPrefix = '';
+                    for (let i = 0; i < (metSplit.length - 1); i++) {
+                        metPrefix += metSplit[i] + '_';
+                    }
+                    metPrefix = metPrefix.substring(0, metPrefix.length - 1);
+                    if (!(fs.componentControllerEventMethodList[componentPath][metPrefix])) {
+                        fs.componentControllerEventMethodList[componentPath][metPrefix] = [];
+                    }
+                    fs.componentControllerEventMethodList[componentPath][metPrefix].push(metSplit[metSplit.length - 1]);
+                }
+            }
+
         };
     };
 
@@ -636,7 +673,7 @@ function ___fairysupport(){
 
     this.bindComponentSingleEvent = function (dom, name, componentPath){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            this.setEventFunction(name, this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], dom);
+            this.setEventFunction(name, this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], dom, this.componentControllerEventMethodList[componentPath]);
         }
     }
 
@@ -765,7 +802,7 @@ function ___fairysupport(){
         }
     };
 
-    this.setEventFunction = function(dataFullName, classObj, methodList, dom){
+    this.setEventFunction = function(dataFullName, classObj, methodList, dom, eventMethodList){
         let trimDataFullName = '';
         let trimDataNameList = [];
         let dataFullNameSplit = dataFullName.split(',');
@@ -795,33 +832,23 @@ function ___fairysupport(){
         } else {
 
             for (let trimDataName of trimDataNameList) {
-
-                for (let met in methodList) {
-                    let metSplit = met.split('_');
-                    if (metSplit.length > 1) {
-                        let metPrefix = '';
-                        for (let i = 0; i < (metSplit.length - 1); i++) {
-                            metPrefix += metSplit[i] + '_';
+                if (eventMethodList[trimDataName]) {
+                    for (let eventName of eventMethodList[trimDataName]) {
+                        if (!this.eventNameDataNameMap.has(classObj)) {
+                            this.eventNameDataNameMap.set(classObj, new Map());
                         }
-                        if (metPrefix === trimDataName + '_') {
-                            let eventName = metSplit[metSplit.length - 1];
-                            if (!this.eventNameDataNameMap.has(classObj)) {
-                                this.eventNameDataNameMap.set(classObj, new Map());
-                            }
-                            let keyFullDataNameValueDataNameListMap = this.eventNameDataNameMap.get(classObj);
-                            if (!keyFullDataNameValueDataNameListMap.has(trimDataFullName)) {
-                                keyFullDataNameValueDataNameListMap.set(trimDataFullName, new Map());
-                            }
-                            let eventNameDataNameListOfClass = keyFullDataNameValueDataNameListMap.get(trimDataFullName);
-                            if (!eventNameDataNameListOfClass.has(eventName)) {
-                                eventNameDataNameListOfClass.set(eventName, []);
-                            }
-                            let dataNameList = eventNameDataNameListOfClass.get(eventName);
-                            dataNameList.push(trimDataName);
+                        let keyFullDataNameValueDataNameListMap = this.eventNameDataNameMap.get(classObj);
+                        if (!keyFullDataNameValueDataNameListMap.has(trimDataFullName)) {
+                            keyFullDataNameValueDataNameListMap.set(trimDataFullName, new Map());
                         }
+                        let eventNameDataNameListOfClass = keyFullDataNameValueDataNameListMap.get(trimDataFullName);
+                        if (!eventNameDataNameListOfClass.has(eventName)) {
+                            eventNameDataNameListOfClass.set(eventName, []);
+                        }
+                        let dataNameList = eventNameDataNameListOfClass.get(eventName);
+                        dataNameList.push(trimDataName);
                     }
                 }
-
             }
 
             if (this.eventNameDataNameMap.has(classObj)) {
