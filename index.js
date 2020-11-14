@@ -776,16 +776,19 @@ function ___fairysupport(){
         }
         if (this.eventMap.has(classObj) && this.eventMap.get(classObj).has(trimDataFullName)) {
 
-            let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
-            for (let eventName of eventNameDataNameMapOfClass.keys()) {
-                let dataNameList = eventNameDataNameMapOfClass.get(eventName);
-                for (let dataName of dataNameList) {
-                    this.execMethod(classObj, methodList, 'beforeName', {'name': dataName, 'event': eventName, 'value': dom});
-                }
-                let eventFn = this.eventMap.get(classObj).get(trimDataFullName);
-                dom.addEventListener(eventName, eventFn);
-                for (let dataName of dataNameList) {
-                    this.execMethod(classObj, methodList, 'afterName', {'name': dataName, 'event': eventName, 'value': dom});
+            let keyFullDataNameValueDataNameListMap = this.eventNameDataNameMap.get(classObj);
+            if (keyFullDataNameValueDataNameListMap.has(trimDataFullName)) {
+                let eventNameDataNameListOfClass = keyFullDataNameValueDataNameListMap.get(trimDataFullName);
+                for (let eventName of eventNameDataNameListOfClass.keys()) {
+                    let dataNameList = eventNameDataNameListOfClass.get(eventName);
+                    for (let dataName of dataNameList) {
+                        this.execMethod(classObj, methodList, 'beforeName', {'name': dataName, 'event': eventName, 'value': dom});
+                    }
+                    let eventFn = this.eventMap.get(classObj).get(trimDataFullName).get(eventName);
+                    dom.addEventListener(eventName, eventFn);
+                    for (let dataName of dataNameList) {
+                        this.execMethod(classObj, methodList, 'afterName', {'name': dataName, 'event': eventName, 'value': dom});
+                    }
                 }
             }
 
@@ -805,11 +808,15 @@ function ___fairysupport(){
                             if (!this.eventNameDataNameMap.has(classObj)) {
                                 this.eventNameDataNameMap.set(classObj, new Map());
                             }
-                            let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
-                            if (!eventNameDataNameMapOfClass.has(eventName)) {
-                                eventNameDataNameMapOfClass.set(eventName, []);
+                            let keyFullDataNameValueDataNameListMap = this.eventNameDataNameMap.get(classObj);
+                            if (!keyFullDataNameValueDataNameListMap.has(trimDataFullName)) {
+                                keyFullDataNameValueDataNameListMap.set(trimDataFullName, new Map());
                             }
-                            let dataNameList = eventNameDataNameMapOfClass.get(eventName);
+                            let eventNameDataNameListOfClass = keyFullDataNameValueDataNameListMap.get(trimDataFullName);
+                            if (!eventNameDataNameListOfClass.has(eventName)) {
+                                eventNameDataNameListOfClass.set(eventName, []);
+                            }
+                            let dataNameList = eventNameDataNameListOfClass.get(eventName);
                             dataNameList.push(trimDataName);
                         }
                     }
@@ -818,32 +825,44 @@ function ___fairysupport(){
             }
 
             if (this.eventNameDataNameMap.has(classObj)) {
-                let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
-                for (let eventName of eventNameDataNameMapOfClass.keys()) {
-                    let dataNameList = eventNameDataNameMapOfClass.get(eventName);
-                    let fnList = [];
-                    for (let dataName of dataNameList) {
-                        this.execMethod(classObj, methodList, 'beforeName', {'name': dataName, 'event': eventName, 'value': dom});
-                        fnList.push(methodList[dataName + '_' + eventName]);
-                    }
-                    let eventFn = (function(fnList){
-                        return function(e){
-                            for (let func of fnList) {
-                                let ret = func(e);
-                                if (ret === false) {
-                                    return;
-                                }
-                            }
-                        };
-                    })(fnList);
-                    dom.addEventListener(eventName, eventFn);
-                    if (!this.eventMap.has(classObj)) {
-                        this.eventMap.set(classObj, new Map());
-                    }
-                    let eventMapOfClass = this.eventMap.get(classObj);
-                    eventMapOfClass.set(trimDataFullName, eventFn);
-                    for (let dataName of dataNameList) {
-                        this.execMethod(classObj, methodList, 'afterName', {'name': dataName, 'event': eventName, 'value': dom});
+                let keyFullDataNameValueDataNameListMap = this.eventNameDataNameMap.get(classObj);
+                if (keyFullDataNameValueDataNameListMap.has(trimDataFullName)) {
+                    let eventNameDataNameListOfClass = keyFullDataNameValueDataNameListMap.get(trimDataFullName);
+                    for (let eventName of eventNameDataNameListOfClass.keys()) {
+                        let dataNameList = eventNameDataNameListOfClass.get(eventName);
+                        let fnList = [];
+                        for (let dataName of dataNameList) {
+                            this.execMethod(classObj, methodList, 'beforeName', {'name': dataName, 'event': eventName, 'value': dom});
+                            fnList.push(methodList[dataName + '_' + eventName]);
+                        }
+
+                        if (!this.eventMap.has(classObj)) {
+                            this.eventMap.set(classObj, new Map());
+                        }
+                        let keyFullDataNameValueFuncMap = this.eventMap.get(classObj);
+                        if (!keyFullDataNameValueFuncMap.has(trimDataFullName)) {
+                            keyFullDataNameValueFuncMap.set(trimDataFullName, new Map());
+                        }
+                        let eventMapOfClass = keyFullDataNameValueFuncMap.get(trimDataFullName);
+                        if (!eventMapOfClass.has(eventName)) {
+                            let eventFn = (function(fnList){
+                                return function(e){
+                                    for (let func of fnList) {
+                                        let ret = func(e);
+                                        if (ret === false) {
+                                            return;
+                                        }
+                                    }
+                                };
+                            })(fnList);
+                            eventMapOfClass.set(eventName, eventFn);
+                        }
+
+                        dom.addEventListener(eventName, eventMapOfClass.get(eventName));
+
+                        for (let dataName of dataNameList) {
+                            this.execMethod(classObj, methodList, 'afterName', {'name': dataName, 'event': eventName, 'value': dom});
+                        }
                     }
                 }
             }
@@ -853,29 +872,31 @@ function ___fairysupport(){
 
     this.removeEventFunction = function(dataFullName, classObj, methodList, dom){
         let trimDataFullName = '';
-        let trimDataNameList = [];
         let dataFullNameSplit = dataFullName.split(',');
         for (let i = 0; i < dataFullNameSplit.length; i++) {
             let trimDataName = dataFullNameSplit[i].trim();
-            trimDataNameList.push(trimDataName);
             trimDataFullName += trimDataName + ',';
         }
         if (this.eventMap.has(classObj) && this.eventMap.get(classObj).has(trimDataFullName)) {
 
-            let eventNameDataNameMapOfClass = this.eventNameDataNameMap.get(classObj);
-            for (let eventName of eventNameDataNameMapOfClass.keys()) {
-                let dataNameList = eventNameDataNameMapOfClass.get(eventName);
-                for (let dataName of dataNameList) {
-                    this.execMethod(classObj, methodList, 'beforeRemoveName', {'name': dataName, 'event': eventName, 'value': dom});
-                }
-                let eventFn = this.eventMap.get(classObj).get(trimDataFullName);
-                dom.removeEventListener(eventName, eventFn);
-                for (let dataName of dataNameList) {
-                    this.execMethod(classObj, methodList, 'afterRemoveName', {'name': dataName, 'event': eventName, 'value': dom});
+            let keyFullDataNameValueDataNameListMap = this.eventNameDataNameMap.get(classObj);
+            if (keyFullDataNameValueDataNameListMap.has(trimDataFullName)) {
+                let eventNameDataNameListOfClass = keyFullDataNameValueDataNameListMap.get(trimDataFullName);
+                for (let eventName of eventNameDataNameListOfClass.keys()) {
+                    let dataNameList = eventNameDataNameListOfClass.get(eventName);
+                    for (let dataName of dataNameList) {
+                        this.execMethod(classObj, methodList, 'beforeRemoveName', {'name': dataName, 'event': eventName, 'value': dom});
+                    }
+                    let eventFn = this.eventMap.get(classObj).get(trimDataFullName).get(eventName);
+                    dom.removeEventListener(eventName, eventFn);
+                    for (let dataName of dataNameList) {
+                        this.execMethod(classObj, methodList, 'afterRemoveName', {'name': dataName, 'event': eventName, 'value': dom});
+                    }
                 }
             }
 
         }
+
     };
 
 }
