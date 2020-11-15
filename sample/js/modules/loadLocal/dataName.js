@@ -1,4 +1,4 @@
-import Base from '../parent.js';
+import Base from '../../parent.js';
 
 export default class extends Base {
 
@@ -64,6 +64,14 @@ export default class extends Base {
 
     add2_click(event) {
         this.dataName8.innerHTML = '<div data-name="dataName1">dataName1</div>';
+    }
+
+    loadComponent_click(event) {
+        $f.loadComponent(this.div, 'dataName', {'key1': 'value1', 'key2': 'value2'});
+    }
+
+    removeComponent_click(event) {
+        this.div.innerHTML = '';
     }
 
 }
