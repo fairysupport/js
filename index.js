@@ -13,6 +13,8 @@ function ___fairysupport(){
         reqPath = reqUrl.origin + ':' + reqUrl.port + reqUrl.pathname.trim();
     }
 
+    this.version = Date.now();
+
     this.clazz = {};
     this.controllerMethodList = {};
     this.controllerEventMethodList = {};
@@ -28,6 +30,8 @@ function ___fairysupport(){
     this.eventMap = new Map();
     this.eventNameDataNameMap = new Map();
 
+    this.instanceMap = {};
+
     let fairysupportClear = class FairysupportClear {
         constructor() {
         }
@@ -42,6 +46,13 @@ function ___fairysupport(){
                     root = argRoot;
                     moduleRoot = root + '/js/modules/';
                     componentRoot = root + '/js/components/';
+                }
+            }
+            let argVersion = scriptObj.dataset.version;
+            if (argVersion !== null && argVersion !== undefined) {
+                argVersion = argVersion.trim();
+                if (argVersion !== '') {
+                    this.version = argVersion;
                 }
             }
         }
@@ -74,10 +85,10 @@ function ___fairysupport(){
                 }
             }
         }
-        modulePath = moduleRoot + modulePath + '.js';
+        let moduleFullPath = moduleRoot + modulePath + '.js';
 
-        import(modulePath + '?' + Date.now())
-        .then(this.getControllerLoader(this))
+        import(moduleFullPath + '?' + this.version)
+        .then(this.getControllerLoader(this, modulePath))
         .then(this.binder(this))
         .then(this.getControllerMethod(this, 'init', null));
 
@@ -85,26 +96,31 @@ function ___fairysupport(){
 
     };
 
-    this.getControllerLoader = function (fs){
+    this.getControllerLoader = function (fs, modulePath){
         return function (Module){
-            fs.clazz.obj = new Module.default();
-            fs.controllerMethodList = fs.getMethodList(fs.clazz.obj);
+            let classFullName = 'modules/' + modulePath;
+            if (!fs.instanceMap[classFullName]) {
 
-            for (let met in fs.controllerMethodList) {
-                let metSplit = met.split('_');
-                if (metSplit.length > 1) {
-                    let metPrefix = '';
-                    for (let i = 0; i < (metSplit.length - 1); i++) {
-                        metPrefix += metSplit[i] + '_';
+                fs.clazz.obj = new Module.default();
+                fs.instanceMap[classFullName] = fs.clazz.obj;
+                fs.controllerMethodList = fs.getMethodList(fs.clazz.obj);
+
+                for (let met in fs.controllerMethodList) {
+                    let metSplit = met.split('_');
+                    if (metSplit.length > 1) {
+                        let metPrefix = '';
+                        for (let i = 0; i < (metSplit.length - 1); i++) {
+                            metPrefix += metSplit[i] + '_';
+                        }
+                        metPrefix = metPrefix.substring(0, metPrefix.length - 1);
+                        if (!(fs.controllerEventMethodList[metPrefix])) {
+                            fs.controllerEventMethodList[metPrefix] = [];
+                        }
+                        fs.controllerEventMethodList[metPrefix].push(metSplit[metSplit.length - 1]);
                     }
-                    metPrefix = metPrefix.substring(0, metPrefix.length - 1);
-                    if (!(fs.controllerEventMethodList[metPrefix])) {
-                        fs.controllerEventMethodList[metPrefix] = [];
-                    }
-                    fs.controllerEventMethodList[metPrefix].push(metSplit[metSplit.length - 1]);
                 }
-            }
 
+            }
         };
     };
 
@@ -497,7 +513,15 @@ function ___fairysupport(){
         }
     };
 
-    this.loadComponent = function (dom, componentPackeage, argObj, cb){
+    this.beforeLoadComponent = function (dom, componentPackeage, argObj, cb){
+        this.loadComponent(dom, componentPackeage, argObj, cb, 'before');
+    };
+
+    this.afterLoadComponent = function (dom, componentPackeage, argObj, cb){
+        this.loadComponent(dom, componentPackeage, argObj, cb, 'after');
+    };
+
+    this.loadComponent = function (dom, componentPackeage, argObj, cb, position){
 
         componentPackeage = componentPackeage.trim();
         let componentPath = '';
@@ -508,12 +532,12 @@ function ___fairysupport(){
         let componentControllerPath = componentRoot + componentPath + 'controller.js';
         let componentViewPath = componentRoot + componentPath + 'view.js';
 
-        import(componentViewPath + '?' + Date.now())
-        .then(this.getComponentInsertFunc(this, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb));
+        import(componentViewPath + '?' + this.version)
+        .then(this.getComponentInsertFunc(this, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position));
 
     };
 
-    this.getComponentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb){
+    this.getComponentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position){
         return function (Module){
 
             let func = function () {};
@@ -523,39 +547,42 @@ function ___fairysupport(){
 
             let viewStr = Module.default;
 
-            import(componentControllerPath + '?' + Date.now())
+            import(componentControllerPath + '?' + fs.version)
             .then(fs.getComponentController(fs, componentPath))
-            .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func))
+            .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position))
         };
     };
 
     this.getComponentController = function (fs, componentPath){
         return function (Module){
-            fs.componentControllerList[componentPath] = new Module.default();
-            fs.componentControllerMethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
+            let classFullName = 'components/' + componentPath.substring(0, componentPath.length - 1);
+            if (!fs.instanceMap[classFullName]) {
+                fs.componentControllerList[componentPath] = new Module.default();
+                fs.instanceMap[classFullName] = fs.componentControllerList[componentPath];
+                fs.componentControllerMethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
 
-            if (!(fs.componentControllerEventMethodList[componentPath])) {
-                fs.componentControllerEventMethodList[componentPath] = {};
-            }
-            for (let met in fs.componentControllerMethodList[componentPath]) {
-                let metSplit = met.split('_');
-                if (metSplit.length > 1) {
-                    let metPrefix = '';
-                    for (let i = 0; i < (metSplit.length - 1); i++) {
-                        metPrefix += metSplit[i] + '_';
+                if (!(fs.componentControllerEventMethodList[componentPath])) {
+                    fs.componentControllerEventMethodList[componentPath] = {};
+                }
+                for (let met in fs.componentControllerMethodList[componentPath]) {
+                    let metSplit = met.split('_');
+                    if (metSplit.length > 1) {
+                        let metPrefix = '';
+                        for (let i = 0; i < (metSplit.length - 1); i++) {
+                            metPrefix += metSplit[i] + '_';
+                        }
+                        metPrefix = metPrefix.substring(0, metPrefix.length - 1);
+                        if (!(fs.componentControllerEventMethodList[componentPath][metPrefix])) {
+                            fs.componentControllerEventMethodList[componentPath][metPrefix] = [];
+                        }
+                        fs.componentControllerEventMethodList[componentPath][metPrefix].push(metSplit[metSplit.length - 1]);
                     }
-                    metPrefix = metPrefix.substring(0, metPrefix.length - 1);
-                    if (!(fs.componentControllerEventMethodList[componentPath][metPrefix])) {
-                        fs.componentControllerEventMethodList[componentPath][metPrefix] = [];
-                    }
-                    fs.componentControllerEventMethodList[componentPath][metPrefix].push(metSplit[metSplit.length - 1]);
                 }
             }
-
         };
     };
 
-    this.getInsertComponent = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func){
+    this.getInsertComponent = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position){
         return function (){
 
             let template = document.createElement('template');
@@ -576,8 +603,19 @@ function ___fairysupport(){
                 }
             }
 
-            dom.innerHTML = "";
-            dom.appendChild(viewDom);
+            if ('before' === position && dom.parentNode) {
+                dom.parentNode.insertBefore(viewDom, dom);
+            } else if ('after' === position && dom.parentNode) {
+                if (dom.nextSibling === null || dom.nextSibling === undefined) {
+                    dom.parentNode.appendChild(viewDom);
+                } else {
+                    dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                }
+            } else {
+                dom.innerHTML = "";
+                dom.appendChild(viewDom);
+            }
+
         };
     };
 
