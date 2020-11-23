@@ -546,6 +546,7 @@ function ___fairysupport(){
             }
 
             let viewStr = Module.default;
+            viewStr = fs.getTplStr(viewStr, argObj);
 
             import(componentControllerPath + '?' + fs.version)
             .then(fs.getComponentController(fs, componentPath))
@@ -963,6 +964,45 @@ function ___fairysupport(){
         }
 
     };
+
+    this.getTplStrParam = function(keySplit, paramObj, keyIndex = 0) {
+        if (keyIndex < keySplit.length) {
+            let key = keySplit[keyIndex];
+            if (paramObj !== null && paramObj !== undefined && key in paramObj) {
+                let param = paramObj[key];
+                return this.getTplStrParam(keySplit, param, keyIndex + 1);
+            }
+            return '';
+        }
+        return paramObj;
+    };
+
+    this.esc = function(strings, ...keys) {
+        return (function(fs, argObj) {
+            let ret = '';
+            if (keys !== null && keys !== undefined) {
+                for (let i = 0; i < keys.length; i++) {
+                    let keySplit = keys[i].split('.');
+                    let value = fs.getTplStrParam(keySplit, argObj);
+                    ret += strings[i] + value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                }
+            }
+            if (keys === null || keys === undefined || keys.length === null || keys.length === undefined) {
+                ret += strings[0];
+            } else if (keys.length < strings.length) {
+                ret += strings[keys.length];
+            }
+            return ret;
+        });
+    };
+
+    this.getTplStr = function(tplFuc, paramObj) {
+        if (typeof tplFuc === 'function') {
+            return tplFuc(this, paramObj);
+        } else {
+            return tplFuc;
+        }
+    }
 
 }
 const $f = new ___fairysupport();

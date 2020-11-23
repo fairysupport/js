@@ -1,4 +1,4 @@
-export default `
+export default $f.esc`
     <div data-data-name-obj="dataObj">div1</div>
     <ol>
         <li data-data-name-list="dataList">dataList1</li>
