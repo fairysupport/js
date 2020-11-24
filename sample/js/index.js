@@ -1152,6 +1152,7 @@ function ___fairysupport(){
                         if ('continueVal' in retObj && retObj.continueVal > 0) {
                             if (retObj.continueVal > 1) {
                                 retObj.continueVal--;
+                                this.nextDelete(newChild);
                                 this.deleteTag(firstElement, tag);
                                 return;
                             } else {
@@ -1162,6 +1163,7 @@ function ___fairysupport(){
                         if ('breakVal' in retObj && retObj.breakVal > 0) {
                             if (retObj.breakVal > 1) {
                                 retObj.breakVal--;
+                                this.nextDelete(newChild);
                                 this.deleteTag(firstElement, tag);
                                 return;
                             } else {
@@ -1199,6 +1201,7 @@ function ___fairysupport(){
                         if ('continueVal' in retObj && retObj.continueVal > 0) {
                             if (retObj.continueVal > 1) {
                                 retObj.continueVal--;
+                                this.nextDelete(newChild);
                                 this.deleteTag(firstElement, tag);
                                 return;
                             } else {
@@ -1209,6 +1212,7 @@ function ___fairysupport(){
                         if ('breakVal' in retObj && retObj.breakVal > 0) {
                             if (retObj.breakVal > 1) {
                                 retObj.breakVal--;
+                                this.nextDelete(newChild);
                                 this.deleteTag(firstElement, tag);
                                 return;
                             } else {
@@ -1240,6 +1244,7 @@ function ___fairysupport(){
                         if ('continueVal' in retObj && retObj.continueVal > 0) {
                             if (retObj.continueVal > 1) {
                                 retObj.continueVal--;
+                                this.nextDelete(newChild);
                                 this.deleteTag(firstElement, tag);
                                 return;
                             } else {
@@ -1250,6 +1255,7 @@ function ___fairysupport(){
                         if ('breakVal' in retObj && retObj.breakVal > 0) {
                             if (retObj.breakVal > 1) {
                                 retObj.breakVal--;
+                                this.nextDelete(newChild);
                                 this.deleteTag(firstElement, tag);
                                 return;
                             } else {
