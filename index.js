@@ -1232,7 +1232,7 @@ function ___fairysupport(){
                     delete child.dataset.while;
                     let firstFlg = true;
                     let firstElement = null;
-                    while ($___fairysupport_param(paramObj, localValue, forEnd)) {
+                    while ($___fairysupport_param(paramObj, localValue, whileValue)) {
                         let newChild = child.cloneNode(true)
                         this.developTpl(newChild, paramObj, localValue, retObj);
                         skipObjMap.set(newChild, newChild);
