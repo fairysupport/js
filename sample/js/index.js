@@ -586,9 +586,7 @@ function ___fairysupport(){
     this.getInsertComponent = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position){
         return function (){
 
-            let template = document.createElement('template');
-            template.innerHTML = viewStr;
-            let viewDom = template.content;
+            let viewDom = fs.getTplDom(viewStr, argObj);
 
             let initFunc = fs.getComponentMethod(fs, componentPath, 'init', argObj, func);
 
@@ -965,25 +963,13 @@ function ___fairysupport(){
 
     };
 
-    this.getTplStrParam = function(keySplit, paramObj, keyIndex = 0) {
-        if (keyIndex < keySplit.length) {
-            let key = keySplit[keyIndex];
-            if (paramObj !== null && paramObj !== undefined && key in paramObj) {
-                let param = paramObj[key];
-                return this.getTplStrParam(keySplit, param, keyIndex + 1);
-            }
-            return '';
-        }
-        return paramObj;
-    };
-
     this.esc = function(strings, ...keys) {
         return (function(fs, argObj) {
             let ret = '';
             if (keys !== null && keys !== undefined) {
                 for (let i = 0; i < keys.length; i++) {
-                    let keySplit = keys[i].split('.');
-                    let value = fs.getTplStrParam(keySplit, argObj);
+                    let value = $___fairysupport_param(argObj, null, keys[i]);
+                    value = String(value);
                     ret += strings[i] + value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
                 }
             }
@@ -1002,8 +988,294 @@ function ___fairysupport(){
         } else {
             return tplFuc;
         }
-    }
+    };
 
+    this.getTplDom = function(viewStr, paramObj){
+
+        let template = document.createElement('template');
+        template.innerHTML = viewStr;
+        let viewDom = template.content;
+
+        if (paramObj === null || paramObj === undefined) {
+            paramObj = Object.create(null);
+        }
+
+        let retObj = Object.create(null);
+        this.developTpl(viewDom, paramObj, retObj);
+
+        return viewDom;
+
+    };
+
+    this.developTpl = function(dom, paramObj, retObj){
+
+        if (dom === null || dom === undefined) {
+            return;
+        }
+
+        let skipObjMap = new WeakMap();
+
+        let beforeIf = false;
+        let beforeElseIf = false;
+
+        let localValue = Object.create(null);
+
+        let childList = dom.childNodes;
+        let child = null;
+        if (childList !== null && childList !== undefined) {
+            for (let i = 0; i < childList.length; i++) {
+                child = childList.item(i);
+
+                if (child instanceof CharacterData) {
+                    continue;
+                }
+
+                let dataset = child.dataset;
+                let tag = dataset.tag;
+
+                let dataValue = dataset.else;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.else;
+                    if (beforeIf || beforeElseIf) {
+                        child.innerHTML = '';
+                        child.parentNode.removeChild(child);
+                        child = null;
+                    }
+                }
+
+                dataValue = dataset.elseif;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.elseif;
+                    if (beforeIf || beforeElseIf) {
+                        beforeElseIf = true;
+                        child.innerHTML = '';
+                        child.parentNode.removeChild(child);
+                        child = null;
+                    } else if (beforeIf === false || beforeElseIf === false) {
+                        let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        if (value) {
+                            beforeElseIf = true;
+                        } else {
+                            beforeElseIf = false;
+                            child.innerHTML = '';
+                            child.parentNode.removeChild(child);
+                            child = null;
+                        }
+                    } else {
+                        beforeElseIf = null;
+                        child.innerHTML = '';
+                        child.parentNode.removeChild(child);
+                        child = null;
+                    }
+                } else {
+                    beforeElseIf = null;
+                }
+
+                dataValue = dataset.if;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.if;
+                    let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                    if (value) {
+                        beforeIf = true;
+                    } else {
+                        beforeIf = false;
+                        child.innerHTML = '';
+                        child.parentNode.removeChild(child);
+                        child = null;
+                    }
+                } else {
+                    beforeIf = null;
+                }
+
+                dataValue = dataset.continue;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.continue;
+                    retObj.continueVal = dataValue;
+                    if (dataValue > 0) {
+                        return;
+                    }
+                }
+
+                dataValue = dataset.break;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.continue;
+                    retObj.breakVal = dataValue;
+                    if (dataValue > 0) {
+                        return;
+                    }
+                }
+
+                dataValue = dataset.js;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.js;
+                    $___fairysupport_param(paramObj, localValue, dataValue);
+                }
+
+                let forStart = dataset.forStart;
+                let forEnd = dataset.forEnd;
+                let forStep = dataset.forStep;
+                if (child !== null && child !== undefined && forStart !== null && forStart !== undefined && forEnd !== null && forEnd !== undefined && forStep !== null && forStep !== undefined) {
+                    delete child.dataset.forStart;
+                    delete child.dataset.forEnd;
+                    delete child.dataset.forStep;
+                    let firstFlg = true;
+                    let firstElement = null;
+                    for ($___fairysupport_param(paramObj, localValue, forStart); $___fairysupport_param(paramObj, localValue, forEnd); $___fairysupport_param(paramObj, localValue, forStep)) {
+                        let newChild = child.cloneNode(true)
+                        this.developTpl(newChild, paramObj, retObj);
+                        skipObjMap.set(newChild, newChild);
+                        child.parentNode.insertBefore(newChild, child);
+                        if (firstFlg) {
+                            firstFlg = false;
+                            firstElement = newChild;
+                        }
+                        if ('continueVal' in retObj && retObj.continueVal > 0) {
+                            if (retObj.continueVal > 1) {
+                                retObj.continueVal--;
+                                return;
+                            } else {
+                                retObj.continueVal--;
+                                continue;
+                            }
+                        }
+                        if ('breakVal' in retObj && retObj.breakVal > 0) {
+                            if (retObj.breakVal > 1) {
+                                retObj.breakVal--;
+                                return;
+                            } else {
+                                retObj.breakVal--;
+                                break;
+                            }
+                        }
+                    }
+                    child.innerHTML = '';
+                    child.parentNode.removeChild(child);
+                    child = firstElement;
+
+                }
+
+                let foreachArray = dataset.foreach;
+                let foreachKey = dataset.foreachKey;
+                let foreachValue = dataset.foreachValue;
+                if (child !== null && child !== undefined && foreachArray !== null && foreachArray !== undefined && foreachKey !== null && foreachKey !== undefined && foreachValue !== null && foreachValue !== undefined) {
+                    delete child.dataset.foreach;
+                    delete child.dataset.foreachKey;
+                    delete child.dataset.foreachValue;
+                    let firstFlg = true;
+                    let firstElement = null;
+                    for (const [localForeachKey, localForeachValue] of Object.entries($___fairysupport_param(paramObj, localValue, foreachArray))) {
+                        localValue[foreachKey] = localForeachKey;
+                        localValue[foreachValue] = localForeachValue;
+                        let newChild = child.cloneNode(true)
+                        this.developTpl(newChild, paramObj, retObj);
+                        skipObjMap.set(newChild, newChild);
+                        child.parentNode.insertBefore(newChild, child);
+                        if (firstFlg) {
+                            firstFlg = false;
+                            firstElement = newChild;
+                        }
+                        if ('continueVal' in retObj && retObj.continueVal > 0) {
+                            if (retObj.continueVal > 1) {
+                                retObj.continueVal--;
+                                return;
+                            } else {
+                                retObj.continueVal--;
+                                continue;
+                            }
+                        }
+                        if ('breakVal' in retObj && retObj.breakVal > 0) {
+                            if (retObj.breakVal > 1) {
+                                retObj.breakVal--;
+                                return;
+                            } else {
+                                retObj.breakVal--;
+                                break;
+                            }
+                        }
+                    }
+                    child.innerHTML = '';
+                    child.parentNode.removeChild(child);
+                    child = firstElement;
+
+                }
+
+                let whileValue = dataset.while;
+                if (child !== null && child !== undefined && whileValue !== null && whileValue !== undefined) {
+                    delete child.dataset.while;
+                    let firstFlg = true;
+                    let firstElement = null;
+                    while ($___fairysupport_param(paramObj, localValue, forEnd)) {
+                        let newChild = child.cloneNode(true)
+                        this.developTpl(newChild, paramObj, retObj);
+                        skipObjMap.set(newChild, newChild);
+                        child.parentNode.insertBefore(newChild, child);
+                        if (firstFlg) {
+                            firstFlg = false;
+                            firstElement = newChild;
+                        }
+                        if ('continueVal' in retObj && retObj.continueVal > 0) {
+                            if (retObj.continueVal > 1) {
+                                retObj.continueVal--;
+                                return;
+                            } else {
+                                retObj.continueVal--;
+                                continue;
+                            }
+                        }
+                        if ('breakVal' in retObj && retObj.breakVal > 0) {
+                            if (retObj.breakVal > 1) {
+                                retObj.breakVal--;
+                                return;
+                            } else {
+                                retObj.breakVal--;
+                                break;
+                            }
+                        }
+                    }
+                    child.innerHTML = '';
+                    child.parentNode.removeChild(child);
+                    child = firstElement;
+
+                }
+
+                dataValue = dataset.text;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.text;
+                    let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                    child.innerHTML = '';
+                    child.appendChild(document.createTextNode(value));
+                }
+
+                if (child !== null && child !== undefined && tag !== null && tag !== undefined) {
+                    delete child.dataset.tag;
+                    if ('hidden' === tag || 'hidden' === $___fairysupport_param(paramObj, localValue, tag)) {
+                        let grandChildList = child.childNodes;
+                        let grandChild = null;
+                        if (grandChildList !== null && grandChildList !== undefined) {
+                            for (let grandChildIdx = 0; grandChildIdx < grandChildList.length; grandChildIdx++) {
+                                grandChild = grandChildList.item(grandChildIdx);
+                                child.removeChild(grandChild);
+                                child.parentNode.insertBefore(grandChild, child);
+                            }
+                        }
+                        child.parentNode.removeChild(child);
+                    }
+                }
+
+                if (!skipObjMap.has(child)) {
+                    this.developTpl(child, paramObj);
+                }
+
+            }
+        }
+
+        return retObj;
+
+    };
+
+}
+const $___fairysupport_param = function(v, l, tpl) {
+    return eval(tpl);
 }
 const $f = new ___fairysupport();
 $f.init();
