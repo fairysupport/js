@@ -1001,13 +1001,14 @@ function ___fairysupport(){
         }
 
         let retObj = Object.create(null);
-        this.developTpl(viewDom, paramObj, retObj);
+        let localValue = Object.create(null);
+        this.developTpl(viewDom, paramObj, localValue, retObj);
 
         return viewDom;
 
     };
 
-    this.developTpl = function(dom, paramObj, retObj){
+    this.developTpl = function(dom, paramObj, localValue, retObj){
 
         if (dom === null || dom === undefined) {
             return;
@@ -1015,16 +1016,22 @@ function ___fairysupport(){
 
         let skipObjMap = new WeakMap();
 
-        let beforeIf = false;
-        let beforeElseIf = false;
-
-        let localValue = Object.create(null);
+        let ifExecutingFlg = null;
 
         let childList = dom.childNodes;
         let child = null;
         if (childList !== null && childList !== undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
+
+                if ('continueVal' in retObj && retObj.continueVal > 0) {
+                    this.selfAndNextDelete(child);
+                    return;
+                }
+                if ('breakVal' in retObj && retObj.breakVal > 0) {
+                    this.selfAndNextDelete(child);
+                    return;
+                }
 
                 if (child instanceof CharacterData) {
                     continue;
@@ -1033,10 +1040,31 @@ function ___fairysupport(){
                 let dataset = child.dataset;
                 let tag = dataset.tag;
 
-                let dataValue = dataset.else;
+                let dataValue = dataset.js;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.js;
+                    $___fairysupport_param(paramObj, localValue, dataValue);
+                }
+
+                dataValue = dataset.text;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.text;
+                    let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                    child.innerHTML = '';
+                    child.appendChild(document.createTextNode(value));
+                }
+
+                dataValue = dataset.else;
                 if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                     delete child.dataset.else;
-                    if (beforeIf || beforeElseIf) {
+                    if (ifExecutingFlg === false) {
+                        child.innerHTML = '';
+                        child.parentNode.removeChild(child);
+                        child = null;
+                    } else if (ifExecutingFlg === true) {
+                        ifExecutingFlg = false;
+                    } else {
+                        ifExecutingFlg = false;
                         child.innerHTML = '';
                         child.parentNode.removeChild(child);
                         child = null;
@@ -1046,29 +1074,25 @@ function ___fairysupport(){
                 dataValue = dataset.elseif;
                 if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                     delete child.dataset.elseif;
-                    if (beforeIf || beforeElseIf) {
-                        beforeElseIf = true;
+                    if (ifExecutingFlg === false) {
                         child.innerHTML = '';
                         child.parentNode.removeChild(child);
                         child = null;
-                    } else if (beforeIf === false || beforeElseIf === false) {
+                    } else if (ifExecutingFlg === true) {
                         let value = $___fairysupport_param(paramObj, localValue, dataValue);
                         if (value) {
-                            beforeElseIf = true;
+                            ifExecutingFlg = false;
                         } else {
-                            beforeElseIf = false;
                             child.innerHTML = '';
                             child.parentNode.removeChild(child);
                             child = null;
                         }
                     } else {
-                        beforeElseIf = null;
+                        ifExecutingFlg = false;
                         child.innerHTML = '';
                         child.parentNode.removeChild(child);
                         child = null;
                     }
-                } else {
-                    beforeElseIf = null;
                 }
 
                 dataValue = dataset.if;
@@ -1076,15 +1100,13 @@ function ___fairysupport(){
                     delete child.dataset.if;
                     let value = $___fairysupport_param(paramObj, localValue, dataValue);
                     if (value) {
-                        beforeIf = true;
+                        ifExecutingFlg = false;
                     } else {
-                        beforeIf = false;
+                        ifExecutingFlg = true;
                         child.innerHTML = '';
                         child.parentNode.removeChild(child);
                         child = null;
                     }
-                } else {
-                    beforeIf = null;
                 }
 
                 dataValue = dataset.continue;
@@ -1092,23 +1114,21 @@ function ___fairysupport(){
                     delete child.dataset.continue;
                     retObj.continueVal = dataValue;
                     if (dataValue > 0) {
+                        this.nextDelete(child);
+                        this.deleteTag(child, tag);
                         return;
                     }
                 }
 
                 dataValue = dataset.break;
                 if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
-                    delete child.dataset.continue;
+                    delete child.dataset.break;
                     retObj.breakVal = dataValue;
                     if (dataValue > 0) {
+                        this.nextDelete(child);
+                        this.deleteTag(child, tag);
                         return;
                     }
-                }
-
-                dataValue = dataset.js;
-                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
-                    delete child.dataset.js;
-                    $___fairysupport_param(paramObj, localValue, dataValue);
                 }
 
                 let forStart = dataset.forStart;
@@ -1122,7 +1142,7 @@ function ___fairysupport(){
                     let firstElement = null;
                     for ($___fairysupport_param(paramObj, localValue, forStart); $___fairysupport_param(paramObj, localValue, forEnd); $___fairysupport_param(paramObj, localValue, forStep)) {
                         let newChild = child.cloneNode(true)
-                        this.developTpl(newChild, paramObj, retObj);
+                        this.developTpl(newChild, paramObj, localValue, retObj);
                         skipObjMap.set(newChild, newChild);
                         child.parentNode.insertBefore(newChild, child);
                         if (firstFlg) {
@@ -1132,6 +1152,7 @@ function ___fairysupport(){
                         if ('continueVal' in retObj && retObj.continueVal > 0) {
                             if (retObj.continueVal > 1) {
                                 retObj.continueVal--;
+                                this.deleteTag(firstElement, tag);
                                 return;
                             } else {
                                 retObj.continueVal--;
@@ -1141,6 +1162,7 @@ function ___fairysupport(){
                         if ('breakVal' in retObj && retObj.breakVal > 0) {
                             if (retObj.breakVal > 1) {
                                 retObj.breakVal--;
+                                this.deleteTag(firstElement, tag);
                                 return;
                             } else {
                                 retObj.breakVal--;
@@ -1167,7 +1189,7 @@ function ___fairysupport(){
                         localValue[foreachKey] = localForeachKey;
                         localValue[foreachValue] = localForeachValue;
                         let newChild = child.cloneNode(true)
-                        this.developTpl(newChild, paramObj, retObj);
+                        this.developTpl(newChild, paramObj, localValue, retObj);
                         skipObjMap.set(newChild, newChild);
                         child.parentNode.insertBefore(newChild, child);
                         if (firstFlg) {
@@ -1177,6 +1199,7 @@ function ___fairysupport(){
                         if ('continueVal' in retObj && retObj.continueVal > 0) {
                             if (retObj.continueVal > 1) {
                                 retObj.continueVal--;
+                                this.deleteTag(firstElement, tag);
                                 return;
                             } else {
                                 retObj.continueVal--;
@@ -1186,6 +1209,7 @@ function ___fairysupport(){
                         if ('breakVal' in retObj && retObj.breakVal > 0) {
                             if (retObj.breakVal > 1) {
                                 retObj.breakVal--;
+                                this.deleteTag(firstElement, tag);
                                 return;
                             } else {
                                 retObj.breakVal--;
@@ -1206,7 +1230,7 @@ function ___fairysupport(){
                     let firstElement = null;
                     while ($___fairysupport_param(paramObj, localValue, forEnd)) {
                         let newChild = child.cloneNode(true)
-                        this.developTpl(newChild, paramObj, retObj);
+                        this.developTpl(newChild, paramObj, localValue, retObj);
                         skipObjMap.set(newChild, newChild);
                         child.parentNode.insertBefore(newChild, child);
                         if (firstFlg) {
@@ -1216,6 +1240,7 @@ function ___fairysupport(){
                         if ('continueVal' in retObj && retObj.continueVal > 0) {
                             if (retObj.continueVal > 1) {
                                 retObj.continueVal--;
+                                this.deleteTag(firstElement, tag);
                                 return;
                             } else {
                                 retObj.continueVal--;
@@ -1225,6 +1250,7 @@ function ___fairysupport(){
                         if ('breakVal' in retObj && retObj.breakVal > 0) {
                             if (retObj.breakVal > 1) {
                                 retObj.breakVal--;
+                                this.deleteTag(firstElement, tag);
                                 return;
                             } else {
                                 retObj.breakVal--;
@@ -1238,39 +1264,45 @@ function ___fairysupport(){
 
                 }
 
-                dataValue = dataset.text;
-                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
-                    delete child.dataset.text;
-                    let value = $___fairysupport_param(paramObj, localValue, dataValue);
-                    child.innerHTML = '';
-                    child.appendChild(document.createTextNode(value));
-                }
+                this.deleteTag(child, tag);
 
-                if (child !== null && child !== undefined && tag !== null && tag !== undefined) {
-                    delete child.dataset.tag;
-                    if ('hidden' === tag || 'hidden' === $___fairysupport_param(paramObj, localValue, tag)) {
-                        let grandChildList = child.childNodes;
-                        let grandChild = null;
-                        if (grandChildList !== null && grandChildList !== undefined) {
-                            for (let grandChildIdx = 0; grandChildIdx < grandChildList.length; grandChildIdx++) {
-                                grandChild = grandChildList.item(grandChildIdx);
-                                child.removeChild(grandChild);
-                                child.parentNode.insertBefore(grandChild, child);
-                            }
-                        }
-                        child.parentNode.removeChild(child);
-                    }
-                }
-
-                if (!skipObjMap.has(child)) {
-                    this.developTpl(child, paramObj);
+                if (child !== null && child !== undefined && !skipObjMap.has(child)) {
+                    this.developTpl(child, paramObj, localValue, retObj);
                 }
 
             }
         }
 
-        return retObj;
+    };
 
+    this.deleteTag = function(child, tag){
+        if (child !== null && child !== undefined && tag !== null && tag !== undefined) {
+            delete child.dataset.tag;
+            if ('hidden' === tag || 'hidden' === $___fairysupport_param(paramObj, localValue, tag)) {
+                let grandChildList = child.childNodes;
+                let grandChild = null;
+                if (grandChildList !== null && grandChildList !== undefined) {
+                    for (let grandChildIdx = 0; grandChildIdx < grandChildList.length; grandChildIdx++) {
+                        grandChild = grandChildList.item(grandChildIdx);
+                        child.removeChild(grandChild);
+                        child.parentNode.insertBefore(grandChild, child);
+                    }
+                }
+                child.parentNode.removeChild(child);
+            }
+        }
+    };
+
+    this.selfAndNextDelete = function(dom){
+        this.nextDelete(dom);
+        dom.parentNode.removeChild(dom);
+    };
+
+    this.nextDelete = function(dom){
+        let nextDom = null;
+        while ((nextDom = dom.nextSibling) !== null) {
+            nextDom.parentNode.removeChild(nextDom);
+        }
     };
 
 }

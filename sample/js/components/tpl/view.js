@@ -65,4 +65,56 @@ export default $f.esc`
         </div>
     </div>
 
+    <hr size="1" width="100%">
+
+    <div data-for-start='l.i = 0' data-for-end='l.i < 10' data-for-step='l.i++'>
+        <div data-if='l.i === 3'>
+            <div data-continue='1'></div>
+        </div>
+        <div data-if='l.i === 6'>
+            <div data-break='1'></div>
+        </div>
+        <div>
+            <span>current value </span>
+            <span data-text='l.i'></span>
+        </div>
+    </div>
+
+    <hr size="1" width="100%">
+
+    <div data-for-start='l.i = 0' data-for-end='l.i < 10' data-for-step='l.i++'>
+        <span data-if='l.i === 3' data-continue='1' data-tag='hidden'></span>
+        <span data-if='l.i === 6' data-break='1' data-tag='hidden'></span>
+        <div>
+            <span>current value </span>
+            <span data-text='l.i'></span>
+        </div>
+    </div>
+
+    <hr size="1" width="100%">
+
+    <div data-for-start='l.i = 0' data-for-end='l.i < 2' data-for-step='l.i++'>
+        <div>
+            <span>current i </span>
+            <span data-text='l.i'></span>
+        </div>
+        <div data-for-start='l.j = 0' data-for-end='l.j < 10' data-for-step='l.j++'>
+            <span data-if='l.j === 3' data-continue='1' data-tag='hidden'></span>
+            <div>
+                <span>current j </span>
+                <span data-text='l.j'></span>
+            </div>
+            <span data-if='l.j === 4' data-continue='2' data-tag='hidden'></span>
+            <div>
+                <span>end loop j </span>
+                <span data-text='l.j'></span>
+            </div>
+        </div>
+        <div>
+            <span>loop end i </span>
+            <span data-text='l.i'></span>
+        </div>
+    </div>
+
+
 `
