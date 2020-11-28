@@ -6,10 +6,12 @@ function ___fairysupport(){
 
     let modulePath = 'index';
     let reqUrl = new URL(window.location.href);
-    let root = reqUrl.origin + '/';
+    let jsRoot = reqUrl.origin + '/';
+    let httpRoot = reqUrl.origin + '/';
     let reqPath = reqUrl.origin + reqUrl.pathname.trim();
     if (reqUrl.port !== null && reqUrl.port !== undefined && reqUrl.port !== '') {
-        root = reqUrl.origin + ':' + reqUrl.port + '/';
+        jsRoot = reqUrl.origin + ':' + reqUrl.port + '/';
+        httpRoot = reqUrl.origin + ':' + reqUrl.port + '/';
         reqPath = reqUrl.origin + ':' + reqUrl.port + reqUrl.pathname.trim();
     }
 
@@ -39,13 +41,20 @@ function ___fairysupport(){
 
     this.init = function () {
         if (scriptObj) {
-            let argRoot = scriptObj.dataset.root;
-            if (argRoot !== null && argRoot !== undefined) {
-                argRoot = argRoot.trim();
-                if (argRoot !== '') {
-                    root = argRoot;
-                    moduleRoot = root + '/js/modules/';
-                    componentRoot = root + '/js/components/';
+            let argJsRoot = scriptObj.dataset.jsRoot;
+            if (argJsRoot !== null && argJsRoot !== undefined) {
+                argJsRoot = argJsRoot.trim();
+                if (argJsRoot !== '') {
+                    jsRoot = argJsRoot;
+                    moduleRoot = jsRoot + '/modules/';
+                    componentRoot = jsRoot + '/components/';
+                }
+            }
+            let argPageRoot = scriptObj.dataset.pageRoot;
+            if (argPageRoot !== null && argPageRoot !== undefined) {
+                argPageRoot = argPageRoot.trim();
+                if (argPageRoot !== '') {
+                    httpRoot = argPageRoot;
                 }
             }
             let argVersion = scriptObj.dataset.version;
@@ -60,15 +69,15 @@ function ___fairysupport(){
         if (reqPath !== null && reqPath !== undefined) {
             reqPath = reqPath.trim();
             if (reqPath !== '') {
-                if (root.length > reqPath.length) {
+                if (httpRoot.length > reqPath.length) {
                     return;
                 }
-                let reqPathHead = reqPath.substring(0, root.length);
-                if (root !== reqPathHead) {
+                let reqPathHead = reqPath.substring(0, httpRoot.length);
+                if (httpRoot !== reqPathHead) {
                     return;
                 }
                 modulePath = '';
-                let reqPathTail = reqPath.substring(root.length);
+                let reqPathTail = reqPath.substring(httpRoot.length);
                 let pathList = reqPathTail.split('/');
                 for (let pathIdx = 0; pathIdx < pathList.length; pathIdx++) {
                     if (pathList[pathIdx] === '') {
