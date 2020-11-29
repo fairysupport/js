@@ -1514,10 +1514,40 @@ function ___fairysupport(){
 
     };
 
-    this.ajax = function (reqUrl, paramObj){
+    this.emptyAjax = function (reqUrl, paramObj, user = null, password = null){
 
         let req = new this.fairysupportAjaxObj(null, null, reqUrl, JSON.stringify(paramObj), null, null, null, 'ajax', null);
-        req.open('POST', reqUrl);
+        req.open('POST', reqUrl, true, user, password);
+        return req;
+
+    };
+
+    this.ajax = function (reqUrl, paramObj, user = null, password = null){
+
+        let req = new this.fairysupportAjaxObj(null, null, reqUrl, JSON.stringify(paramObj), null, null, null, 'ajax', null);
+        req.open('POST', reqUrl, true, user, password);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'application/json');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.responseType = 'json';
+
+        return req;
+
+    };
+
+    this.emptyAjaxByForm = function (reqUrl, formObj, user = null, password = null){
+
+        let req = new this.fairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
+        req.open('POST', reqUrl, true, user, password);
+
+        return req;
+
+    };
+
+    this.ajaxByForm = function (reqUrl, formObj, user = null, password = null){
+
+        let req = new this.fairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
+        req.open('POST', reqUrl, true, user, password);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
         req.setRequestHeader('Content-Type', 'application/json');
@@ -1694,8 +1724,13 @@ function ___fairysupport(){
                 set : setFunc
             });
         }
+        setResponseType(val) {
+            this.responseType = val;
+            return this;
+        }
         abort() {
-            return this.xhr.abort();
+            this.xhr.abort();
+            return this;
         }
         getAllResponseHeaders() {
             return this.xhr.getAllResponseHeaders();
@@ -1704,10 +1739,12 @@ function ___fairysupport(){
             return this.xhr.getResponseHeader(headerName);
         }
         open(method, url, async = true, user = null, password = null) {
-            return this.xhr.open(method, url, async, user, password);
+            this.xhr.open(method, url, async, user, password);
+            return this;
         }
         overrideMimeType(mimeType) {
-            return this.xhr.overrideMimeType(mimeType);
+            this.xhr.overrideMimeType(mimeType);
+            return this;
         }
         send(body) {
             if (this.paramObj !== null && this.paramObj !== undefined) {
@@ -1722,6 +1759,10 @@ function ___fairysupport(){
         }
         setOnreadystatechange(fn) {
             this.onreadystatechange = fn;
+            return this;
+        }
+        setWithCredentials(val) {
+            this.withCredentials = val;
             return this;
         }
         setOnabort(fn) {
