@@ -1550,7 +1550,6 @@ function ___fairysupport(){
         req.open('POST', reqUrl, true, user, password);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
-        req.setRequestHeader('Content-Type', 'application/json');
         req.responseType = 'json';
 
         return req;
