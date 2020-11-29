@@ -1,5 +1,13 @@
 export default $f.esc`
 
+    <div data-attr='{"style": "color:white; background-color: black; ", "contenteditable" : true, "title" : "span1"}'>data-attr</div>
+    <div data-js='l.attr = {"style": "color:red; background-color: blue;", "contenteditable" : true, "title" : "span1"}'></div>
+    <div data-attr='l.attr'>data-attr</div>
+
+    <div data-prop='{"style": {"color" : "white", "backgroundColor": "black"}, "contentEditable" : true, "title" : "span2", "dataset" : {"sample1": "val1", "sample2": "val2"}}'>data-prop</div>
+    <div data-js='l.prop = {"dataset" : {"sample1": "val1", "sample2": "val2"}, "contentEditable" : true, "title" : "span2", "style": {"color" : "red", "backgroundColor": "blue"}}'></div>
+    <div data-prop='l.prop'>data-prop</div>
+
     <div data-if='v.parent.val1 === 1'>
         <div>
             <span>1 v.parent.val1 === ${'v.parent.val1'}</span>

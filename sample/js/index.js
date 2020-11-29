@@ -548,19 +548,24 @@ function ___fairysupport(){
 
     this.getComponentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position){
         return function (Module){
-
-            let func = function () {};
-            if (cb !== null && cb !== undefined && typeof cb === 'function') {
-                func = cb;
-            }
-
             let viewStr = Module.default;
-            viewStr = fs.getTplStr(viewStr, argObj);
-
-            import(componentControllerPath + '?' + fs.version)
-            .then(fs.getComponentController(fs, componentPath))
-            .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position))
+            fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
         };
+    };
+
+    this.componentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr){
+
+        let func = function () {};
+        if (cb !== null && cb !== undefined && typeof cb === 'function') {
+            func = cb;
+        }
+
+        viewStr = fs.getTplStr(viewStr, argObj);
+
+        import(componentControllerPath + '?' + fs.version)
+        .then(fs.getComponentController(fs, componentPath))
+        .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position));
+
     };
 
     this.getComponentController = function (fs, componentPath){
@@ -1055,6 +1060,22 @@ function ___fairysupport(){
                     $___fairysupport_param(paramObj, localValue, dataValue);
                 }
 
+                dataValue = dataset.attr;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.attr;
+                    let value = $___fairysupport_param(paramObj, localValue, '(' + dataValue + ')');
+                    for (const [k, v] of Object.entries(value)) {
+                        child.setAttribute(k, v);
+                    }
+                }
+
+                dataValue = dataset.prop;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.prop;
+                    let value = $___fairysupport_param(paramObj, localValue, '(' + dataValue + ')');
+                    this.setTplProp(child, value);
+                }
+
                 dataValue = dataset.text;
                 if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                     delete child.dataset.text;
@@ -1317,6 +1338,419 @@ function ___fairysupport(){
         let nextDom = null;
         while ((nextDom = dom.nextSibling) !== null) {
             nextDom.parentNode.removeChild(nextDom);
+        }
+    };
+
+    this.setTplProp = function(obj, props){
+        if (obj === null && obj === undefined) {
+            return;
+        }
+        for (const [k, v] of Object.entries(props)) {
+            if (v.constructor === Object) {
+                this.setTplProp(obj[k], v);
+            } else {
+                obj[k] = v;
+            }
+        }
+    };
+
+    this.beforeResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
+        return this.resJsonComponent(dom, componentPackeage, reqUrl, paramObj, cb, 'before');
+    };
+    this.afterResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
+        return this.resJsonComponent(dom, componentPackeage, reqUrl, paramObj, cb, 'after');
+    };
+
+    this.resJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, position){
+
+        let req = new this.fairysupportAjaxObj(dom, componentPackeage, reqUrl, JSON.stringify(paramObj), null, cb, position, 'resJsonComponent', componentRoot);
+        req.open('POST', reqUrl);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'application/json');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.responseType = 'json';
+        req.onload = (function(fs, dom, componentPackeage, cb, position, componentRoot){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+
+                        let json = xhr.response;
+
+                        componentPackeage = componentPackeage.trim();
+                        let componentPath = '';
+                        let componentNameList = componentPackeage.split('.');
+                        for (let componentName of componentNameList) {
+                            componentPath += (componentName + '/');
+                        }
+                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+                        let componentViewPath = componentRoot + componentPath + 'view.js';
+
+                        import(componentViewPath + '?' + fs.version)
+                        .then(fs.getComponentInsertFunc(fs, dom, componentPath, componentControllerPath, json, componentPackeage, cb, position));
+
+                    }
+
+                }
+            }
+        )(this, dom, componentPackeage, cb, position, componentRoot);
+
+        return req;
+
+    };
+
+    this.beforeResJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb){
+        return this.resJsonComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, 'before');
+    };
+    this.afterResJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb){
+        return this.resJsonComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, 'after');
+    };
+
+    this.resJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, position){
+
+        let req = new this.fairysupportAjaxObj(dom, componentPackeage, reqUrl, new FormData(formObj), null, cb, position, 'resJsonComponentByForm', componentRoot);
+        req.open('POST', reqUrl);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'application/json');
+        req.responseType = 'json';
+        req.onload = (function(fs, dom, componentPackeage, cb, position, componentRoot){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+
+                        let json = xhr.response;
+
+                        componentPackeage = componentPackeage.trim();
+                        let componentPath = '';
+                        let componentNameList = componentPackeage.split('.');
+                        for (let componentName of componentNameList) {
+                            componentPath += (componentName + '/');
+                        }
+                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+                        let componentViewPath = componentRoot + componentPath + 'view.js';
+
+                        import(componentViewPath + '?' + fs.version)
+                        .then(fs.getComponentInsertFunc(fs, dom, componentPath, componentControllerPath, json, componentPackeage, cb, position));
+
+                    }
+
+                }
+            }
+        )(this, dom, componentPackeage, cb, position, componentRoot);
+
+        return req;
+
+    };
+
+    this.beforeResHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb){
+        return this.resHtmlComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, 'before');
+    };
+    this.afterResHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb){
+        return this.resHtmlComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, 'after');
+    };
+
+    this.resHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, position){
+
+        let req = new this.fairysupportAjaxObj(dom, componentPackeage, viewUrl, JSON.stringify(paramObj), argObj, cb, position, 'resHtmlComponent', componentRoot);
+        req.open('POST', viewUrl);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.responseType = 'text';
+        req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let viewStr = xhr.response;
+
+                        componentPackeage = componentPackeage.trim();
+                        let componentPath = '';
+                        let componentNameList = componentPackeage.split('.');
+                        for (let componentName of componentNameList) {
+                            componentPath += (componentName + '/');
+                        }
+                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+
+                        fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
+                    }
+                }
+            }
+        )(this, dom, componentPackeage, argObj, cb, position, componentRoot);
+
+        return req;
+
+    };
+
+    this.beforeResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, cb){
+        return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'before');
+    };
+    this.afterResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, cb){
+        return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'after');
+    };
+
+    this.resHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, position){
+
+        let req = new this.fairysupportAjaxObj(dom, componentPackeage, viewUrl, new FormData(formObj), argObj, cb, position, 'resHtmlComponentByForm', componentRoot);
+        req.open('POST', viewUrl);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.responseType = 'text';
+        req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let viewStr = xhr.response;
+
+                        componentPackeage = componentPackeage.trim();
+                        let componentPath = '';
+                        let componentNameList = componentPackeage.split('.');
+                        for (let componentName of componentNameList) {
+                            componentPath += (componentName + '/');
+                        }
+                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+
+                        fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
+                    }
+                }
+            }
+        )(this, dom, componentPackeage, argObj, cb, position, componentRoot);
+
+        return req;
+
+    };
+
+    this.ajax = function (reqUrl, paramObj){
+
+        let req = new this.fairysupportAjaxObj(null, null, reqUrl, JSON.stringify(paramObj), null, null, null, 'ajax', null);
+        req.open('POST', reqUrl);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'application/json');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.responseType = 'json';
+
+        return req;
+
+    };
+
+    this.fairysupportAjaxObj = class FairysupportAjaxObj {
+        constructor(dom, componentPackeage, viewUrl, paramObj, argObj, cb, position, metName, componentRoot) {
+
+            this.dom = dom;
+            this.componentPackeage = componentPackeage;
+            this.viewUrl = viewUrl;
+            this.paramObj = paramObj;
+            this.argObj = argObj;
+            this.cb = cb;
+            this.position = position;
+            this.metName = metName;
+            this.componentRoot = componentRoot;
+
+            this.xhr = new XMLHttpRequest();
+            let getFunc = (function(s){return function(){return s.xhr.onreadystatechange;};})(this);
+            let setFunc = (function(s){return function(newFunc){s.xhr.onreadystatechange = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'onreadystatechange', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.readyState;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.readyState = newValue;};})(this);
+            Object.defineProperty(this, 'readyState', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.response;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.response = newValue;};})(this);
+            Object.defineProperty(this, 'response', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.responseText;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.responseText = newValue;};})(this);
+            Object.defineProperty(this, 'responseText', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.responseType;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.responseType = newValue;};})(this);
+            Object.defineProperty(this, 'responseType', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.responseURL;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.responseURL = newValue;};})(this);
+            Object.defineProperty(this, 'responseURL', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.responseXML;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.responseXML = newValue;};})(this);
+            Object.defineProperty(this, 'responseXML', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.status;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.status = newValue;};})(this);
+            Object.defineProperty(this, 'status', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.statusText;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.statusText = newValue;};})(this);
+            Object.defineProperty(this, 'statusText', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.timeout;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.timeout = newValue;};})(this);
+            Object.defineProperty(this, 'timeout', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.upload;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.upload = newValue;};})(this);
+            Object.defineProperty(this, 'upload', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.withCredentials;};})(this);
+            setFunc = (function(s){return function(newValue){s.xhr.withCredentials = newValue;};})(this);
+            Object.defineProperty(this, 'withCredentials', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.onabort;};})(this);
+            setFunc = (function(s){return function(newFunc){s.xhr.onabort = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'onabort', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.onerror;};})(this);
+            setFunc = (function(s){return function(newFunc){s.xhr.onerror = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'onerror', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.onload;};})(this);
+            setFunc = (function(s){return function(newFunc){s.xhr.onload = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'onload', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.onloadend;};})(this);
+            setFunc = (function(s){return function(newFunc){s.xhr.onloadend = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'onloadend', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.onloadstart;};})(this);
+            setFunc = (function(s){return function(newFunc){s.xhr.onloadstart = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'onloadstart', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.onprogress;};})(this);
+            setFunc = (function(s){return function(newFunc){s.xhr.onprogress = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'onprogress', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(s){return function(){return s.xhr.ontimeout;};})(this);
+            setFunc = (function(s){return function(newFunc){s.xhr.ontimeout = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            Object.defineProperty(this, 'ontimeout', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+        }
+        abort() {
+            return this.xhr.abort();
+        }
+        getAllResponseHeaders() {
+            return this.xhr.getAllResponseHeaders();
+        }
+        getResponseHeader(headerName) {
+            return this.xhr.getResponseHeader(headerName);
+        }
+        open(method, url, async = true, user = null, password = null) {
+            return this.xhr.open(method, url, async, user, password);
+        }
+        overrideMimeType(mimeType) {
+            return this.xhr.overrideMimeType(mimeType);
+        }
+        send(body) {
+            if (this.paramObj !== null && this.paramObj !== undefined) {
+                this.xhr.send(this.paramObj);
+            } else {
+                this.xhr.send(body);
+            }
+            return this;
+        }
+        setRequestHeader(header, value) {
+            return this.xhr.setRequestHeader(header, value);
+        }
+        setOnreadystatechange(fn) {
+            this.onreadystatechange = fn;
+            return this;
+        }
+        setOnabort(fn) {
+            this.onabort = fn;
+            return this;
+        }
+        setOnerror(fn) {
+            this.onerror = fn;
+            return this;
+        }
+        setOnload(fn) {
+            this.onload = fn;
+            return this;
+        }
+        setOnloadend(fn) {
+            this.onloadend = fn;
+            return this;
+        }
+        setOnloadstart(fn) {
+            this.onloadstart = fn;
+            return this;
+        }
+        setOnprogress(fn) {
+            this.onprogress = fn;
+            return this;
+        }
+        setOntimeout(fn) {
+            this.ontimeout = fn;
+            return this;
         }
     };
 
