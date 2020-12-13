@@ -522,6 +522,10 @@ function ___fairysupport(){
         }
     };
 
+    this.appendLoadComponent = function (dom, componentPackeage, argObj, cb){
+        this.loadComponent(dom, componentPackeage, argObj, cb, 'append');
+    };
+
     this.beforeLoadComponent = function (dom, componentPackeage, argObj, cb){
         this.loadComponent(dom, componentPackeage, argObj, cb, 'before');
     };
@@ -536,6 +540,9 @@ function ___fairysupport(){
         let componentPath = '';
         let componentNameList = componentPackeage.split('.');
         for (let componentName of componentNameList) {
+            if (componentName.trim() === '') {
+                continue;
+            }
             componentPath += (componentName + '/');
         }
         let componentControllerPath = componentRoot + componentPath + 'controller.js';
@@ -624,6 +631,8 @@ function ___fairysupport(){
                 } else {
                     dom.parentNode.insertBefore(viewDom, dom.nextSibling);
                 }
+            } else if ('append' === position) {
+                dom.appendChild(viewDom);
             } else {
                 dom.innerHTML = "";
                 dom.appendChild(viewDom);
@@ -1792,6 +1801,90 @@ function ___fairysupport(){
             this.ontimeout = fn;
             return this;
         }
+    };
+
+    this.getComponentController = function (componentPackeage){
+
+        componentPackeage = componentPackeage.trim();
+        let componentPath = '';
+        let componentNameList = componentPackeage.split('.');
+        for (let componentName of componentNameList) {
+            if (componentName.trim() === '') {
+                continue;
+            }
+            componentPath += (componentName + '/');
+        }
+
+        if (this.componentControllerList[componentPath]) {
+            return this.componentControllerList[componentPath];
+        }
+
+        return null;
+
+    };
+
+    this.getModuleController = function (){
+        return fs.clazz.obj;
+    };
+
+    this.setTimeLineProp = function(obj, props){
+        if (obj === null && obj === undefined) {
+            return;
+        }
+        for (const [k, v] of Object.entries(props)) {
+            if (v.constructor === Object) {
+                this.setTimeLineProp(obj[k], v);
+            } else {
+                obj[k] = v;
+            }
+        }
+    };
+
+    this.timeLineClass =  class FairysupportTimeLineClass {
+        constructor(fs, timelinePropList, preClazz, props) {
+            this.fs = fs;
+            this.timelinePropList = timelinePropList;
+            this.preClazz = preClazz;
+            this.props = props;
+        }
+        execTimer() {
+            if (this.preClazz !== null && this.preClazz !== undefined && this.preClazz.timerId !== null && this.preClazz.timerId !== undefined) {
+                this.preClazz.clerTimer();
+            }
+            if (this.timerId !== null && this.timerId !== undefined) {
+                let propsValues = this.props.values();
+                for (let propsVal of propsValues) {
+                    this.fs.setTimeLineProp(propsVal.obj, propsVal.value);
+                }
+            }
+            let timelineProp = this.timelinePropList.shift();
+            if (timelineProp !== null && timelineProp !== undefined) {
+                let timeLineClazz = new this.fs.timeLineClass(this.fs, timelinePropList, this, timelineProp.prop);
+                timeLineClazz.timerId = window.setTimeout(timeLineClazz.execTimer.bind(timeLineClazz), timelineProp.ms);
+            } else {
+                this.clerTimer();
+            }
+        }
+        clerTimer() {
+            window.clearTimeout(this.timerId);
+        }
+    };
+
+    this.timeline = function (argTimelinePropList){
+
+        let timelinePropList = Object.assign({}, argTimelinePropList);
+        timelinePropList.sort(function(a, b){
+            if(a.ms < b.ms) {
+                return -1;
+            } else if(a.ms === b.ms) {
+                return 0;
+            } else {
+                return 1;
+            }
+        });
+
+        let timeLineClazz = new this.timeLineClass(this, timelinePropList, null, null);
+        timeLineClazz.execTimer();
     };
 
 }
