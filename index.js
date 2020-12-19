@@ -34,6 +34,8 @@ function ___fairysupport(){
 
     this.instanceMap = {};
 
+    const msgObj = Object.create(null);
+
     let fairysupportClear = class FairysupportClear {
         constructor() {
         }
@@ -94,15 +96,25 @@ function ___fairysupport(){
                 }
             }
         }
+
         let moduleFullPath = moduleRoot + modulePath + '.js';
 
-        import(moduleFullPath + '?' + this.version)
-        .then(this.getControllerLoader(this, modulePath))
-        .then(this.binder(this))
-        .then(this.getControllerMethod(this, 'init', null));
+        import(jsRoot + '/msg.js' + '?' + this.version)
+        .then(this.getLoadMsg(this, moduleFullPath + '?' + this.version, modulePath, msgObj))
 
         return this;
 
+    };
+
+    this.getLoadMsg = function (fs, moduleUrl, modulePath, msgObj){
+        return function(Module) {
+            let msg = Module.default;
+            Object.assign(msgObj, msg);
+            import(moduleUrl)
+            .then(fs.getControllerLoader(fs, modulePath))
+            .then(fs.binder(fs))
+            .then(fs.getControllerMethod(fs, 'init', null));
+        };
     };
 
     this.getControllerLoader = function (fs, modulePath){
@@ -1885,6 +1897,18 @@ function ___fairysupport(){
 
         let timeLineClazz = new this.timeLineClass(this, timelinePropList, null, null);
         timeLineClazz.execTimer();
+    };
+
+    this.msg = function (name, replaceObj){
+
+        let str = msgObj[name];
+        for (const [key, value] of Object.entries(replaceObj)) {
+            let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
+            str = str.replace(re, value);
+            str = str.replace("\\${" + key + "}", "${" + key + "}");
+        }
+        return str;
+
     };
 
 }
