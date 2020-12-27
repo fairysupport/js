@@ -1610,7 +1610,7 @@ function ___fairysupport(){
     this.emptyAjaxByForm = function (reqUrl, formObj, user = null, password = null){
 
         let req = new this.fairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
-        req.open(formObj.action, reqUrl, true, user, password);
+        req.open('POST', reqUrl, true, user, password);
 
         return req;
 
