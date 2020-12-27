@@ -1105,6 +1105,13 @@ function ___fairysupport(){
                     child.appendChild(document.createTextNode(value));
                 }
 
+                dataValue = dataset.html;
+                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                    delete child.dataset.html;
+                    let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                    child.innerHTML = value;
+                }
+
                 dataValue = dataset.else;
                 if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                     delete child.dataset.else;
@@ -1535,22 +1542,66 @@ function ___fairysupport(){
 
     };
 
-    this.emptyAjax = function (reqUrl, paramObj, user = null, password = null){
+    this.paramFmt = function (fmt, paramObj, prefixName) {
+        let result = '';
+        if (paramObj === null || paramObj === undefined) {
+            result = '';
+        } else if (fmt === 'json') {
+            result = JSON.stringify(paramObj)
+        } else {
+            for (const [key, value] of Object.entries(paramObj)) {
+                if (value.constructor === Object) {
+                    if (prefixName === '') {
+                        result = result + this.paramFmt(fmt, value, key);
+                    } else {
+                        result = result + this.paramFmt(fmt, value, prefixName + '[' + key + ']');
+                    }
+                } else {
+                    if (prefixName === '') {
+                        result = result + encodeURIComponent(key) + '=' + encodeURIComponent(value) + '&';
+                    } else {
+                        result = result + encodeURIComponent(prefixName + '[' + key + ']') + '=' + encodeURIComponent(value) + '&';
+                    }
+                }
+            }
+        }
+        return result;
+    };
 
-        let req = new this.fairysupportAjaxObj(null, null, reqUrl, JSON.stringify(paramObj), null, null, null, 'ajax', null);
-        req.open('POST', reqUrl, true, user, password);
+    this.emptyAjax = function (reqUrl, paramObj, met = 'POST', fmt = 'json',  user = null, password = null){
+
+        if (met.toLowerCase() !== 'post') {
+            fmt = 'query'
+        }
+
+        let paramStr = this.paramFmt(fmt, paramObj, '');
+        if (met.toLowerCase() !== 'post') {
+            if (reqUrl.indexOf('?') >= 0) {
+                reqUrl += '&' + paramStr;
+            } else {
+                reqUrl += '?' + paramStr;
+            }
+            paramObj = null;
+        }
+
+        let req = new this.fairysupportAjaxObj(null, null, reqUrl, paramStr, null, null, null, 'ajax', null);
+        req.open(met, reqUrl, true, user, password);
         return req;
 
     };
 
-    this.ajax = function (reqUrl, paramObj, user = null, password = null){
+    this.ajax = function (reqUrl, paramObj, met = 'POST', fmt = 'json', user = null, password = null){
 
-        let req = new this.fairysupportAjaxObj(null, null, reqUrl, JSON.stringify(paramObj), null, null, null, 'ajax', null);
-        req.open('POST', reqUrl, true, user, password);
+        let req = this.emptyAjax(reqUrl, paramObj, met, fmt,  user, password);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
-        req.setRequestHeader('Content-Type', 'application/json');
         req.responseType = 'json';
+
+        if (met.toLowerCase() === 'post') {
+            req.setRequestHeader('Content-Type', 'application/json');
+        } else {
+            req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        }
 
         return req;
 
@@ -1559,7 +1610,7 @@ function ___fairysupport(){
     this.emptyAjaxByForm = function (reqUrl, formObj, user = null, password = null){
 
         let req = new this.fairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
-        req.open('POST', reqUrl, true, user, password);
+        req.open(formObj.action, reqUrl, true, user, password);
 
         return req;
 
@@ -1567,8 +1618,7 @@ function ___fairysupport(){
 
     this.ajaxByForm = function (reqUrl, formObj, user = null, password = null){
 
-        let req = new this.fairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
-        req.open('POST', reqUrl, true, user, password);
+        let req = this.emptyAjaxByForm(reqUrl, formObj, user, password);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
         req.responseType = 'json';
