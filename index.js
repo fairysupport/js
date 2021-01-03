@@ -965,11 +965,12 @@ function ___fairysupport(){
                             let eventFn = (function(fnList, classObj){
                                 return function(e){
                                     for (let func of fnList) {
+                                        let ret = null;
                                         try {
                                             if (classObj.beforeEvent && typeof classObj.beforeEvent === 'function') {
                                                 classObj.beforeEvent(e);
                                             }
-                                            let ret = func(e);
+                                            ret = func(e);
                                             if (classObj.afterEvent && typeof classObj.afterEvent === 'function') {
                                                 classObj.afterEvent(e, ret);
                                             }
@@ -978,13 +979,13 @@ function ___fairysupport(){
                                             }
                                         } catch(exception) {
                                             if (classObj.errorHandle && typeof classObj.errorHandle === 'function') {
-                                                classObj.errorHandle(exception);
+                                                classObj.errorHandle(e, exception);
                                             } else {
                                                 throw exception;
                                             }
                                         } finally {
                                             if (classObj.finalEvent && typeof classObj.finalEvent === 'function') {
-                                                classObj.finalEvent(e);
+                                                classObj.finalEvent(e, ret);
                                             }
                                         }
                                     }
@@ -1529,13 +1530,13 @@ function ___fairysupport(){
 
     };
 
-    this.appendResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, cb){
+    this.appendResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb){
         return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'append');
     };
-    this.beforeResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, cb){
+    this.beforeResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb){
         return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'before');
     };
-    this.afterResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, cb){
+    this.afterResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb){
         return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'after');
     };
 
