@@ -1921,7 +1921,7 @@ function ___fairysupport(){
     };
 
     this.getModuleController = function (){
-        return fs.clazz.obj;
+        return this.clazz.obj;
     };
 
     this.setTimeLineProp = function(obj, props){
