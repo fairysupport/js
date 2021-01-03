@@ -32,6 +32,8 @@ function ___fairysupport(){
     this.eventMap = new Map();
     this.eventNameDataNameMap = new Map();
 
+    this.metaMap = new Map();
+
     this.instanceMap = {};
 
     const msgObj = Object.create(null);
@@ -452,6 +454,7 @@ function ___fairysupport(){
     };
 
     this.removeAllSingle = function (obj){
+        this.metaMap.delete(obj);
         let dataset = obj.dataset;
         if (dataset !== null && dataset !== undefined) {
             let bindObj = dataset.obj;
@@ -558,10 +561,25 @@ function ___fairysupport(){
             componentPath += (componentName + '/');
         }
         let componentControllerPath = componentRoot + componentPath + 'controller.js';
-        let componentViewPath = componentRoot + componentPath + 'view.js';
+        let componentViewPath = componentRoot + componentPath + 'view.html';
 
-        import(componentViewPath + '?' + this.version)
-        .then(this.getComponentInsertFunc(this, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position));
+        let req = new this.fairysupportAjaxObj(dom, componentPackeage, componentViewPath + '?' + this.version, null, argObj, cb, position, 'loadComponent', componentRoot);
+        req.open('GET', componentViewPath + '?' + this.version);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.withCredentials = true;
+        req.responseType = 'text';
+        req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentPath, componentControllerPath){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let viewStr = xhr.response;
+                        fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
+                    }
+                }
+            }
+        )(this, dom, componentPackeage, argObj, cb, position, componentPath, componentControllerPath);
+        req.send();
 
     };
 
@@ -582,12 +600,12 @@ function ___fairysupport(){
         viewStr = fs.getTplStr(viewStr, argObj);
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.getComponentController(fs, componentPath))
+        .then(fs.loadComponentControllerMethodList(fs, componentPath))
         .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position));
 
     };
 
-    this.getComponentController = function (fs, componentPath){
+    this.loadComponentControllerMethodList = function (fs, componentPath){
         return function (Module){
             let classFullName = 'components/' + componentPath.substring(0, componentPath.length - 1);
             if (!fs.instanceMap[classFullName]) {
@@ -944,16 +962,34 @@ function ___fairysupport(){
                         }
                         let eventMapOfClass = keyFullDataNameValueFuncMap.get(trimDataFullName);
                         if (!eventMapOfClass.has(eventName)) {
-                            let eventFn = (function(fnList){
+                            let eventFn = (function(fnList, classObj){
                                 return function(e){
                                     for (let func of fnList) {
-                                        let ret = func(e);
-                                        if (ret === false) {
-                                            return;
+                                        try {
+                                            if (classObj.beforeEvent && typeof classObj.beforeEvent === 'function') {
+                                                classObj.beforeEvent(e);
+                                            }
+                                            let ret = func(e);
+                                            if (classObj.afterEvent && typeof classObj.afterEvent === 'function') {
+                                                classObj.afterEvent(e, ret);
+                                            }
+                                            if (ret === false) {
+                                                return;
+                                            }
+                                        } catch(exception) {
+                                            if (classObj.errorHandle && typeof classObj.errorHandle === 'function') {
+                                                classObj.errorHandle(exception);
+                                            } else {
+                                                throw exception;
+                                            }
+                                        } finally {
+                                            if (classObj.finalEvent && typeof classObj.finalEvent === 'function') {
+                                                classObj.finalEvent(e);
+                                            }
                                         }
                                     }
                                 };
-                            })(fnList);
+                            })(fnList, classObj);
                             eventMapOfClass.set(eventName, eventFn);
                         }
 
@@ -1382,6 +1418,9 @@ function ___fairysupport(){
         }
     };
 
+    this.appendResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
+        return this.resJsonComponent(dom, componentPackeage, reqUrl, paramObj, cb, 'append');
+    };
     this.beforeResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
         return this.resJsonComponent(dom, componentPackeage, reqUrl, paramObj, cb, 'before');
     };
@@ -1396,35 +1435,25 @@ function ___fairysupport(){
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
         req.setRequestHeader('Content-Type', 'application/json');
+        req.withCredentials = true;
         req.responseType = 'json';
-        req.onload = (function(fs, dom, componentPackeage, cb, position, componentRoot){
+        req.onload = (function(fs, dom, componentPackeage, cb, position){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
-
                         let json = xhr.response;
-
-                        componentPackeage = componentPackeage.trim();
-                        let componentPath = '';
-                        let componentNameList = componentPackeage.split('.');
-                        for (let componentName of componentNameList) {
-                            componentPath += (componentName + '/');
-                        }
-                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
-                        let componentViewPath = componentRoot + componentPath + 'view.js';
-
-                        import(componentViewPath + '?' + fs.version)
-                        .then(fs.getComponentInsertFunc(fs, dom, componentPath, componentControllerPath, json, componentPackeage, cb, position));
-
+                        fs.loadComponent(dom, componentPackeage, json, cb, position);
                     }
-
                 }
             }
-        )(this, dom, componentPackeage, cb, position, componentRoot);
+        )(this, dom, componentPackeage, cb, position);
 
         return req;
 
     };
 
+    this.appendResJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb){
+        return this.resJsonComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, 'append');
+    };
     this.beforeResJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb){
         return this.resJsonComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, 'before');
     };
@@ -1438,35 +1467,26 @@ function ___fairysupport(){
         req.open('POST', reqUrl);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
+        req.withCredentials = true;
         req.responseType = 'json';
-        req.onload = (function(fs, dom, componentPackeage, cb, position, componentRoot){
+        req.onload = (function(fs, dom, componentPackeage, cb, position){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
-
                         let json = xhr.response;
-
-                        componentPackeage = componentPackeage.trim();
-                        let componentPath = '';
-                        let componentNameList = componentPackeage.split('.');
-                        for (let componentName of componentNameList) {
-                            componentPath += (componentName + '/');
-                        }
-                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
-                        let componentViewPath = componentRoot + componentPath + 'view.js';
-
-                        import(componentViewPath + '?' + fs.version)
-                        .then(fs.getComponentInsertFunc(fs, dom, componentPath, componentControllerPath, json, componentPackeage, cb, position));
-
+                        fs.loadComponent(dom, componentPackeage, json, cb, position);
                     }
 
                 }
             }
-        )(this, dom, componentPackeage, cb, position, componentRoot);
+        )(this, dom, componentPackeage, cb, position);
 
         return req;
 
     };
 
+    this.appendResHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb){
+        return this.resHtmlComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, 'append');
+    };
     this.beforeResHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb){
         return this.resHtmlComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, 'before');
     };
@@ -1481,6 +1501,7 @@ function ___fairysupport(){
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/json');
+        req.withCredentials = true;
         req.responseType = 'text';
         req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
                 return function (e, xhr) {
@@ -1491,6 +1512,9 @@ function ___fairysupport(){
                         let componentPath = '';
                         let componentNameList = componentPackeage.split('.');
                         for (let componentName of componentNameList) {
+                            if (componentName.trim() === '') {
+                                continue;
+                            }
                             componentPath += (componentName + '/');
                         }
                         let componentControllerPath = componentRoot + componentPath + 'controller.js';
@@ -1505,6 +1529,9 @@ function ___fairysupport(){
 
     };
 
+    this.appendResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, cb){
+        return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'append');
+    };
     this.beforeResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, cb){
         return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'before');
     };
@@ -1518,6 +1545,7 @@ function ___fairysupport(){
         req.open('POST', viewUrl);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
+        req.withCredentials = true;
         req.responseType = 'text';
         req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
                 return function (e, xhr) {
@@ -1528,6 +1556,9 @@ function ___fairysupport(){
                         let componentPath = '';
                         let componentNameList = componentPackeage.split('.');
                         for (let componentName of componentNameList) {
+                            if (componentName.trim() === '') {
+                                continue;
+                            }
                             componentPath += (componentName + '/');
                         }
                         let componentControllerPath = componentRoot + componentPath + 'controller.js';
@@ -1548,7 +1579,7 @@ function ___fairysupport(){
             result = '';
         } else if (fmt === 'json') {
             result = JSON.stringify(paramObj)
-        } else {
+        } else if (fmt === 'query') {
             for (const [key, value] of Object.entries(paramObj)) {
                 if (value.constructor === Object) {
                     if (prefixName === '') {
@@ -1565,6 +1596,9 @@ function ___fairysupport(){
                 }
             }
         }
+        if (result === '') {
+            result = null;
+        }
         return result;
     };
 
@@ -1575,13 +1609,13 @@ function ___fairysupport(){
         }
 
         let paramStr = this.paramFmt(fmt, paramObj, '');
-        if (met.toLowerCase() !== 'post') {
+        if (met.toLowerCase() !== 'post' && paramStr !== null && paramStr !== '') {
             if (reqUrl.indexOf('?') >= 0) {
                 reqUrl += '&' + paramStr;
             } else {
                 reqUrl += '?' + paramStr;
             }
-            paramObj = null;
+            paramStr = null;
         }
 
         let req = new this.fairysupportAjaxObj(null, null, reqUrl, paramStr, null, null, null, 'ajax', null);
@@ -1597,7 +1631,7 @@ function ___fairysupport(){
         req.setRequestHeader('Accept', 'application/json');
         req.responseType = 'json';
 
-        if (met.toLowerCase() === 'post') {
+        if (fmt.toLowerCase() === 'json') {
             req.setRequestHeader('Content-Type', 'application/json');
         } else {
             req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -1959,6 +1993,14 @@ function ___fairysupport(){
         }
         return str;
 
+    };
+
+    this.addMeta = function (element, mata){
+        this.metaMap.set(element, mata);
+    };
+
+    this.getMeta = function (element){
+        return this.metaMap.get(element);
     };
 
 }
