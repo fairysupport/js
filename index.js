@@ -1932,17 +1932,22 @@ function ___fairysupport(){
             if (v.constructor === Object) {
                 this.setTimeLineProp(obj[k], v);
             } else {
-                obj[k] = v;
+                if (typeof v === 'function') {
+                    obj[k] = v();
+                } else {
+                    obj[k] = v;
+                }
             }
         }
     };
 
     this.timeLineClass =  class FairysupportTimeLineClass {
-        constructor(fs, timelinePropList, preClazz, props) {
+        constructor(fs, timelinePropList, preClazz, props, ms) {
             this.fs = fs;
             this.timelinePropList = timelinePropList;
             this.preClazz = preClazz;
             this.props = props;
+            this.ms = ms;
         }
         execTimer() {
             if (this.preClazz !== null && this.preClazz !== undefined && this.preClazz.timerId !== null && this.preClazz.timerId !== undefined) {
@@ -1956,8 +1961,8 @@ function ___fairysupport(){
             }
             let timelineProp = this.timelinePropList.shift();
             if (timelineProp !== null && timelineProp !== undefined) {
-                let timeLineClazz = new this.fs.timeLineClass(this.fs, timelinePropList, this, timelineProp.prop);
-                timeLineClazz.timerId = window.setTimeout(timeLineClazz.execTimer.bind(timeLineClazz), timelineProp.ms);
+                let timeLineClazz = new this.fs.timeLineClass(this.fs, this.timelinePropList, this, timelineProp.prop, timelineProp.ms);
+                timeLineClazz.timerId = window.setTimeout(timeLineClazz.execTimer.bind(timeLineClazz), timelineProp.ms - this.ms);
             } else {
                 this.clerTimer();
             }
@@ -1969,7 +1974,7 @@ function ___fairysupport(){
 
     this.timeline = function (argTimelinePropList){
 
-        let timelinePropList = Object.assign({}, argTimelinePropList);
+        let timelinePropList = [].concat(argTimelinePropList);
         timelinePropList.sort(function(a, b){
             if(a.ms < b.ms) {
                 return -1;
@@ -1980,7 +1985,7 @@ function ___fairysupport(){
             }
         });
 
-        let timeLineClazz = new this.timeLineClass(this, timelinePropList, null, null);
+        let timeLineClazz = new this.timeLineClass(this, timelinePropList, null, null, 0);
         timeLineClazz.execTimer();
     };
 
