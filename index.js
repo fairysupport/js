@@ -32,7 +32,7 @@ function ___fairysupport(){
     this.eventMap = new Map();
     this.eventNameDataNameMap = new Map();
 
-    this.metaMap = new Map();
+    let metaMap = new Map();
 
     this.instanceMap = {};
 
@@ -230,7 +230,19 @@ function ___fairysupport(){
                                 if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
                                     fs.componentDomInitCntMap.delete(initFunc);
                                     fs.componentDomInitTotalMap.delete(initFunc);
-                                    initFunc();
+                                    try {
+                                        initFunc();
+                                    } catch(exception) {
+                                        if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                                            fs.clazz.obj.errorHandle(null, exception);
+                                        } else {
+                                            throw exception;
+                                        }
+                                    } finally {
+                                        if (fs.clazz.obj.finalEvent && typeof fs.clazz.obj.finalEvent === 'function') {
+                                            fs.clazz.obj.finalEvent(null, null);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -379,16 +391,44 @@ function ___fairysupport(){
 
     this.bindControllerSingleEvent = function (dom, name){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            this.setEventFunction(name, this.clazz.obj, this.controllerMethodList, dom, this.controllerEventMethodList);
+            this.setEventFunction(name, this.clazz.obj, this.controllerMethodList, dom, this.controllerEventMethodList, this.clazz.obj);
         }
     }
 
     this.execMethod = function (obj, methodList, methodName, argList){
         if (methodList[methodName]) {
             if (argList === null || argList === undefined) {
-                return obj[methodName]();
+                let ret = null;
+                try {
+                    ret = obj[methodName]();
+                } catch(exception) {
+                    if (this.clazz.obj.errorHandle && typeof this.clazz.obj.errorHandle === 'function') {
+                        this.clazz.obj.errorHandle(null, exception);
+                    } else {
+                        throw exception;
+                    }
+                } finally {
+                    if (this.clazz.obj.finalEvent && typeof this.clazz.obj.finalEvent === 'function') {
+                        this.clazz.obj.finalEvent(null, ret);
+                    }
+                }
+                return ret;
             } else {
-                return obj[methodName](argList);
+                let ret = null;
+                try {
+                    ret = obj[methodName](argList);
+                } catch(exception) {
+                    if (this.clazz.obj.errorHandle && typeof this.clazz.obj.errorHandle === 'function') {
+                        this.clazz.obj.errorHandle(null, exception);
+                    } else {
+                        throw exception;
+                    }
+                } finally {
+                    if (this.clazz.obj.finalEvent && typeof this.clazz.obj.finalEvent === 'function') {
+                        this.clazz.obj.finalEvent(null, ret);
+                    }
+                }
+                return ret;
             }
         }
         return null;
@@ -454,7 +494,7 @@ function ___fairysupport(){
     };
 
     this.removeAllSingle = function (obj){
-        this.metaMap.delete(obj);
+        this.deleteMeta(obj);
         let dataset = obj.dataset;
         if (dataset !== null && dataset !== undefined) {
             let bindObj = dataset.obj;
@@ -763,7 +803,7 @@ function ___fairysupport(){
 
     this.bindComponentSingleEvent = function (dom, name, componentPath){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            this.setEventFunction(name, this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], dom, this.componentControllerEventMethodList[componentPath]);
+            this.setEventFunction(name, this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], dom, this.componentControllerEventMethodList[componentPath], this.clazz.obj);
         }
     }
 
@@ -892,7 +932,7 @@ function ___fairysupport(){
         }
     };
 
-    this.setEventFunction = function(dataFullName, classObj, methodList, dom, eventMethodList){
+    this.setEventFunction = function(dataFullName, classObj, methodList, dom, eventMethodList, moduleClassObj){
         let trimDataFullName = '';
         let trimDataNameList = [];
         let dataFullNameSplit = dataFullName.split(',');
@@ -978,14 +1018,14 @@ function ___fairysupport(){
                                                 return;
                                             }
                                         } catch(exception) {
-                                            if (classObj.errorHandle && typeof classObj.errorHandle === 'function') {
-                                                classObj.errorHandle(e, exception);
+                                            if (moduleClassObj.errorHandle && typeof moduleClassObj.errorHandle === 'function') {
+                                                moduleClassObj.errorHandle(e, exception);
                                             } else {
                                                 throw exception;
                                             }
                                         } finally {
-                                            if (classObj.finalEvent && typeof classObj.finalEvent === 'function') {
-                                                classObj.finalEvent(e, ret);
+                                            if (moduleClassObj.finalEvent && typeof moduleClassObj.finalEvent === 'function') {
+                                                moduleClassObj.finalEvent(e, ret);
                                             }
                                         }
                                     }
@@ -2002,12 +2042,133 @@ function ___fairysupport(){
     };
 
     this.addMeta = function (element, mata){
-        this.metaMap.set(element, mata);
+        metaMap.set(element, mata);
     };
 
     this.getMeta = function (element){
-        return this.metaMap.get(element);
+        return metaMap.get(element);
     };
+
+    this.deleteMeta = function (element){
+        metaMap.delete(element);
+    };
+
+    this.validate = function (obj, prop, eventList, func, funcArg){
+        let preValueHolder = {
+                preVal: Object.create({})
+        };
+        this.wrapObjAccessor(obj, prop, func, preValueHolder, eventList, funcArg);
+    }
+
+    this.wrapObjAccessor = function (obj, prop, func, preValueHolder, eventList, funcArg){
+
+        let protoPropertyDescriptor = this.getPrototypePropertyDescriptor(obj, prop);
+
+        let getFunc = (function(protoPropertyDescriptor, obj){
+            return function(){
+                return protoPropertyDescriptor.get.call(obj);
+            }
+        })(protoPropertyDescriptor, obj);
+        let setFunc = (function(protoPropertyDescriptor, obj, func, funcArg){
+            return function(arg){
+                let valid = func(obj, arg, protoPropertyDescriptor.get.call(obj), funcArg);
+                if (valid) {
+                    protoPropertyDescriptor.set.call(obj, arg);
+                }
+            }
+        })(protoPropertyDescriptor, obj, func, funcArg);
+
+        Object.defineProperty(obj, prop, {
+            enumerable: true,
+            configurable: true,
+            get: getFunc,
+            set : setFunc
+        });
+
+        if (eventList !== null && eventList !== undefined && 'addEventListener' in obj) {
+            preValueHolder.preVal[prop] = obj[prop];
+            obj.addEventListener("focus",
+                                 (function(preValueHolder, obj, prop){
+                                    return function(){
+                                        preValueHolder.preVal[prop] = obj[prop];
+                                    };
+                                 })(preValueHolder, obj, prop),
+                                 false);
+            let eventFunc = (function (func, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor){
+                return function (event) {
+                    let valid = func(obj, obj[prop], preValueHolder.preVal[prop], funcArg);
+                    if (!valid) {
+                        protoPropertyDescriptor.set.call(obj, preValueHolder.preVal[prop]);
+                    }
+                    preValueHolder.preVal[prop] = obj[prop];
+                };
+            })(func, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor);
+            for (const eventName of eventList) {
+                obj.addEventListener(eventName, eventFunc, true);
+            }
+        }
+
+        func(obj, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
+
+    }
+
+    this.getPrototypePropertyDescriptor = function (obj, propName){
+        let protoObj = Object.getPrototypeOf(obj);
+        let protoPropertyDescriptor = null;
+        if (protoObj === null || protoObj == undefined) {
+            protoPropertyDescriptor = Object.create({});
+        } else {
+            protoPropertyDescriptor = Object.getOwnPropertyDescriptor(protoObj, propName);
+            if (protoPropertyDescriptor === null || protoPropertyDescriptor === undefined) {
+                protoPropertyDescriptor = Object.create({});
+            }
+            if ('configurable' in protoPropertyDescriptor && !protoPropertyDescriptor.configurable) {
+                return;
+            }
+        }
+        if (!('get' in protoPropertyDescriptor) || !('set' in protoPropertyDescriptor)) {
+
+            let newProtoPropertyDescriptor = Object.create({});
+            let accessor = {
+                    val: obj[propName]
+            };
+            accessor.get = (function(obj){return function(){return obj.val;}})(accessor);
+            accessor.set = (function(obj){return function(arg){return obj.val = arg;}})(accessor);
+            if ('get' in protoPropertyDescriptor) {
+                newProtoPropertyDescriptor.get = (function (accessor, obj, protoPropertyDescriptor) {
+                    return function () {
+                        protoPropertyDescriptor.get.call(obj);
+                        return accessor.get();
+                    }
+                })(accessor, obj, protoPropertyDescriptor);
+            } else {
+                newProtoPropertyDescriptor.get = (function (accessor) {
+                    return function () {
+                        return accessor.get();
+                    }
+                })(accessor);
+            }
+            if ('set' in protoPropertyDescriptor) {
+                newProtoPropertyDescriptor.set = (function (accessor, obj, protoPropertyDescriptor) {
+                    return function (arg) {
+                        accessor.set(arg);
+                        protoPropertyDescriptor.set.call(obj, arg);
+                    }
+                })(accessor, obj, protoPropertyDescriptor);
+            } else {
+                newProtoPropertyDescriptor.set = (function (accessor) {
+                    return function (arg) {
+                        accessor.set(arg);
+                    }
+                })(accessor);
+            }
+            newProtoPropertyDescriptor.configurable = true;
+            newProtoPropertyDescriptor.enumerable = true;
+            Object.defineProperty(obj, propName, newProtoPropertyDescriptor);
+            protoPropertyDescriptor = newProtoPropertyDescriptor
+        }
+        return protoPropertyDescriptor;
+    }
 
 }
 const $___fairysupport_param = function(v, l, tpl) {
@@ -2015,4 +2176,3 @@ const $___fairysupport_param = function(v, l, tpl) {
 }
 const $f = new ___fairysupport();
 $f.init();
-
