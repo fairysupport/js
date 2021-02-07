@@ -2098,8 +2098,7 @@ function ___fairysupport(){
                                     return function(){
                                         preValueHolder.preVal[prop] = obj[prop];
                                     };
-                                 })(preValueHolder, obj, prop),
-                                 false);
+                                 })(preValueHolder, obj, prop));
             let eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor){
                 return function (event) {
                     let valid = true;
@@ -2116,7 +2115,7 @@ function ___fairysupport(){
                 };
             })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor);
             for (const eventName of eventList) {
-                obj.addEventListener(eventName, eventFunc, true);
+                obj.addEventListener(eventName, eventFunc);
             }
         }
 
@@ -2184,6 +2183,11 @@ function ___fairysupport(){
         return protoPropertyDescriptor;
     }
 
+    this.linkEvent = function (fromObj, toObj, eventList){
+        for (const eventName of eventList) {
+            fromObj.addEventListener(eventName, toObj[eventName].bind(toObj));
+        }
+    }
 }
 const $___fairysupport_param = function(v, l, tpl) {
     return eval(tpl);
