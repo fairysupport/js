@@ -2053,14 +2053,14 @@ function ___fairysupport(){
         metaMap.delete(element);
     };
 
-    this.validate = function (obj, prop, eventList, func, funcArg){
+    this.validate = function (obj, prop, eventList, funcList, funcArg){
         let preValueHolder = {
                 preVal: Object.create({})
         };
-        this.wrapObjAccessor(obj, prop, func, preValueHolder, eventList, funcArg);
+        this.wrapObjAccessor(obj, prop, funcList, preValueHolder, eventList, funcArg);
     }
 
-    this.wrapObjAccessor = function (obj, prop, func, preValueHolder, eventList, funcArg){
+    this.wrapObjAccessor = function (obj, prop, funcList, preValueHolder, eventList, funcArg){
 
         let protoPropertyDescriptor = this.getPrototypePropertyDescriptor(obj, prop);
 
@@ -2069,14 +2069,20 @@ function ___fairysupport(){
                 return protoPropertyDescriptor.get.call(obj);
             }
         })(protoPropertyDescriptor, obj);
-        let setFunc = (function(protoPropertyDescriptor, obj, func, funcArg){
+        let setFunc = (function(protoPropertyDescriptor, obj, funcList, funcArg){
             return function(arg){
-                let valid = func(obj, arg, protoPropertyDescriptor.get.call(obj), funcArg);
+                let valid = true;
+                for (const func of funcList) {
+                    let funcResult = func(obj, arg, protoPropertyDescriptor.get.call(obj), funcArg);
+                    if (!funcResult) {
+                        valid = funcResult;
+                    }
+                }
                 if (valid) {
                     protoPropertyDescriptor.set.call(obj, arg);
                 }
             }
-        })(protoPropertyDescriptor, obj, func, funcArg);
+        })(protoPropertyDescriptor, obj, funcList, funcArg);
 
         Object.defineProperty(obj, prop, {
             enumerable: true,
@@ -2094,21 +2100,29 @@ function ___fairysupport(){
                                     };
                                  })(preValueHolder, obj, prop),
                                  false);
-            let eventFunc = (function (func, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor){
+            let eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor){
                 return function (event) {
-                    let valid = func(obj, obj[prop], preValueHolder.preVal[prop], funcArg);
+                    let valid = true;
+                    for (const func of funcList) {
+                        let funcResult = func(obj, obj[prop], preValueHolder.preVal[prop], funcArg);
+                        if (!funcResult) {
+                            valid = funcResult;
+                        }
+                    }
                     if (!valid) {
                         protoPropertyDescriptor.set.call(obj, preValueHolder.preVal[prop]);
                     }
                     preValueHolder.preVal[prop] = obj[prop];
                 };
-            })(func, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor);
+            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor);
             for (const eventName of eventList) {
                 obj.addEventListener(eventName, eventFunc, true);
             }
         }
 
-        func(obj, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
+        for (const func of funcList) {
+            func(obj, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
+        }
 
     }
 
