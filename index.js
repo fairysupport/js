@@ -37,6 +37,7 @@ function ___fairysupport(){
     this.instanceMap = {};
 
     const msgObj = Object.create(null);
+    const envValueObj = Object.create(null);
 
     let fairysupportClear = class FairysupportClear {
         constructor() {
@@ -101,22 +102,84 @@ function ___fairysupport(){
 
         let moduleFullPath = moduleRoot + modulePath + '.js';
 
-        import(jsRoot + '/msg.js' + '?' + this.version)
-        .then(this.getLoadMsg(this, moduleFullPath + '?' + this.version, modulePath, msgObj))
+        this.getLoadEnv(jsRoot, this.version, moduleFullPath + '?' + this.version, modulePath, msgObj, envValueObj);
 
         return this;
 
     };
 
-    this.getLoadMsg = function (fs, moduleUrl, modulePath, msgObj){
-        return function(Module) {
-            let msg = Module.default;
-            Object.assign(msgObj, msg);
-            import(moduleUrl)
-            .then(fs.getControllerLoader(fs, modulePath))
-            .then(fs.binder(fs))
-            .then(fs.getControllerMethod(fs, 'init', null));
-        };
+    this.getLoadEnv = function (jsRoot, version, moduleControllerUrl, modulePath, msgObj, envValueObj){
+
+        let req = new this.fairysupportAjaxObj(null, null, jsRoot + '/env.txt' + '?' + version, null, null, null, null, 'getLoadEnv', null);
+        req.open('GET', jsRoot + '/env.txt' + '?' + version);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.withCredentials = true;
+        req.responseType = 'text';
+        req.onload = (function(fs, moduleControllerUrl, modulePath, msgObj, jsRoot, version, msgObj, envValueObj){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let envStr = xhr.response;
+                        envStr = envStr.trim();
+                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, jsRoot, msgObj, moduleControllerUrl, modulePath);
+
+                    }
+                }
+            }
+        )(this, moduleControllerUrl, modulePath, msgObj, jsRoot, version, msgObj, envValueObj);
+        req.send();
+
+    };
+
+    this.getEnvValue = function (jsRoot, envStr, version, envValueObj, jsRoot, msgObj, moduleControllerUrl, modulePath){
+
+        let req = new this.fairysupportAjaxObj(null, null, jsRoot + '/envValue.' + envStr + '.js' + '?' + version, null, null, null, null, 'getEnvValue', null);
+        req.open('GET', jsRoot + '/envValue.' + envStr + '.js' + '?' + version);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'application/json');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.withCredentials = true;
+        req.responseType = 'json';
+        req.onload = (function(fs, envValueObj, jsRoot, version, msgObj, moduleControllerUrl, modulePath){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let json = xhr.response;
+                        Object.assign(envValueObj, json);
+                        fs.getLoadMsg(jsRoot, version, msgObj, moduleControllerUrl, modulePath);
+
+                    }
+                }
+            }
+        )(this, envValueObj, jsRoot, version, msgObj, moduleControllerUrl, modulePath);
+        req.send();
+
+    };
+
+    this.getLoadMsg = function (jsRoot, version, msgObj, moduleControllerUrl, modulePath){
+
+        let req = new this.fairysupportAjaxObj(null, null, jsRoot + '/msg.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
+        req.open('GET', jsRoot + '/msg.js' + '?' + version);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'application/json');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.withCredentials = true;
+        req.responseType = 'json';
+        req.onload = (function(fs, msgObj, moduleControllerUrl, modulePath){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let json = xhr.response;
+                        Object.assign(msgObj, json);
+                        import(moduleControllerUrl)
+                        .then(fs.getControllerLoader(fs, modulePath))
+                        .then(fs.binder(fs))
+                        .then(fs.getControllerMethod(fs, 'init', null));
+                    }
+                }
+            }
+        )(this, msgObj, moduleControllerUrl, modulePath);
+        req.send();
+
     };
 
     this.getControllerLoader = function (fs, modulePath){
