@@ -1,21 +1,17 @@
 function ___fairysupport(){
 
-    let moduleRoot = '/js/modules/';
-    let componentRoot = '/js/components/';
     let scriptObj = document.getElementById("fs-js");
 
-    let modulePath = 'index';
-    let reqUrl = new URL(window.location.href);
-    let jsRoot = reqUrl.origin + '/';
-    let httpRoot = reqUrl.origin + '/';
-    let reqPath = reqUrl.origin + reqUrl.pathname.trim();
-    if (reqUrl.port !== null && reqUrl.port !== undefined && reqUrl.port !== '') {
-        jsRoot = reqUrl.origin + ':' + reqUrl.port + '/';
-        httpRoot = reqUrl.origin + ':' + reqUrl.port + '/';
-        reqPath = reqUrl.origin + ':' + reqUrl.port + reqUrl.pathname.trim();
-    }
-
-    this.version = Date.now();
+    let pageUrl = new URL(window.location.href);
+    let reqLang = pageUrl.searchParams.get("lang")
+    let confLang = window.navigator.language;
+    let jsFwUrl = new URL(scriptObj.src);
+    this.version = 'version' in scriptObj ? scriptObj.version : Date.now();
+    let jsFwPath = jsFwUrl.origin + jsFwUrl.pathname.trim();
+    let jsFwPathSplit = jsFwPath.split('/');
+    let jsRoot = jsFwPath.substring(0, jsFwPath.length - jsFwPathSplit[jsFwPathSplit.length - 1].length);
+    let moduleRoot = jsRoot + 'modules/';
+    let componentRoot = jsRoot + 'components/';
 
     this.clazz = {};
     this.controllerMethodList = {};
@@ -45,131 +41,139 @@ function ___fairysupport(){
     }
 
     this.init = function () {
-        if (scriptObj) {
-            let argJsRoot = scriptObj.dataset.jsRoot;
-            if (argJsRoot !== null && argJsRoot !== undefined) {
-                argJsRoot = argJsRoot.trim();
-                if (argJsRoot !== '') {
-                    jsRoot = argJsRoot;
-                    moduleRoot = jsRoot + '/modules/';
-                    componentRoot = jsRoot + '/components/';
-                }
-            }
-            let argPageRoot = scriptObj.dataset.pageRoot;
-            if (argPageRoot !== null && argPageRoot !== undefined) {
-                argPageRoot = argPageRoot.trim();
-                if (argPageRoot !== '') {
-                    httpRoot = argPageRoot;
-                }
-            }
-            let argVersion = scriptObj.dataset.version;
-            if (argVersion !== null && argVersion !== undefined) {
-                argVersion = argVersion.trim();
-                if (argVersion !== '') {
-                    this.version = argVersion;
-                }
-            }
-        }
-
-        if (reqPath !== null && reqPath !== undefined) {
-            reqPath = reqPath.trim();
-            if (reqPath !== '') {
-                if (httpRoot.length > reqPath.length) {
-                    return;
-                }
-                let reqPathHead = reqPath.substring(0, httpRoot.length);
-                if (httpRoot !== reqPathHead) {
-                    return;
-                }
-                modulePath = '';
-                let reqPathTail = reqPath.substring(httpRoot.length);
-                let pathList = reqPathTail.split('/');
-                for (let pathIdx = 0; pathIdx < pathList.length; pathIdx++) {
-                    if (pathList[pathIdx] === '') {
-                        continue;
-                    }
-                    if ((pathIdx + 1) >= pathList.length) {
-                        modulePath += pathList[pathIdx].split('.')[0];
-                    } else {
-                        modulePath += pathList[pathIdx] + '/';
-                    }
-                }
-                if (modulePath === '') {
-                    modulePath = 'index';
-                }
-            }
-        }
-
-        let moduleFullPath = moduleRoot + modulePath + '.js';
-
-        this.getLoadEnv(jsRoot, this.version, moduleFullPath + '?' + this.version, modulePath, msgObj, envValueObj);
-
+        this.getLoadEnv(jsRoot, this.version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot);
         return this;
-
     };
 
-    this.getLoadEnv = function (jsRoot, version, moduleControllerUrl, modulePath, msgObj, envValueObj){
+    this.getLoadEnv = function (jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot){
 
-        let req = new this.fairysupportAjaxObj(null, null, jsRoot + '/env.txt' + '?' + version, null, null, null, null, 'getLoadEnv', null);
-        req.open('GET', jsRoot + '/env.txt' + '?' + version);
+        let req = new this.fairysupportAjaxObj(null, null, jsRoot + 'env/env.txt' + '?' + version, null, null, null, null, 'getLoadEnv', null);
+        req.open('GET', jsRoot + 'env/env.txt' + '?' + version);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.withCredentials = true;
         req.responseType = 'text';
-        req.onload = (function(fs, moduleControllerUrl, modulePath, msgObj, jsRoot, version, msgObj, envValueObj){
+        req.onloadend = (function(fs, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let envStr = xhr.response;
                         envStr = envStr.trim();
-                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, jsRoot, msgObj, moduleControllerUrl, modulePath);
+                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
 
                     }
                 }
             }
-        )(this, moduleControllerUrl, modulePath, msgObj, jsRoot, version, msgObj, envValueObj);
+        )(this, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot);
         req.send();
 
     };
 
-    this.getEnvValue = function (jsRoot, envStr, version, envValueObj, jsRoot, msgObj, moduleControllerUrl, modulePath){
+    this.getEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
 
-        let req = new this.fairysupportAjaxObj(null, null, jsRoot + '/envValue.' + envStr + '.js' + '?' + version, null, null, null, null, 'getEnvValue', null);
-        req.open('GET', jsRoot + '/envValue.' + envStr + '.js' + '?' + version);
+        let req = new this.fairysupportAjaxObj(null, null, jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version, null, null, null, null, 'getEnvValue', null);
+        req.open('GET', jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
         req.setRequestHeader('Content-Type', 'application/json');
         req.withCredentials = true;
         req.responseType = 'json';
-        req.onload = (function(fs, envValueObj, jsRoot, version, msgObj, moduleControllerUrl, modulePath){
+        req.onloadend = (function(fs, envValueObj, jsRoot, version, msgObj, reqLang, confLang, pageUrl, moduleRoot){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let json = xhr.response;
                         Object.assign(envValueObj, json);
-                        fs.getLoadMsg(jsRoot, version, msgObj, moduleControllerUrl, modulePath);
+                        fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
 
                     }
                 }
             }
-        )(this, envValueObj, jsRoot, version, msgObj, moduleControllerUrl, modulePath);
+        )(this, envValueObj, jsRoot, version, msgObj, reqLang, confLang, pageUrl, moduleRoot);
         req.send();
 
     };
 
-    this.getLoadMsg = function (jsRoot, version, msgObj, moduleControllerUrl, modulePath){
+    this.getLoadMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
 
-        let req = new this.fairysupportAjaxObj(null, null, jsRoot + '/msg.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
-        req.open('GET', jsRoot + '/msg.js' + '?' + version);
+        if (reqLang !== null) {
+            let reqLangAjax = new this.fairysupportAjaxObj(null, null, jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
+            reqLangAjax.open('GET', jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version);
+            reqLangAjax.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            reqLangAjax.setRequestHeader('Accept', 'application/json');
+            reqLangAjax.setRequestHeader('Content-Type', 'application/json');
+            reqLangAjax.withCredentials = true;
+            reqLangAjax.responseType = 'json';
+            reqLangAjax.onloadend = (function(msgObj, reqLang){
+                    return function (e, xhr) {
+                        if (xhr.status === 200) {
+                            let json = xhr.response;
+                            msgObj[reqLang] =  Object.create({});
+                            Object.assign(msgObj[reqLang], json);
+                        }
+                    }
+                }
+            )(msgObj, reqLang);
+            reqLangAjax.send();
+        }
+
+
+        confLangAjax = new this.fairysupportAjaxObj(null, null, jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
+        confLangAjax.open('GET', jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version);
+        confLangAjax.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        confLangAjax.setRequestHeader('Accept', 'application/json');
+        confLangAjax.setRequestHeader('Content-Type', 'application/json');
+        confLangAjax.withCredentials = true;
+        confLangAjax.responseType = 'json';
+        confLangAjax.onloadend = (function(msgObj, confLang){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let json = xhr.response;
+                        msgObj[confLang] =  Object.create({});
+                        Object.assign(msgObj[confLang], json);
+                    }
+                }
+            }
+        )(msgObj, confLang);
+        confLangAjax.send();
+
+
+        let req = new this.fairysupportAjaxObj(null, null, jsRoot + 'msg/msg.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
+        req.open('GET', jsRoot + 'msg/msg.js' + '?' + version);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
         req.setRequestHeader('Content-Type', 'application/json');
         req.withCredentials = true;
         req.responseType = 'json';
-        req.onload = (function(fs, msgObj, moduleControllerUrl, modulePath){
+        req.onloadend = (function(fs, version, envValueObj, msgObj, pageUrl, moduleRoot){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let json = xhr.response;
-                        Object.assign(msgObj, json);
+                        msgObj['__fairysupport_default'] = Object.create({});
+                        Object.assign(msgObj['__fairysupport_default'], json);
+
+                        let pageRoot = envValueObj['pageRoot'];
+                        let reqPath = pageUrl.origin + pageUrl.pathname.trim();
+
+                        let modulePath = '';
+                        let reqPathTail = reqPath.substring(pageRoot.length);
+                        let pathList = reqPathTail.split('/');
+                        for (let pathIdx = 0; pathIdx < pathList.length; pathIdx++) {
+                            if (pathList[pathIdx] === '') {
+                                continue;
+                            }
+                            if ((pathIdx + 1) >= pathList.length) {
+                                modulePath += pathList[pathIdx].split('.')[0];
+                            } else {
+                                modulePath += pathList[pathIdx] + '/';
+                            }
+                        }
+                        if (modulePath === '') {
+                            modulePath = 'index';
+                        }
+
+                        let moduleFullPath = moduleRoot + modulePath + '.js';
+                        let moduleControllerUrl = moduleFullPath + '?' + version;
+
                         import(moduleControllerUrl)
                         .then(fs.getControllerLoader(fs, modulePath))
                         .then(fs.binder(fs))
@@ -177,7 +181,7 @@ function ___fairysupport(){
                     }
                 }
             }
-        )(this, msgObj, moduleControllerUrl, modulePath);
+        )(this, version, envValueObj, msgObj, pageUrl, moduleRoot);
         req.send();
 
     };
@@ -673,7 +677,7 @@ function ___fairysupport(){
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.withCredentials = true;
         req.responseType = 'text';
-        req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentPath, componentControllerPath){
+        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentPath, componentControllerPath){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let viewStr = xhr.response;
@@ -1541,7 +1545,7 @@ function ___fairysupport(){
         req.setRequestHeader('Content-Type', 'application/json');
         req.withCredentials = true;
         req.responseType = 'json';
-        req.onload = (function(fs, dom, componentPackeage, cb, position){
+        req.onloadend = (function(fs, dom, componentPackeage, cb, position){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let json = xhr.response;
@@ -1573,7 +1577,7 @@ function ___fairysupport(){
         req.setRequestHeader('Accept', 'application/json');
         req.withCredentials = true;
         req.responseType = 'json';
-        req.onload = (function(fs, dom, componentPackeage, cb, position){
+        req.onloadend = (function(fs, dom, componentPackeage, cb, position){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let json = xhr.response;
@@ -1607,7 +1611,7 @@ function ___fairysupport(){
         req.setRequestHeader('Content-Type', 'application/json');
         req.withCredentials = true;
         req.responseType = 'text';
-        req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
+        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let viewStr = xhr.response;
@@ -1651,7 +1655,7 @@ function ___fairysupport(){
         req.setRequestHeader('Accept', 'text/*');
         req.withCredentials = true;
         req.responseType = 'text';
-        req.onload = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
+        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let viewStr = xhr.response;
@@ -2094,7 +2098,17 @@ function ___fairysupport(){
 
     this.msg = function (name, replaceObj){
 
-        let str = msgObj[name];
+        let reqLang = this.getReqLang();
+        let confLang = this.getConfLang();
+
+        let str = msgObj['__fairysupport_default'][name];
+        if (confLang !== null && (confLang in msgObj) && (name in msgObj[confLang])) {
+            str = msgObj[confLang][name];
+        }
+        if (reqLang !== null && (reqLang in msgObj) && (name in msgObj[reqLang])) {
+            str = msgObj[reqLang][name];
+        }
+
         for (const [key, value] of Object.entries(replaceObj)) {
             let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
             str = str.replace(re, value);
@@ -2251,9 +2265,19 @@ function ___fairysupport(){
             fromObj.addEventListener(eventName, toObj[eventName].bind(toObj));
         }
     }
+
+    this.getReqLang = function () {
+        return reqLang;
+    }
+
+    this.getConfLang = function () {
+        return confLang;
+    }
+
+    this.init();
+
 }
 const $___fairysupport_param = function(v, l, tpl) {
     return eval(tpl);
 }
 const $f = new ___fairysupport();
-$f.init();
