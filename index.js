@@ -2274,6 +2274,34 @@ function ___fairysupport(){
         return confLang;
     }
 
+    this.storeClass = class FairysupportStore {
+        constructor() {
+            this.data = Object.create({});
+            this.listener = new Map();
+        }
+        set(k, v) {
+            this.data[k] = v;
+            for (let l of this.listener.values()) {
+              l(k, v);
+            }
+        }
+        get(k) {
+            return this.data[k];
+        }
+        addListener(l){
+            this.listener.set(l, l);
+        }
+        removeListener(l){
+            this.listener.delete(l);
+        }
+    };
+
+    let storeInstance = new this.storeClass();
+
+    this.store = function () {
+        return storeInstance;
+    }
+
     this.init();
 
 }
