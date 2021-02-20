@@ -47,12 +47,10 @@ function ___fairysupport(){
 
     this.getLoadEnv = function (jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot){
 
-        let req = new this.fairysupportAjaxObj(null, null, jsRoot + 'env/env.txt' + '?' + version, null, null, null, null, 'getLoadEnv', null);
-        req.open('GET', jsRoot + 'env/env.txt' + '?' + version);
+        let req = this.emptyAjax(jsRoot + 'env/env.txt' + '?' + version, null, 'GET', 'query');
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        req.withCredentials = true;
         req.responseType = 'text';
         req.onloadend = (function(fs, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot){
                 return function (e, xhr) {
@@ -71,13 +69,7 @@ function ___fairysupport(){
 
     this.getEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
 
-        let req = new this.fairysupportAjaxObj(null, null, jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version, null, null, null, null, 'getEnvValue', null);
-        req.open('GET', jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version);
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'application/json');
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.withCredentials = true;
-        req.responseType = 'json';
+        let req = this.ajax(jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version, null, 'GET', 'query');
         req.onloadend = (function(fs, envValueObj, jsRoot, version, msgObj, reqLang, confLang, pageUrl, moduleRoot){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
@@ -96,13 +88,7 @@ function ___fairysupport(){
     this.getLoadMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
 
         if (reqLang !== null) {
-            let reqLangAjax = new this.fairysupportAjaxObj(null, null, jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
-            reqLangAjax.open('GET', jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version);
-            reqLangAjax.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-            reqLangAjax.setRequestHeader('Accept', 'application/json');
-            reqLangAjax.setRequestHeader('Content-Type', 'application/json');
-            reqLangAjax.withCredentials = true;
-            reqLangAjax.responseType = 'json';
+            let reqLangAjax = this.ajax(jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version, null, 'GET', 'query');
             reqLangAjax.onloadend = (function(msgObj, reqLang){
                     return function (e, xhr) {
                         if (xhr.status === 200) {
@@ -117,13 +103,7 @@ function ___fairysupport(){
         }
 
 
-        confLangAjax = new this.fairysupportAjaxObj(null, null, jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
-        confLangAjax.open('GET', jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version);
-        confLangAjax.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        confLangAjax.setRequestHeader('Accept', 'application/json');
-        confLangAjax.setRequestHeader('Content-Type', 'application/json');
-        confLangAjax.withCredentials = true;
-        confLangAjax.responseType = 'json';
+        let confLangAjax = this.ajax(jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version, null, 'GET', 'query');
         confLangAjax.onloadend = (function(msgObj, confLang){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
@@ -137,13 +117,7 @@ function ___fairysupport(){
         confLangAjax.send();
 
 
-        let req = new this.fairysupportAjaxObj(null, null, jsRoot + 'msg/msg.js' + '?' + version, null, null, null, null, 'getLoadMsg', null);
-        req.open('GET', jsRoot + 'msg/msg.js' + '?' + version);
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'application/json');
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.withCredentials = true;
-        req.responseType = 'json';
+        let req = this.ajax(jsRoot + 'msg/msg.js' + '?' + version, null, 'GET', 'query');
         req.onloadend = (function(fs, version, envValueObj, msgObj, pageUrl, moduleRoot){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
@@ -670,12 +644,10 @@ function ___fairysupport(){
         let componentControllerPath = componentRoot + componentPath + 'controller.js';
         let componentViewPath = componentRoot + componentPath + 'view.html';
 
-        let req = new this.fairysupportAjaxObj(dom, componentPackeage, componentViewPath + '?' + this.version, null, argObj, cb, position, 'loadComponent', componentRoot);
-        req.open('GET', componentViewPath + '?' + this.version);
+        let req = this.emptyAjax(componentViewPath + '?' + this.version, paramObj, 'GET', 'query');
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        req.withCredentials = true;
         req.responseType = 'text';
         req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentPath, componentControllerPath){
                 return function (e, xhr) {
@@ -1538,13 +1510,7 @@ function ___fairysupport(){
 
     this.resJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, position){
 
-        let req = new this.fairysupportAjaxObj(dom, componentPackeage, reqUrl, JSON.stringify(paramObj), null, cb, position, 'resJsonComponent', componentRoot);
-        req.open('POST', reqUrl);
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'application/json');
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.withCredentials = true;
-        req.responseType = 'json';
+        let req = this.ajax(reqUrl, paramObj);
         req.onloadend = (function(fs, dom, componentPackeage, cb, position){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
@@ -1571,12 +1537,7 @@ function ___fairysupport(){
 
     this.resJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, position){
 
-        let req = new this.fairysupportAjaxObj(dom, componentPackeage, reqUrl, new FormData(formObj), null, cb, position, 'resJsonComponentByForm', componentRoot);
-        req.open('POST', reqUrl);
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'application/json');
-        req.withCredentials = true;
-        req.responseType = 'json';
+        let req = this.ajaxByForm(reqUrl, formObj);
         req.onloadend = (function(fs, dom, componentPackeage, cb, position){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
@@ -1604,12 +1565,10 @@ function ___fairysupport(){
 
     this.resHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, position){
 
-        let req = new this.fairysupportAjaxObj(dom, componentPackeage, viewUrl, JSON.stringify(paramObj), argObj, cb, position, 'resHtmlComponent', componentRoot);
-        req.open('POST', viewUrl);
+        let req = this.emptyAjax(viewUrl, paramObj);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/json');
-        req.withCredentials = true;
         req.responseType = 'text';
         req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
                 return function (e, xhr) {
@@ -1649,11 +1608,9 @@ function ___fairysupport(){
 
     this.resHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, position){
 
-        let req = new this.fairysupportAjaxObj(dom, componentPackeage, viewUrl, new FormData(formObj), argObj, cb, position, 'resHtmlComponentByForm', componentRoot);
-        req.open('POST', viewUrl);
+        let req = this.emptyAjaxByForm(viewUrl, formObj);
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
-        req.withCredentials = true;
         req.responseType = 'text';
         req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
                 return function (e, xhr) {
@@ -1703,6 +1660,8 @@ function ___fairysupport(){
                     }
                 }
             }
+        } else {
+            result = paramObj;
         }
         if (result === '') {
             result = null;
@@ -1712,12 +1671,12 @@ function ___fairysupport(){
 
     this.emptyAjax = function (reqUrl, paramObj, met = 'POST', fmt = 'json',  user = null, password = null){
 
-        if (met.toLowerCase() !== 'post') {
+        if (met.toLowerCase() === 'get') {
             fmt = 'query'
         }
 
         let paramStr = this.paramFmt(fmt, paramObj, '');
-        if (met.toLowerCase() !== 'post' && paramStr !== null && paramStr !== '') {
+        if (met.toLowerCase() === 'get' && paramStr !== null && paramStr !== '') {
             if (reqUrl.indexOf('?') >= 0) {
                 reqUrl += '&' + paramStr;
             } else {
@@ -1935,6 +1894,14 @@ function ___fairysupport(){
                 get: getFunc,
                 set : setFunc
             });
+            getFunc = (function(funcMap){return function(){return funcMap;};})(Object.create({}));
+            setFunc = function(){};
+            Object.defineProperty(this, '__resFunc', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
         }
         setResponseType(val) {
             this.responseType = val;
@@ -2003,6 +1970,185 @@ function ___fairysupport(){
         }
         setOntimeout(fn) {
             this.ontimeout = fn;
+            return this;
+        }
+        setReadystatechange(state, status, fn) {
+            if (!('readystatechange' in this.__resFunc)) {
+                this.__resFunc['readystatechange'] = Object.create({});
+            }
+            if (state === null && status === null) {
+                this.__resFunc['readystatechange']['default'] = fn;
+            } else if (state !== null && status === null) {
+                if (!('statusDefault' in this.__resFunc['readystatechange'])) {
+                    this.__resFunc['readystatechange']['statusDefault'] = Object.create({});
+                }
+                this.__resFunc['readystatechange']['statusDefault'][state] = fn;
+            } else if (state === null && status !== null) {
+                if (!('stateDefault' in this.__resFunc['readystatechange'])) {
+                    this.__resFunc['readystatechange']['stateDefault'] = Object.create({});
+                }
+                this.__resFunc['readystatechange']['stateDefault'][status] = fn;
+            } else {
+                if (!('fn' in this.__resFunc['readystatechange'])) {
+                    this.__resFunc['readystatechange']['fn'] = Object.create({});
+                }
+                if (!(state in this.__resFunc['readystatechange']['fn'])) {
+                    this.__resFunc['readystatechange']['fn'][state] = Object.create({});
+                }
+                this.__resFunc['readystatechange']['fn'][state][status] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                    if ('statusDefault' in resFunc && xhr.readyState in resFunc['statusDefault']) {
+                                        resFunc['statusDefault'][xhr.readyState](e, xhr);
+                                    }
+                                    if ('stateDefault' in resFunc && xhr.status in resFunc['stateDefault']) {
+                                        resFunc['stateDefault'][xhr.status](e, xhr);
+                                    }
+                                    if ('fn' in resFunc && xhr.readyState in resFunc['fn'] && xhr.status in resFunc['fn'][xhr.readyState]) {
+                                        resFunc['fn'][xhr.readyState][xhr.status](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['readystatechange']);
+            this.onreadystatechange = useFunc;
+            return this;
+        }
+        setAbort(fn) {
+            if (!('abort' in this.__resFunc)) {
+                this.__resFunc['abort'] = Object.create({});
+            }
+            this.__resFunc['abort']['default'] = fn;
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['abort']);
+            this.onabort = useFunc;
+            return this;
+        }
+        setError(fn) {
+            if (!('error' in this.__resFunc)) {
+                this.__resFunc['error'] = Object.create({});
+            }
+            this.__resFunc['error']['default'] = fn;
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['error']);
+            this.onerror = useFunc;
+            return this;
+        }
+        setLoad(status, fn) {
+            if (!('load' in this.__resFunc)) {
+                this.__resFunc['load'] = Object.create({});
+            }
+            if (status === null) {
+                this.__resFunc['load']['default'] = fn;
+            } else {
+                if (!('fn' in this.__resFunc['load'])) {
+                    this.__resFunc['load']['fn'] = Object.create({});
+                }
+                this.__resFunc['load']['fn'][status] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                    if ('fn' in resFunc && xhr.status in resFunc['fn']) {
+                                        resFunc['fn'][xhr.status](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['load']);
+            this.onload = useFunc;
+            return this;
+        }
+        setLoadend(status, fn) {
+            if (!('loadend' in this.__resFunc)) {
+                this.__resFunc['loadend'] = Object.create({});
+            }
+            if (status === null) {
+                this.__resFunc['loadend']['default'] = fn;
+            } else {
+                if (!('fn' in this.__resFunc['loadend'])) {
+                    this.__resFunc['loadend']['fn'] = Object.create({});
+                }
+                this.__resFunc['loadend']['fn'][status] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                    if ('fn' in resFunc && xhr.status in resFunc['fn']) {
+                                        resFunc['fn'][xhr.status](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['loadend']);
+            this.onloadend = useFunc;
+            return this;
+        }
+        setLoadstart(fn) {
+            if (!('loadstart' in this.__resFunc)) {
+                this.__resFunc['loadstart'] = Object.create({});
+            }
+            this.__resFunc['loadstart']['default'] = fn;
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['loadstart']);
+            this.onloadstart = useFunc;
+            return this;
+        }
+        setProgress(status, fn) {
+            if (!('progress' in this.__resFunc)) {
+                this.__resFunc['progress'] = Object.create({});
+            }
+            if (status === null) {
+                this.__resFunc['progress']['default'] = fn;
+            } else {
+                if (!('fn' in this.__resFunc['progress'])) {
+                    this.__resFunc['progress']['fn'] = Object.create({});
+                }
+                this.__resFunc['progress']['fn'][status] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                    if ('fn' in resFunc && xhr.status in resFunc['fn']) {
+                                        resFunc['fn'][xhr.status](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['progress']);
+            this.onprogress = useFunc;
+            return this;
+        }
+        setTimeout(fn) {
+            if (!('timeout' in this.__resFunc)) {
+                this.__resFunc['timeout'] = Object.create({});
+            }
+            this.__resFunc['timeout']['default'] = fn;
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.__resFunc['timeout']);
+            this.ontimeout = useFunc;
             return this;
         }
     };
