@@ -57,12 +57,30 @@ function ___fairysupport(){
                     if (xhr.status === 200) {
                         let envStr = xhr.response;
                         envStr = envStr.trim();
-                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
+                        fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
 
                     }
                 }
             }
         )(this, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot);
+        req.send();
+
+    };
+
+    this.getEnvDefaultValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
+
+        let req = this.ajax(jsRoot + 'env/envValue.js' + '?' + version, null, 'GET', 'query');
+        req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot){
+                return function (e, xhr) {
+                    if (xhr.status === 200) {
+                        let json = xhr.response;
+                        Object.assign(envValueObj, json);
+                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
+
+                    }
+                }
+            }
+        )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot);
         req.send();
 
     };
@@ -93,7 +111,7 @@ function ___fairysupport(){
                     return function (e, xhr) {
                         if (xhr.status === 200) {
                             let json = xhr.response;
-                            msgObj[reqLang] =  Object.create({});
+                            msgObj[reqLang] =  Object.create(null);
                             Object.assign(msgObj[reqLang], json);
                         }
                     }
@@ -108,7 +126,7 @@ function ___fairysupport(){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let json = xhr.response;
-                        msgObj[confLang] =  Object.create({});
+                        msgObj[confLang] =  Object.create(null);
                         Object.assign(msgObj[confLang], json);
                     }
                 }
@@ -122,7 +140,7 @@ function ___fairysupport(){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let json = xhr.response;
-                        msgObj['__fairysupport_default'] = Object.create({});
+                        msgObj['__fairysupport_default'] = Object.create(null);
                         Object.assign(msgObj['__fairysupport_default'], json);
 
                         let pageRoot = envValueObj['pageRoot'];
@@ -662,21 +680,12 @@ function ___fairysupport(){
 
     };
 
-    this.getComponentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position){
-        return function (Module){
-            let viewStr = Module.default;
-            fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
-        };
-    };
-
     this.componentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr){
 
         let func = function () {};
         if (cb !== null && cb !== undefined && typeof cb === 'function') {
             func = cb;
         }
-
-        viewStr = fs.getTplStr(viewStr, argObj);
 
         import(componentControllerPath + '?' + fs.version)
         .then(fs.loadComponentControllerMethodList(fs, componentPath))
@@ -1133,14 +1142,6 @@ function ___fairysupport(){
         });
     };
 
-    this.getTplStr = function(tplFuc, paramObj) {
-        if (typeof tplFuc === 'function') {
-            return tplFuc(this, paramObj);
-        } else {
-            return tplFuc;
-        }
-    };
-
     this.getTplDom = function(viewStr, paramObj){
 
         let template = document.createElement('template');
@@ -1331,6 +1332,7 @@ function ___fairysupport(){
                                 return;
                             } else {
                                 retObj.continueVal--;
+                                delete retObj.continueVal;
                                 continue;
                             }
                         }
@@ -1342,6 +1344,7 @@ function ___fairysupport(){
                                 return;
                             } else {
                                 retObj.breakVal--;
+                                delete retObj.breakVal;
                                 break;
                             }
                         }
@@ -1380,6 +1383,7 @@ function ___fairysupport(){
                                 return;
                             } else {
                                 retObj.continueVal--;
+                                delete retObj.continueVal;
                                 continue;
                             }
                         }
@@ -1391,6 +1395,7 @@ function ___fairysupport(){
                                 return;
                             } else {
                                 retObj.breakVal--;
+                                delete retObj.breakVal;
                                 break;
                             }
                         }
@@ -1423,6 +1428,7 @@ function ___fairysupport(){
                                 return;
                             } else {
                                 retObj.continueVal--;
+                                delete retObj.continueVal;
                                 continue;
                             }
                         }
@@ -1434,6 +1440,7 @@ function ___fairysupport(){
                                 return;
                             } else {
                                 retObj.breakVal--;
+                                delete retObj.breakVal;
                                 break;
                             }
                         }
@@ -1496,6 +1503,36 @@ function ___fairysupport(){
                 obj[k] = v;
             }
         }
+    };
+
+    this.appendLoadStringTemplate = function (dom, viewStr, argObj){
+        this.loadStringTemplate(dom, viewStr, argObj, 'append');
+    };
+    this.beforeLoadStringTemplate = function (dom, viewStr, argObj){
+        this.loadStringTemplate(dom, viewStr, argObj, 'before');
+    };
+    this.afterLoadStringTemplate = function (dom, viewStr, argObj){
+        this.loadStringTemplate(dom, viewStr, argObj, 'after');
+    };
+    this.loadStringTemplate = function (dom, viewStr, argObj, position){
+
+        let viewDom = this.getTplDom(viewStr, argObj);
+
+        if ('before' === position && dom.parentNode) {
+            dom.parentNode.insertBefore(viewDom, dom);
+        } else if ('after' === position && dom.parentNode) {
+            if (dom.nextSibling === null || dom.nextSibling === undefined) {
+                dom.parentNode.appendChild(viewDom);
+            } else {
+                dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+            }
+        } else if ('append' === position) {
+            dom.appendChild(viewDom);
+        } else {
+            dom.innerHTML = "";
+            dom.appendChild(viewDom);
+        }
+
     };
 
     this.appendResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
@@ -1894,7 +1931,7 @@ function ___fairysupport(){
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(funcMap){return function(){return funcMap;};})(Object.create({}));
+            getFunc = (function(funcMap){return function(){return funcMap;};})(Object.create(null));
             setFunc = function(){};
             Object.defineProperty(this, '__resFunc', {
                 enumerable: true,
@@ -1974,26 +2011,26 @@ function ___fairysupport(){
         }
         setReadystatechange(state, status, fn) {
             if (!('readystatechange' in this.__resFunc)) {
-                this.__resFunc['readystatechange'] = Object.create({});
+                this.__resFunc['readystatechange'] = Object.create(null);
             }
             if (state === null && status === null) {
                 this.__resFunc['readystatechange']['default'] = fn;
             } else if (state !== null && status === null) {
                 if (!('statusDefault' in this.__resFunc['readystatechange'])) {
-                    this.__resFunc['readystatechange']['statusDefault'] = Object.create({});
+                    this.__resFunc['readystatechange']['statusDefault'] = Object.create(null);
                 }
                 this.__resFunc['readystatechange']['statusDefault'][state] = fn;
             } else if (state === null && status !== null) {
                 if (!('stateDefault' in this.__resFunc['readystatechange'])) {
-                    this.__resFunc['readystatechange']['stateDefault'] = Object.create({});
+                    this.__resFunc['readystatechange']['stateDefault'] = Object.create(null);
                 }
                 this.__resFunc['readystatechange']['stateDefault'][status] = fn;
             } else {
                 if (!('fn' in this.__resFunc['readystatechange'])) {
-                    this.__resFunc['readystatechange']['fn'] = Object.create({});
+                    this.__resFunc['readystatechange']['fn'] = Object.create(null);
                 }
                 if (!(state in this.__resFunc['readystatechange']['fn'])) {
-                    this.__resFunc['readystatechange']['fn'][state] = Object.create({});
+                    this.__resFunc['readystatechange']['fn'][state] = Object.create(null);
                 }
                 this.__resFunc['readystatechange']['fn'][state][status] = fn;
             }
@@ -2018,7 +2055,7 @@ function ___fairysupport(){
         }
         setAbort(fn) {
             if (!('abort' in this.__resFunc)) {
-                this.__resFunc['abort'] = Object.create({});
+                this.__resFunc['abort'] = Object.create(null);
             }
             this.__resFunc['abort']['default'] = fn;
             let useFunc = (function (resFunc) {
@@ -2033,7 +2070,7 @@ function ___fairysupport(){
         }
         setError(fn) {
             if (!('error' in this.__resFunc)) {
-                this.__resFunc['error'] = Object.create({});
+                this.__resFunc['error'] = Object.create(null);
             }
             this.__resFunc['error']['default'] = fn;
             let useFunc = (function (resFunc) {
@@ -2048,13 +2085,13 @@ function ___fairysupport(){
         }
         setLoad(status, fn) {
             if (!('load' in this.__resFunc)) {
-                this.__resFunc['load'] = Object.create({});
+                this.__resFunc['load'] = Object.create(null);
             }
             if (status === null) {
                 this.__resFunc['load']['default'] = fn;
             } else {
                 if (!('fn' in this.__resFunc['load'])) {
-                    this.__resFunc['load']['fn'] = Object.create({});
+                    this.__resFunc['load']['fn'] = Object.create(null);
                 }
                 this.__resFunc['load']['fn'][status] = fn;
             }
@@ -2073,13 +2110,13 @@ function ___fairysupport(){
         }
         setLoadend(status, fn) {
             if (!('loadend' in this.__resFunc)) {
-                this.__resFunc['loadend'] = Object.create({});
+                this.__resFunc['loadend'] = Object.create(null);
             }
             if (status === null) {
                 this.__resFunc['loadend']['default'] = fn;
             } else {
                 if (!('fn' in this.__resFunc['loadend'])) {
-                    this.__resFunc['loadend']['fn'] = Object.create({});
+                    this.__resFunc['loadend']['fn'] = Object.create(null);
                 }
                 this.__resFunc['loadend']['fn'][status] = fn;
             }
@@ -2098,7 +2135,7 @@ function ___fairysupport(){
         }
         setLoadstart(fn) {
             if (!('loadstart' in this.__resFunc)) {
-                this.__resFunc['loadstart'] = Object.create({});
+                this.__resFunc['loadstart'] = Object.create(null);
             }
             this.__resFunc['loadstart']['default'] = fn;
             let useFunc = (function (resFunc) {
@@ -2113,13 +2150,13 @@ function ___fairysupport(){
         }
         setProgress(status, fn) {
             if (!('progress' in this.__resFunc)) {
-                this.__resFunc['progress'] = Object.create({});
+                this.__resFunc['progress'] = Object.create(null);
             }
             if (status === null) {
                 this.__resFunc['progress']['default'] = fn;
             } else {
                 if (!('fn' in this.__resFunc['progress'])) {
-                    this.__resFunc['progress']['fn'] = Object.create({});
+                    this.__resFunc['progress']['fn'] = Object.create(null);
                 }
                 this.__resFunc['progress']['fn'][status] = fn;
             }
@@ -2138,7 +2175,7 @@ function ___fairysupport(){
         }
         setTimeout(fn) {
             if (!('timeout' in this.__resFunc)) {
-                this.__resFunc['timeout'] = Object.create({});
+                this.__resFunc['timeout'] = Object.create(null);
             }
             this.__resFunc['timeout']['default'] = fn;
             let useFunc = (function (resFunc) {
@@ -2278,7 +2315,7 @@ function ___fairysupport(){
 
     this.validate = function (obj, prop, eventList, funcList, funcArg){
         let preValueHolder = {
-                preVal: Object.create({})
+                preVal: Object.create(null)
         };
         this.wrapObjAccessor(obj, prop, funcList, preValueHolder, eventList, funcArg);
     }
@@ -2352,11 +2389,11 @@ function ___fairysupport(){
         let protoObj = Object.getPrototypeOf(obj);
         let protoPropertyDescriptor = null;
         if (protoObj === null || protoObj == undefined) {
-            protoPropertyDescriptor = Object.create({});
+            protoPropertyDescriptor = Object.create(null);
         } else {
             protoPropertyDescriptor = Object.getOwnPropertyDescriptor(protoObj, propName);
             if (protoPropertyDescriptor === null || protoPropertyDescriptor === undefined) {
-                protoPropertyDescriptor = Object.create({});
+                protoPropertyDescriptor = Object.create(null);
             }
             if ('configurable' in protoPropertyDescriptor && !protoPropertyDescriptor.configurable) {
                 return;
@@ -2364,7 +2401,7 @@ function ___fairysupport(){
         }
         if (!('get' in protoPropertyDescriptor) || !('set' in protoPropertyDescriptor)) {
 
-            let newProtoPropertyDescriptor = Object.create({});
+            let newProtoPropertyDescriptor = Object.create(null);
             let accessor = {
                     val: obj[propName]
             };
@@ -2422,7 +2459,7 @@ function ___fairysupport(){
 
     this.storeClass = class FairysupportStore {
         constructor() {
-            this.data = Object.create({});
+            this.data = Object.create(null);
             this.listener = new Map();
         }
         set(k, v) {
