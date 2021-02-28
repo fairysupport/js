@@ -6,12 +6,13 @@ function ___fairysupport(){
     let reqLang = pageUrl.searchParams.get("lang")
     let confLang = window.navigator.language;
     let jsFwUrl = new URL(scriptObj.src);
-    this.version = 'version' in scriptObj ? scriptObj.version : Date.now();
+    this.version = ('dataset' in scriptObj && 'version' in scriptObj.dataset) ? scriptObj.dataset.version : Date.now();
     let jsFwPath = jsFwUrl.origin + jsFwUrl.pathname.trim();
     let jsFwPathSplit = jsFwPath.split('/');
     let jsRoot = jsFwPath.substring(0, jsFwPath.length - jsFwPathSplit[jsFwPathSplit.length - 1].length);
     let moduleRoot = jsRoot + 'modules/';
     let componentRoot = jsRoot + 'components/';
+    let templateRoot = jsRoot + 'templates/';
 
     this.clazz = {};
     this.controllerMethodList = {};
@@ -28,12 +29,38 @@ function ___fairysupport(){
     this.eventMap = new Map();
     this.eventNameDataNameMap = new Map();
 
+    this.bindDomInitFuncMap = new Map();
+    this.bindDomInitCntMap = new Map();
+    this.bindDomInitTotalMap = new Map();
+
     let metaMap = new Map();
+
+    let fsTimeout = ('dataset' in scriptObj && 'timeout' in scriptObj.dataset) ? scriptObj.dataset.timeout : 0;
+    fsTimeout = fsTimeout - 0;
 
     this.instanceMap = {};
 
     const msgObj = Object.create(null);
     const envValueObj = Object.create(null);
+
+    if (!('fairysupportInitFail' in window)) {
+        window.fairysupportInitFail = function (retryCount) {
+            alert('network error');
+            return false;
+        }
+    }
+    if (!('fairysupportTemplateFail' in window)) {
+        window.fairysupportTemplateFail = function (retryCount) {
+            alert('network error');
+            return false;
+        }
+    }
+    if (!('fairysupportComponentFail' in window)) {
+        window.fairysupportComponentFail = function (retryCount) {
+            alert('network error');
+            return false;
+        }
+    }
 
     let fairysupportClear = class FairysupportClear {
         constructor() {
@@ -41,42 +68,75 @@ function ___fairysupport(){
     }
 
     this.init = function () {
-        this.getLoadEnv(jsRoot, this.version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot);
+        this.getLoadEnv(jsRoot, this.version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, 0);
         return this;
     };
 
-    this.getLoadEnv = function (jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot){
+    this.getLoadEnv = function (jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
 
         let req = this.emptyAjax(jsRoot + 'env/env.txt' + '?' + version, null, 'GET', 'query');
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.responseType = 'text';
-        req.onloadend = (function(fs, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot){
+        req.timeout = fsTimeout;
+        req.onloadend = (function(fs, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let envStr = xhr.response;
                         envStr = envStr.trim();
-                        fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
-
+                        fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, 0);
+                    } else {
+                        let failResult = fairysupportInitFail(retryCount);
+                        if (failResult) {
+                            fs.getLoadEnv(jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                        }
                     }
                 }
             }
-        )(this, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot);
+        )(this, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, retryCount);
         req.send();
 
     };
 
-    this.getEnvDefaultValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
+    this.getEnvDefaultValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
 
         let req = this.ajax(jsRoot + 'env/envValue.js' + '?' + version, null, 'GET', 'query');
-        req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot){
+        req.timeout = fsTimeout;
+        req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
                         let json = xhr.response;
                         Object.assign(envValueObj, json);
-                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
+                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, 0);
+                    } else {
+                        let failResult = fairysupportInitFail(retryCount);
+                        if (failResult) {
+                            fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount);
+        req.send();
 
+    };
+
+    this.getEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
+
+        let req = this.ajax(jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version, null, 'GET', 'query');
+        req.timeout = fsTimeout;
+        req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let json = xhr.response;
+                        Object.assign(envValueObj, json);
+                        fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, 0);
+                    } else {
+                        let failResult = fairysupportInitFail(retryCount);
+                        if (failResult) {
+                            fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                        }
                     }
                 }
             }
@@ -85,60 +145,45 @@ function ___fairysupport(){
 
     };
 
-    this.getEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
-
-        let req = this.ajax(jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version, null, 'GET', 'query');
-        req.onloadend = (function(fs, envValueObj, jsRoot, version, msgObj, reqLang, confLang, pageUrl, moduleRoot){
-                return function (e, xhr) {
-                    if (xhr.status === 200) {
-                        let json = xhr.response;
-                        Object.assign(envValueObj, json);
-                        fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot);
-
-                    }
-                }
-            }
-        )(this, envValueObj, jsRoot, version, msgObj, reqLang, confLang, pageUrl, moduleRoot);
-        req.send();
-
-    };
-
-    this.getLoadMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot){
+    this.getLoadMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
 
         if (reqLang !== null) {
             let reqLangAjax = this.ajax(jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version, null, 'GET', 'query');
-            reqLangAjax.onloadend = (function(msgObj, reqLang){
+            reqLangAjax.timeout = fsTimeout;
+            reqLangAjax.onloadend = (function(msgObj, reqLang, fs, envValueObj, jsRoot, version, confLang, pageUrl, moduleRoot, retryCount){
                     return function (e, xhr) {
-                        if (xhr.status === 200) {
+                        if (200 === xhr.status) {
                             let json = xhr.response;
                             msgObj[reqLang] =  Object.create(null);
                             Object.assign(msgObj[reqLang], json);
                         }
                     }
                 }
-            )(msgObj, reqLang);
+            )(msgObj, reqLang, this, envValueObj, jsRoot, version, confLang, pageUrl, moduleRoot, retryCount);
             reqLangAjax.send();
         }
 
 
         let confLangAjax = this.ajax(jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version, null, 'GET', 'query');
-        confLangAjax.onloadend = (function(msgObj, confLang){
+        confLangAjax.timeout = fsTimeout;
+        confLangAjax.onloadend = (function(msgObj, confLang, fs, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
                         let json = xhr.response;
                         msgObj[confLang] =  Object.create(null);
                         Object.assign(msgObj[confLang], json);
                     }
                 }
             }
-        )(msgObj, confLang);
+        )(msgObj, confLang, this, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount);
         confLangAjax.send();
 
 
         let req = this.ajax(jsRoot + 'msg/msg.js' + '?' + version, null, 'GET', 'query');
-        req.onloadend = (function(fs, version, envValueObj, msgObj, pageUrl, moduleRoot){
+        req.timeout = fsTimeout;
+        req.onloadend = (function(fs, version, envValueObj, msgObj, pageUrl, moduleRoot, jsRoot, reqLang, confLang, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
                         let json = xhr.response;
                         msgObj['__fairysupport_default'] = Object.create(null);
                         Object.assign(msgObj['__fairysupport_default'], json);
@@ -168,12 +213,25 @@ function ___fairysupport(){
 
                         import(moduleControllerUrl)
                         .then(fs.getControllerLoader(fs, modulePath))
-                        .then(fs.binder(fs))
-                        .then(fs.getControllerMethod(fs, 'init', null));
+                        .catch((function(msgObj, confLang, fs, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount){
+                                return function (err) {
+                                    let failResult = fairysupportInitFail(retryCount);
+                                    if (failResult) {
+                                        fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                                    }
+                                }
+                            }
+                        )(msgObj, confLang, fs, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount))
+                        ;
+                    } else {
+                        let failResult = fairysupportInitFail(retryCount);
+                        if (failResult) {
+                            fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                        }
                     }
                 }
             }
-        )(this, version, envValueObj, msgObj, pageUrl, moduleRoot);
+        )(this, version, envValueObj, msgObj, pageUrl, moduleRoot, jsRoot, reqLang, confLang, retryCount);
         req.send();
 
     };
@@ -203,115 +261,158 @@ function ___fairysupport(){
                 }
 
             }
+
+            fs.binder(fs);
+            let moduleControllerInitFunc = fs.getControllerMethod(fs, 'init', null);
+            moduleControllerInitFunc();
+
         };
     };
 
     this.binder = function (fs){
-        return function (){
-            let bodyObj = document.getElementsByTagName("BODY");
-            let observer = new MutationObserver((records, obj) => {
-                for (let record of records) {
-                    if (record.type === 'attributes') {
+        let bodyObj = document.getElementsByTagName("BODY");
+        let observer = new MutationObserver((records, obj) => {
+            for (let record of records) {
+                if (record.type === 'attributes') {
 
-                        if (record.attributeName === 'data-obj') {
-                            fs.removeControllerSingleObjOnlyValue(record.target, record.oldValue);
+                    if (record.attributeName === 'data-obj') {
+                        fs.removeControllerSingleObjOnlyValue(record.target, record.oldValue);
+                        let dataset = record.target.dataset;
+                        if (dataset !== null && dataset !== undefined) {
+                            let bindObj = dataset.obj;
+                            fs.bindControllerSingleObj(record.target, bindObj);
+                        }
+                    }
+                    if (record.attributeName === 'data-list') {
+                        fs.removeControllerSingleListOnlyValue(record.target, record.oldValue);
+                        let dataset = record.target.dataset;
+                        if (dataset !== null && dataset !== undefined) {
+                            let bindList = dataset.list;
+                            fs.bindControllerSingleList(record.target, bindList);
+                        }
+                    }
+                    if (record.attributeName === 'data-name') {
+                        fs.removeControllerSingleEvent(record.target, record.oldValue);
+                        let dataset = record.target.dataset;
+                        if (dataset !== null && dataset !== undefined) {
+                            let name = dataset.name;
+                            fs.bindControllerSingleEvent(record.target, name);
+                        }
+                    }
+
+                    for (let targetInfoKey in fs.componentPackageList) {
+
+                        let targetInfoValue = fs.componentPackageList[targetInfoKey];
+
+                        let componentPath = targetInfoValue['componentPath'];
+                        let componentPackeage = targetInfoValue['componentPackeage'];
+                        let componentPackeageHyphen = componentPackeage.replace(/[A-Z]/g, function(match, offset){
+                                                          return (offset > 0 ? '-' : '') + match.toLowerCase();
+                                                      });
+
+                        if (record.attributeName === 'data-' + componentPackeageHyphen + '-obj') {
+                            fs.removeComponentSingleObjOnlyValue(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset !== undefined) {
-                                let bindObj = dataset.obj;
-                                fs.bindControllerSingleObj(record.target, bindObj);
+                                let compObj = dataset[componentPackeage + 'Obj'];
+                                fs.bindComponentSingleObj(record.target, compObj, componentPath);
                             }
                         }
-                        if (record.attributeName === 'data-list') {
-                            fs.removeControllerSingleListOnlyValue(record.target, record.oldValue);
+                        if (record.attributeName === 'data-' + componentPackeageHyphen + '-list') {
+                            fs.removeComponentSingleListOnlyValue(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset !== undefined) {
-                                let bindList = dataset.list;
-                                fs.bindControllerSingleList(record.target, bindList);
+                                let compList = dataset[componentPackeage + 'List'];
+                                fs.bindComponentSingleList(record.target, compList, componentPath);
                             }
                         }
-                        if (record.attributeName === 'data-name') {
-                            fs.removeControllerSingleEvent(record.target, record.oldValue);
+                        if (record.attributeName === 'data-' + componentPackeageHyphen + '-name') {
+                            fs.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset !== undefined) {
-                                let name = dataset.name;
-                                fs.bindControllerSingleEvent(record.target, name);
+                                let compName = dataset[componentPackeage + 'Name'];
+                                fs.bindComponentSingleEvent(record.target, compName, componentPath);
                             }
                         }
 
-                        for (let targetInfoKey in fs.componentPackageList) {
+                    }
 
-                            let targetInfoValue = fs.componentPackageList[targetInfoKey];
+                } else if (record.type === 'childList') {
+                    let initFunc = null;
+                    let bindCb = null;
+                    for (let i = 0; i < record.removedNodes.length; i++) {
+                        fs.removeAllNest(record.removedNodes.item(i));
+                    }
+                    for (let i = 0; i < record.addedNodes.length; i++) {
+                        fs.bindAllNest(record.addedNodes.item(i));
 
-                            let componentPath = targetInfoValue['componentPath'];
-                            let componentPackeage = targetInfoValue['componentPackeage'];
-                            let componentPackeageHyphen = componentPackeage.replace(/[A-Z]/g, function(match, offset){
-                                                              return (offset > 0 ? '-' : '') + match.toLowerCase();
-                                                          });
-
-                            if (record.attributeName === 'data-' + componentPackeageHyphen + '-obj') {
-                                fs.removeComponentSingleObjOnlyValue(record.target, record.oldValue, componentPath);
-                                let dataset = record.target.dataset;
-                                if (dataset !== null && dataset !== undefined) {
-                                    let compObj = dataset[componentPackeage + 'Obj'];
-                                    fs.bindComponentSingleObj(record.target, compObj, componentPath);
+                        if (fs.componentDomInitFuncMap.has(record.addedNodes.item(i))) {
+                            initFunc = fs.componentDomInitFuncMap.get(record.addedNodes.item(i));
+                            fs.componentDomInitFuncMap.delete(record.addedNodes.item(i));
+                            fs.componentDomInitCntMap.set(initFunc, fs.componentDomInitCntMap.get(initFunc) + 1);
+                            if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
+                                fs.componentDomInitCntMap.delete(initFunc);
+                                fs.componentDomInitTotalMap.delete(initFunc);
+                                try {
+                                    initFunc();
+                                } catch(exception) {
+                                    if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                                        fs.clazz.obj.errorHandle(null, exception);
+                                    } else {
+                                        throw exception;
+                                    }
+                                } finally {
+                                    if (fs.clazz.obj.finalEvent && typeof fs.clazz.obj.finalEvent === 'function') {
+                                        fs.clazz.obj.finalEvent(null, null);
+                                    }
                                 }
                             }
-                            if (record.attributeName === 'data-' + componentPackeageHyphen + '-list') {
-                                fs.removeComponentSingleListOnlyValue(record.target, record.oldValue, componentPath);
-                                let dataset = record.target.dataset;
-                                if (dataset !== null && dataset !== undefined) {
-                                    let compList = dataset[componentPackeage + 'List'];
-                                    fs.bindComponentSingleList(record.target, compList, componentPath);
-                                }
-                            }
-                            if (record.attributeName === 'data-' + componentPackeageHyphen + '-name') {
-                                fs.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
-                                let dataset = record.target.dataset;
-                                if (dataset !== null && dataset !== undefined) {
-                                    let compName = dataset[componentPackeage + 'Name'];
-                                    fs.bindComponentSingleEvent(record.target, compName, componentPath);
-                                }
-                            }
-
                         }
 
-                    } else if (record.type === 'childList') {
-                        let initFunc = null;
-                        for (let i = 0; i < record.removedNodes.length; i++) {
-                            fs.removeAllNest(record.removedNodes.item(i));
-                        }
-                        for (let i = 0; i < record.addedNodes.length; i++) {
-                            fs.bindAllNest(record.addedNodes.item(i));
-                            if (fs.componentDomInitFuncMap.has(record.addedNodes.item(i))) {
-                                initFunc = fs.componentDomInitFuncMap.get(record.addedNodes.item(i));
-                                fs.componentDomInitFuncMap.delete(record.addedNodes.item(i));
-                                fs.componentDomInitCntMap.set(initFunc, fs.componentDomInitCntMap.get(initFunc) + 1);
-                                if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
-                                    fs.componentDomInitCntMap.delete(initFunc);
-                                    fs.componentDomInitTotalMap.delete(initFunc);
-                                    try {
-                                        initFunc();
-                                    } catch(exception) {
-                                        if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
-                                            fs.clazz.obj.errorHandle(null, exception);
-                                        } else {
-                                            throw exception;
-                                        }
-                                    } finally {
-                                        if (fs.clazz.obj.finalEvent && typeof fs.clazz.obj.finalEvent === 'function') {
-                                            fs.clazz.obj.finalEvent(null, null);
-                                        }
+                        if (fs.bindDomInitFuncMap.has(record.addedNodes.item(i))) {
+                            bindCb = fs.bindDomInitFuncMap.get(record.addedNodes.item(i));
+                            fs.bindDomInitFuncMap.delete(record.addedNodes.item(i));
+                            fs.bindDomInitCntMap.set(bindCb, fs.bindDomInitCntMap.get(bindCb) + 1);
+                            if (fs.bindDomInitCntMap.get(bindCb) === fs.bindDomInitTotalMap.get(bindCb)) {
+                                fs.bindDomInitCntMap.delete(bindCb);
+                                fs.bindDomInitTotalMap.delete(bindCb);
+                                try {
+                                    bindCb();
+                                } catch(exception) {
+                                    if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                                        fs.clazz.obj.errorHandle(null, exception);
+                                    } else {
+                                        throw exception;
+                                    }
+                                } finally {
+                                    if (fs.clazz.obj.finalEvent && typeof fs.clazz.obj.finalEvent === 'function') {
+                                        fs.clazz.obj.finalEvent(null, null);
                                     }
                                 }
                             }
                         }
                     }
                 }
-            });
-            let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
-            observer.observe(bodyObj[0], config);
-            fs.bindBody();
-        };
+            }
+        });
+        let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
+        observer.observe(bodyObj[0], config);
+        fs.bindBody();
+    };
+
+    this.addInitFuncForAfterObserver = function (viewDom, initFunc){
+
+        let childList = viewDom.childNodes;
+        let child = null;
+        if (childList !== null && childList !== undefined) {
+            this.bindDomInitCntMap.set(initFunc, 0);
+            this.bindDomInitTotalMap.set(initFunc, childList.length);
+            for (let i = 0; i < childList.length; i++) {
+                child = childList.item(i);
+                this.bindDomInitFuncMap.set(child, initFunc);
+            }
+        }
+
     };
 
     this.bindBody = function (){
@@ -636,19 +737,23 @@ function ___fairysupport(){
         }
     };
 
-    this.appendLoadComponent = function (dom, componentPackeage, argObj, cb){
-        this.loadComponent(dom, componentPackeage, argObj, cb, 'append');
+    this.appendLoadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb){
+        this.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, 'append');
     };
 
-    this.beforeLoadComponent = function (dom, componentPackeage, argObj, cb){
-        this.loadComponent(dom, componentPackeage, argObj, cb, 'before');
+    this.beforeLoadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb){
+        this.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, 'before');
     };
 
-    this.afterLoadComponent = function (dom, componentPackeage, argObj, cb){
-        this.loadComponent(dom, componentPackeage, argObj, cb, 'after');
+    this.afterLoadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb){
+        this.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, 'after');
     };
 
-    this.loadComponent = function (dom, componentPackeage, argObj, cb, position){
+    this.loadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
 
         componentPackeage = componentPackeage.trim();
         let componentPath = '';
@@ -662,25 +767,39 @@ function ___fairysupport(){
         let componentControllerPath = componentRoot + componentPath + 'controller.js';
         let componentViewPath = componentRoot + componentPath + 'view.html';
 
-        let req = this.emptyAjax(componentViewPath + '?' + this.version, paramObj, 'GET', 'query');
+        let req = this.emptyAjax(componentViewPath + '?' + this.version, null, 'GET', 'query');
+        req.timeout = fsTimeout;
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.responseType = 'text';
-        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentPath, componentControllerPath){
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, errCb, position, componentPath, componentControllerPath, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
                         let viewStr = xhr.response;
-                        fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
+                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, 0);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, position, ++retryCount);
+                        }
                     }
                 }
             }
-        )(this, dom, componentPackeage, argObj, cb, position, componentPath, componentControllerPath);
+        )(this, dom, componentPackeage, argObj, cb, errCb, position, componentPath, componentControllerPath, retryCount);
         req.send();
 
     };
 
-    this.componentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr){
+    this.singleComponentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
 
         let func = function () {};
         if (cb !== null && cb !== undefined && typeof cb === 'function') {
@@ -688,12 +807,24 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadComponentControllerMethodList(fs, componentPath))
-        .then(fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position));
+        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position))
+        .catch((function(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount){
+                return function (err) {
+                    if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                        errCb();
+                    }
+                    let failResult = fairysupportComponentFail(retryCount);
+                    if (failResult) {
+                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, ++retryCount);
+                    }
+                }
+            }
+        )(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount))
+        ;
 
     };
 
-    this.loadComponentControllerMethodList = function (fs, componentPath){
+    this.loadSingleComponentControllerMethodList = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position){
         return function (Module){
             let classFullName = 'components/' + componentPath.substring(0, componentPath.length - 1);
             if (!fs.instanceMap[classFullName]) {
@@ -719,6 +850,10 @@ function ___fairysupport(){
                     }
                 }
             }
+
+            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position);
+            insertComponentFunc();
+
         };
     };
 
@@ -1505,18 +1640,19 @@ function ___fairysupport(){
         }
     };
 
-    this.appendLoadStringTemplate = function (dom, viewStr, argObj){
-        this.loadStringTemplate(dom, viewStr, argObj, 'append');
+    this.appendLoadStringTemplate = function (dom, viewStr, argObj, cb){
+        this.loadStringTemplate(dom, viewStr, argObj, cb, 'append');
     };
-    this.beforeLoadStringTemplate = function (dom, viewStr, argObj){
-        this.loadStringTemplate(dom, viewStr, argObj, 'before');
+    this.beforeLoadStringTemplate = function (dom, viewStr, argObj, cb){
+        this.loadStringTemplate(dom, viewStr, argObj, cb, 'before');
     };
-    this.afterLoadStringTemplate = function (dom, viewStr, argObj){
-        this.loadStringTemplate(dom, viewStr, argObj, 'after');
+    this.afterLoadStringTemplate = function (dom, viewStr, argObj, cb){
+        this.loadStringTemplate(dom, viewStr, argObj, cb, 'after');
     };
-    this.loadStringTemplate = function (dom, viewStr, argObj, position){
+    this.loadStringTemplate = function (dom, viewStr, argObj, cb, position){
 
         let viewDom = this.getTplDom(viewStr, argObj);
+        this.addInitFuncForAfterObserver(viewDom, cb);
 
         if ('before' === position && dom.parentNode) {
             dom.parentNode.insertBefore(viewDom, dom);
@@ -1535,123 +1671,339 @@ function ___fairysupport(){
 
     };
 
-    this.appendResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
-        return this.resJsonComponent(dom, componentPackeage, reqUrl, paramObj, cb, 'append');
-    };
-    this.beforeResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
-        return this.resJsonComponent(dom, componentPackeage, reqUrl, paramObj, cb, 'before');
-    };
-    this.afterResJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb){
-        return this.resJsonComponent(dom, componentPackeage, reqUrl, paramObj, cb, 'after');
+    this.appendLoadTemplate = function (dom, templatePackeage, argObj, cb, errCb){
+        this.loadTemplate(dom, templatePackeage, argObj, cb, errCb, 'append');
     };
 
-    this.resJsonComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, position){
+    this.beforeLoadTemplate = function (dom, templatePackeage, argObj, cb, errCb){
+        this.loadTemplate(dom, templatePackeage, argObj, cb, errCb, 'before');
+    };
+
+    this.afterLoadTemplate = function (dom, templatePackeage, argObj, cb, errCb){
+        this.loadTemplate(dom, templatePackeage, argObj, cb, errCb, 'after');
+    };
+
+    this.loadTemplate = function (dom, templatePackeage, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        templatePackeage = templatePackeage.trim();
+        let templatePath = '';
+        let templateNameList = templatePackeage.split('.');
+        for (let templateName of templateNameList) {
+            if (templateName.trim() === '') {
+                continue;
+            }
+            templatePath += (templateName + '/');
+        }
+        templatePath = templatePath.substring(0, templatePath.length - 1);
+        let templateViewPath = templateRoot + templatePath + '.js';
+
+        let req = this.emptyAjax(templateViewPath + '?' + this.version, null, 'GET', 'query');
+        req.timeout = fsTimeout;
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.responseType = 'text';
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, templatePackeage, argObj, cb, errCb, position, retryCount){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let viewStr = xhr.response;
+                        fs.loadStringTemplate(dom, viewStr, argObj, cb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportTemplateFail(retryCount);
+                        if (failResult) {
+                            fs.loadTemplate(dom, templatePackeage, argObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, dom, templatePackeage, argObj, cb, errCb, position, retryCount);
+        req.send();
+
+    };
+
+    this.appendResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, 'append');
+    };
+    this.beforeResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, 'before');
+    };
+    this.afterResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, 'after');
+    };
+
+    this.resJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
 
         let req = this.ajax(reqUrl, paramObj);
-        req.onloadend = (function(fs, dom, componentPackeage, cb, position){
+        req.timeout = fsTimeout;
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
                         let json = xhr.response;
-                        fs.loadComponent(dom, componentPackeage, json, cb, position);
+                        fs.loadTemplate(dom, templatePackeage, json, cb, errCb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportTemplateFail(retryCount);
+                        if (failResult) {
+                            fs.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, ++retryCount);
+                        }
                     }
                 }
             }
-        )(this, dom, componentPackeage, cb, position);
-
-        return req;
+        )(this, dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, retryCount);
+        req.send();
 
     };
 
-    this.appendResJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb){
-        return this.resJsonComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, 'append');
+    this.appendResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, 'append');
     };
-    this.beforeResJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb){
-        return this.resJsonComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, 'before');
+    this.beforeResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, 'before');
     };
-    this.afterResJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb){
-        return this.resJsonComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, 'after');
+    this.afterResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, 'after');
     };
 
-    this.resJsonComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, position){
+    this.resJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
 
         let req = this.ajaxByForm(reqUrl, formObj);
-        req.onloadend = (function(fs, dom, componentPackeage, cb, position){
+        req.timeout = fsTimeout;
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, templatePackeage, reqUrl, formObj, cb, errCb, position, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
                         let json = xhr.response;
-                        fs.loadComponent(dom, componentPackeage, json, cb, position);
+                        fs.loadTemplate(dom, templatePackeage, json, cb, errCb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportTemplateFail(retryCount);
+                        if (failResult) {
+                            fs.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, position, ++retryCount);
+                        }
                     }
 
                 }
             }
-        )(this, dom, componentPackeage, cb, position);
-
-        return req;
+        )(this, dom, templatePackeage, reqUrl, formObj, cb, errCb, position, retryCount);
+        req.send();
 
     };
 
-    this.appendResHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb){
-        return this.resHtmlComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, 'append');
+    this.appendResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, 'append');
     };
-    this.beforeResHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb){
-        return this.resHtmlComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, 'before');
+    this.beforeResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, 'before');
     };
-    this.afterResHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb){
-        return this.resHtmlComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, 'after');
+    this.afterResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, 'after');
     };
 
-    this.resHtmlComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, position){
+    this.resHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
 
         let req = this.emptyAjax(viewUrl, paramObj);
+        req.timeout = fsTimeout;
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.setRequestHeader('Content-Type', 'application/json');
         req.responseType = 'text';
-        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
                         let viewStr = xhr.response;
-
-                        componentPackeage = componentPackeage.trim();
-                        let componentPath = '';
-                        let componentNameList = componentPackeage.split('.');
-                        for (let componentName of componentNameList) {
-                            if (componentName.trim() === '') {
-                                continue;
-                            }
-                            componentPath += (componentName + '/');
+                        fs.loadStringTemplate(dom, viewStr, argObj, cb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
                         }
-                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
-
-                        fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
+                        let failResult = fairysupportTemplateFail(retryCount);
+                        if (failResult) {
+                            fs.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, position, ++retryCount);
+                        }
                     }
                 }
             }
-        )(this, dom, componentPackeage, argObj, cb, position, componentRoot);
-
-        return req;
+        )(this, dom, viewUrl, paramObj, argObj, cb, errCb, position, retryCount);
+        req.send();
 
     };
 
-    this.appendResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb){
-        return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'append');
+    this.appendResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, 'append');
     };
-    this.beforeResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb){
-        return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'before');
+    this.beforeResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, 'before');
     };
-    this.afterResHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb){
-        return this.resHtmlComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, 'after');
+    this.afterResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, 'after');
     };
 
-    this.resHtmlComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, position){
+    this.resHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
 
         let req = this.emptyAjaxByForm(viewUrl, formObj);
+        req.timeout = fsTimeout;
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'text/*');
         req.responseType = 'text';
-        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, position, componentRoot){
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
                 return function (e, xhr) {
-                    if (xhr.status === 200) {
+                    if (200 === xhr.status) {
+                        let viewStr = xhr.response;
+                        fs.loadStringTemplate(dom, viewStr, argObj, cb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportTemplateFail(retryCount);
+                        if (failResult) {
+                            fs.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, dom, viewUrl, formObj, argObj, cb, errCb, position, retryCount);
+        req.send();
+
+    };
+
+    this.appendResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, 'append');
+    };
+    this.beforeResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, 'before');
+    };
+    this.afterResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, 'after');
+    };
+
+    this.resJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let req = this.ajax(reqUrl, paramObj);
+        req.timeout = fsTimeout;
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let json = xhr.response;
+                        fs.loadSingleComponent(dom, componentPackeage, json, cb, errCb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, retryCount);
+        req.send();
+
+    };
+
+    this.appendResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'append');
+    };
+    this.beforeResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'before');
+    };
+    this.afterResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'after');
+    };
+
+    this.resJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let req = this.ajaxByForm(reqUrl, formObj);
+        req.timeout = fsTimeout;
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let json = xhr.response;
+                        fs.loadSingleComponent(dom, componentPackeage, json, cb, errCb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+
+                }
+            }
+        )(this, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount);
+        req.send();
+
+    };
+
+    this.appendResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'append');
+    };
+    this.beforeResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'before');
+    };
+    this.afterResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'after');
+    };
+
+    this.resHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let req = this.emptyAjax(viewUrl, paramObj);
+        req.timeout = fsTimeout;
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.responseType = 'text';
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
                         let viewStr = xhr.response;
 
                         componentPackeage = componentPackeage.trim();
@@ -1665,13 +2017,75 @@ function ___fairysupport(){
                         }
                         let componentControllerPath = componentRoot + componentPath + 'controller.js';
 
-                        fs.componentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, position, viewStr);
+                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, ++retryCount);
+                        }
                     }
                 }
             }
-        )(this, dom, componentPackeage, argObj, cb, position, componentRoot);
+        )(this, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot);
+        req.send();
 
-        return req;
+    };
+
+    this.appendResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'append');
+    };
+    this.beforeResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'before');
+    };
+    this.afterResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'after');
+    };
+
+    this.resHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let req = this.emptyAjaxByForm(viewUrl, formObj);
+        req.timeout = fsTimeout;
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.responseType = 'text';
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let viewStr = xhr.response;
+
+                        componentPackeage = componentPackeage.trim();
+                        let componentPath = '';
+                        let componentNameList = componentPackeage.split('.');
+                        for (let componentName of componentNameList) {
+                            if (componentName.trim() === '') {
+                                continue;
+                            }
+                            componentPath += (componentName + '/');
+                        }
+                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+
+                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot);
+        req.send();
 
     };
 
@@ -2284,7 +2698,10 @@ function ___fairysupport(){
         let reqLang = this.getReqLang();
         let confLang = this.getConfLang();
 
-        let str = msgObj['__fairysupport_default'][name];
+        let str = null;
+        if (('__fairysupport_default' in msgObj) && (name in msgObj['__fairysupport_default'])) {
+            str = msgObj['__fairysupport_default'][name];
+        }
         if (confLang !== null && (confLang in msgObj) && (name in msgObj[confLang])) {
             str = msgObj[confLang][name];
         }
