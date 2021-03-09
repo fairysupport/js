@@ -305,32 +305,30 @@ function ___fairysupport(){
                         let targetInfoValue = fs.componentPackageList[targetInfoKey];
 
                         let componentPath = targetInfoValue['componentPath'];
-                        let componentPackeage = targetInfoValue['componentPackeage'];
-                        let componentPackeageHyphen = componentPackeage.replace(/[A-Z]/g, function(match, offset){
-                                                          return (offset > 0 ? '-' : '') + match.toLowerCase();
-                                                      });
+                        let componentHyphen = targetInfoValue['componentHyphen'];
+                        let componentCamel = targetInfoValue['componentCamel'];
 
-                        if (record.attributeName === 'data-' + componentPackeageHyphen + '-obj') {
+                        if (record.attributeName === 'data-' + componentHyphen + '-obj') {
                             fs.removeComponentSingleObjOnlyValue(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset !== undefined) {
-                                let compObj = dataset[componentPackeage + 'Obj'];
+                                let compObj = dataset[componentCamel + 'Obj'];
                                 fs.bindComponentSingleObj(record.target, compObj, componentPath);
                             }
                         }
-                        if (record.attributeName === 'data-' + componentPackeageHyphen + '-list') {
+                        if (record.attributeName === 'data-' + componentHyphen + '-list') {
                             fs.removeComponentSingleListOnlyValue(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset !== undefined) {
-                                let compList = dataset[componentPackeage + 'List'];
+                                let compList = dataset[componentCamel + 'List'];
                                 fs.bindComponentSingleList(record.target, compList, componentPath);
                             }
                         }
-                        if (record.attributeName === 'data-' + componentPackeageHyphen + '-name') {
+                        if (record.attributeName === 'data-' + componentHyphen + '-name') {
                             fs.removeComponentSingleEvent(record.target, record.oldValue, componentPath);
                             let dataset = record.target.dataset;
                             if (dataset !== null && dataset !== undefined) {
-                                let compName = dataset[componentPackeage + 'Name'];
+                                let compName = dataset[componentCamel + 'Name'];
                                 fs.bindComponentSingleEvent(record.target, compName, componentPath);
                             }
                         }
@@ -446,7 +444,7 @@ function ___fairysupport(){
 
             if (obj !== null && obj !== undefined) {
                 if ((bindObj !== null && bindObj !== undefined) || (bindList !== null && bindList !== undefined) || (name !== null && name !== undefined)) {
-                    this.addTargetDom(obj, null, null);
+                    this.addTargetDom(obj, null);
                 }
             }
 
@@ -460,16 +458,16 @@ function ___fairysupport(){
 
                 let targetInfoValue = this.componentPackageList[targetInfoKey];
                 let componentPath = targetInfoValue['componentPath'];
-                let componentPackeage = targetInfoValue['componentPackeage'];
+                let componentCamel = targetInfoValue['componentCamel'];
 
-                this.addTargetDomForComponent(obj, componentPath, componentPackeage);
+                this.addTargetDomForComponent(obj, targetInfoValue);
                 if (!this.targetDomMap.has(obj)) {
                     continue;
                 }
 
-                bindObj = dataset[componentPackeage + 'Obj'];
-                bindList = dataset[componentPackeage + 'List'];
-                name = dataset[componentPackeage + 'Name'];
+                bindObj = dataset[componentCamel + 'Obj'];
+                bindList = dataset[componentCamel + 'List'];
+                name = dataset[componentCamel + 'Name'];
 
                 if (bindObj !== null && bindObj !== undefined) {
                     this.bindComponentSingleObj(obj, bindObj, componentPath);
@@ -685,11 +683,11 @@ function ___fairysupport(){
 
                 let targetInfoValue = targetInfo[targetInfoKey];
                 let componentPath = targetInfoValue['componentPath'];
-                let componentPackeage = targetInfoValue['componentPackeage'];
+                let componentCamel = targetInfoValue['componentCamel'];
 
-                bindObj = dataset[componentPackeage + 'Obj'];
-                bindList = dataset[componentPackeage + 'List'];
-                name = dataset[componentPackeage + 'Name'];
+                bindObj = dataset[componentCamel + 'Obj'];
+                bindList = dataset[componentCamel + 'List'];
+                name = dataset[componentCamel + 'Name'];
 
                 if (bindObj !== null && bindObj !== undefined) {
                     this.removeComponentSingleObj(obj, bindObj, componentPath);
@@ -742,7 +740,7 @@ function ___fairysupport(){
         }
     };
 
-    this.singleComponentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount){
+    this.singleComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -754,25 +752,26 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position))
-        .catch((function(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount){
+        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position))
+        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
                 return function (err) {
                     if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
                         errCb();
                     }
                     let failResult = fairysupportComponentFail(retryCount);
                     if (failResult) {
-                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, ++retryCount);
+                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
                     }
                 }
             }
-        )(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount))
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount))
         ;
 
     };
 
-    this.loadSingleComponentControllerMethodList = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position){
+    this.loadSingleComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position){
         return function (Module){
+            let componentPath = componentValueMap['componentPath'];
             let classFullName = 'components/' + componentPath.substring(0, componentPath.length - 1);
             if (!fs.instanceMap[classFullName]) {
                 fs.componentControllerList[componentPath] = new Module.default();
@@ -798,18 +797,18 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position);
+            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentValueMap, viewStr, argObj, func, position);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertComponent = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position){
+    this.getInsertComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position){
         return function (){
 
             let viewDom = fs.getTplDom(viewStr, argObj);
 
-            let initFunc = fs.getComponentMethod(fs, componentPath, 'init', argObj, func);
+            let initFunc = fs.getComponentMethod(fs, componentValueMap['componentPath'], 'init', argObj, func);
 
             let childList = viewDom.childNodes;
             let child = null;
@@ -818,7 +817,7 @@ function ___fairysupport(){
                 fs.componentDomInitTotalMap.set(initFunc, childList.length);
                 for (let i = 0; i < childList.length; i++) {
                     child = childList.item(i);
-                    fs.addComponentTargetDomNest(child, componentPath, componentPackeage);
+                    fs.addComponentTargetDomNest(child, componentValueMap);
                     fs.componentDomInitFuncMap.set(child, initFunc);
                 }
             }
@@ -841,31 +840,31 @@ function ___fairysupport(){
         };
     };
 
-    this.addTargetDomForComponent = function (obj, componentPath, componentPackeage){
+    this.addTargetDomForComponent = function (obj, componentValueMap){
         let dataset = obj.dataset;
         if (dataset !== null && dataset !== undefined) {
-            let bindObj = dataset[componentPackeage + 'Obj'];
-            let bindList = dataset[componentPackeage + 'List'];
-            let name = dataset[componentPackeage + 'Name'];
+            let bindObj = dataset[componentValueMap['componentCamel'] + 'Obj'];
+            let bindList = dataset[componentValueMap['componentCamel'] + 'List'];
+            let name = dataset[componentValueMap['componentCamel'] + 'Name'];
             if ((bindObj !== null && bindObj !== undefined) || (bindList !== null && bindList !== undefined) || (name !== null && name !== undefined)) {
-                this.addTargetDom(obj, componentPath, componentPackeage);
+                this.addTargetDom(obj, componentValueMap);
             }
         }
     };
 
-    this.addComponentTargetDomNest = function (obj, componentPath, componentPackeage){
+    this.addComponentTargetDomNest = function (obj, componentValueMap){
         if (obj === null || obj === undefined) {
             return;
         }
 
-        this.addTargetDomForComponent(obj, componentPath, componentPackeage);
+        this.addTargetDomForComponent(obj, componentValueMap);
 
         let childList = obj.childNodes;
         let child = null;
         if (childList !== null && childList !== undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
-                this.addComponentTargetDomNest(child, componentPath, componentPackeage);
+                this.addComponentTargetDomNest(child, componentValueMap);
             }
         }
     };
@@ -988,15 +987,36 @@ function ___fairysupport(){
             this.removeEventFunction(name, this.componentControllerList[componentPath], this.componentControllerMethodList[componentPath], dom);
         }
     };
+    
+    this.getComponentValue = function (componentPackeage){
+        
+        componentPackeage = componentPackeage.trim();
+        let componentPath = '';
+        let componentCamel = '';
+        let componentHyphen = '';
+        let componentNameList = componentPackeage.split('.');
+        for (let componentName of componentNameList) {
+            if (componentName.trim() === '') {
+                continue;
+            }
+            componentPath += (componentName + '/');
+            componentCamel += (componentName.substring(0, 1).toUpperCase() + componentName.substring(1));
+            componentHyphen += (componentName + '-');
+        }
+        componentCamel = componentCamel.toLowerCase() + componentCamel.substring(1);
+        componentHyphen = componentHyphen.substring(0, componentHyphen.length - 1);
+        return {'componentPath':componentPath, 'componentPackeage':componentPackeage, 'componentCamel':componentCamel, 'componentHyphen':componentHyphen};
+        
+    };
 
-    this.addTargetDom = function (dom, componentPath, componentPackeage) {
+    this.addTargetDom = function (dom, componentValueMap) {
         if (!this.targetDomMap.has(dom)) {
             this.targetDomMap.set(dom, {});
         }
-        if ((componentPath !== null && componentPath !== undefined) || (componentPackeage !== null && componentPackeage !== undefined)) {
+        if (componentValueMap !== null && componentValueMap !== undefined) {
             let targetInfo = this.targetDomMap.get(dom)
-            targetInfo[componentPackeage] = {'componentPath':componentPath, 'componentPackeage':componentPackeage};
-            this.componentPackageList[componentPackeage] = {'componentPath':componentPath, 'componentPackeage':componentPackeage};
+            targetInfo[componentValueMap['componentPackeage']] = componentValueMap;
+            this.componentPackageList[componentValueMap['componentPackeage']] = componentValueMap;
         }
     };
 
@@ -1941,7 +1961,57 @@ function ___fairysupport(){
         };
     };
 
-    this.uniqueComponentInsertFunc = function (fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount){
+    this.appendLoadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb){
+        this.loadUniqueComponent(dom, componentPackeage, argObj, cb, errCb, 'append');
+    };
+
+    this.beforeLoadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb){
+        this.loadUniqueComponent(dom, componentPackeage, argObj, cb, errCb, 'before');
+    };
+
+    this.afterLoadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb){
+        this.loadUniqueComponent(dom, componentPackeage, argObj, cb, errCb, 'after');
+    };
+
+    this.loadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let componentValueMap = this.getComponentValue(componentPackeage);
+        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+        let componentViewPath = componentRoot + componentValueMap['componentPath'] + 'view.html';
+
+        let req = this.emptyAjax(componentViewPath + '?' + this.version, null, 'GET', 'query');
+        req.timeout = fsTimeout;
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.responseType = 'text';
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let viewStr = xhr.response;
+                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, 0);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.loadUniqueComponent(dom, componentValueMap['componentPackeage'], argObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount);
+        req.send();
+
+    };
+
+    this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -1953,24 +2023,24 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position))
-        .catch((function(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount){
+        .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position))
+        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
                 return function (err) {
                     if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
                         errCb();
                     }
                     let failResult = fairysupportComponentFail(retryCount);
                     if (failResult) {
-                        fs.uniqueComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, ++retryCount);
+                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
                     }
                 }
             }
-        )(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, retryCount))
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount))
         ;
 
     };
 
-    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position){
+    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position){
         return function (Module){
             let uniqueComponentControllerObj = new Module.default();
             let uniqueComponentControllerMethodList = fs.getMethodList(uniqueComponentControllerObj);
@@ -1991,25 +2061,25 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap);
+            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertUniqueComponent = function (fs, dom, componentPath, componentPackeage, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap){
+    this.getInsertUniqueComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap){
         return function (){
 
             let viewDom = fs.getTplDom(viewStr, argObj);
             let initFunc = fs.getUniqueComponentMethod(fs, controllerObj, methodList, 'init', argObj, func);
-            // fs.addInitFuncForAfterObserver(viewDom, initFunc);
+            fs.addInitFuncForAfterObserver(viewDom, initFunc);
 
             let childList = viewDom.childNodes;
             let child = null;
             if (childList !== null && childList !== undefined) {
                 for (let i = 0; i < childList.length; i++) {
                     child = childList.item(i);
-                    this.bindUniqueComponentAll(child, componentPackeage, controllerObj, methodList, dataNameEventMap);
+                    this.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, dataNameEventMap);
                 }
             }
             
@@ -2031,31 +2101,31 @@ function ___fairysupport(){
         };
     };
 
-    this.bindUniqueComponentAll = function (obj, componentPackeage, controllerObj, methodList, eventMethodList){
+    this.bindUniqueComponentAll = function (obj, componentValueMap, controllerObj, methodList, eventMethodList){
         if (obj === null || obj === undefined) {
             return;
         }
-        this.bindAllSingle(obj, this.bindUniqueComponentProp(obj, componentPackeage, controllerObj, methodList, eventMethodList));
+        this.bindAllSingle(obj, this.bindUniqueComponentProp(obj, componentValueMap, controllerObj, methodList, eventMethodList));
         let childList = obj.childNodes;
         let child = null;
         if (childList !== null && childList !== undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
-                this.bindUniqueComponentAll(child, componentPackeage, controllerObj, methodList, eventMethodList);
+                this.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, eventMethodList);
             }
         }
 
     };
 
-    this.bindUniqueComponentProp = function (obj, componentPackeage, controllerObj, methodList, eventMethodList){
-        (function(obj, componentPackeage, controllerObj, methodList, eventMethodList){
+    this.bindUniqueComponentProp = function (obj, componentValueMap, controllerObj, methodList, eventMethodList){
+        (function(obj, componentValueMap, controllerObj, methodList, eventMethodList){
             return function(){
                 let dataset = obj.dataset;
                 if (dataset !== null && dataset !== undefined) {
         
-                    let bindObj = dataset[componentPackeage + 'Obj'];
-                    let bindList = dataset[componentPackeage + 'List'];
-                    let name = dataset[componentPackeage + 'Name'];
+                    let bindObj = dataset[componentValueMap['componentCamel'] + 'Obj'];
+                    let bindList = dataset[componentValueMap['componentCamel'] + 'List'];
+                    let name = dataset[componentValueMap['componentCamel'] + 'Name'];
         
                     if (bindObj !== null && bindObj !== undefined) {
                         this.bindUniqueComponentSingleObj(obj, bindObj, controllerObj, methodList);
@@ -2071,7 +2141,7 @@ function ___fairysupport(){
         
                 }
             };
-        })(obj, componentPackeage, controllerObj, methodList, eventMethodList);
+        })(obj, componentValueMap, controllerObj, methodList, eventMethodList);
     };
 
     this.bindUniqueComponentSingleObj = function (dom, bindStr, controllerObj, methodList){
@@ -2159,17 +2229,9 @@ function ___fairysupport(){
             retryCount = 0;
         }
 
-        componentPackeage = componentPackeage.trim();
-        let componentPath = '';
-        let componentNameList = componentPackeage.split('.');
-        for (let componentName of componentNameList) {
-            if (componentName.trim() === '') {
-                continue;
-            }
-            componentPath += (componentName + '/');
-        }
-        let componentControllerPath = componentRoot + componentPath + 'controller.js';
-        let componentViewPath = componentRoot + componentPath + 'view.html';
+        let componentValueMap = this.getComponentValue(componentPackeage);
+        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+        let componentViewPath = componentRoot + componentValueMap['componentPath'] + 'view.html';
 
         let req = this.emptyAjax(componentViewPath + '?' + this.version, null, 'GET', 'query');
         req.timeout = fsTimeout;
@@ -2178,23 +2240,23 @@ function ___fairysupport(){
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.responseType = 'text';
         req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, argObj, cb, errCb, position, componentPath, componentControllerPath, retryCount){
+        req.onloadend = (function(fs, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount){
                 return function (e, xhr) {
                     if (200 === xhr.status) {
                         let viewStr = xhr.response;
-                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr, 0);
+                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, 0);
                     } else {
                         if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
                             errCb();
                         }
                         let failResult = fairysupportComponentFail(retryCount);
                         if (failResult) {
-                            fs.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, position, ++retryCount);
+                            fs.loadSingleComponent(dom, componentValueMap['componentPackeage'], argObj, cb, errCb, position, ++retryCount);
                         }
                     }
                 }
             }
-        )(this, dom, componentPackeage, argObj, cb, errCb, position, componentPath, componentControllerPath, retryCount);
+        )(this, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount);
         req.send();
 
     };
@@ -2308,18 +2370,10 @@ function ___fairysupport(){
                     if (200 === xhr.status) {
                         let viewStr = xhr.response;
 
-                        componentPackeage = componentPackeage.trim();
-                        let componentPath = '';
-                        let componentNameList = componentPackeage.split('.');
-                        for (let componentName of componentNameList) {
-                            if (componentName.trim() === '') {
-                                continue;
-                            }
-                            componentPath += (componentName + '/');
-                        }
-                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+                        let componentValueMap = fs.getComponentValue(componentPackeage);
+                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
 
-                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr);
+                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
                     } else {
                         if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
                             errCb();
@@ -2363,18 +2417,10 @@ function ___fairysupport(){
                     if (200 === xhr.status) {
                         let viewStr = xhr.response;
 
-                        componentPackeage = componentPackeage.trim();
-                        let componentPath = '';
-                        let componentNameList = componentPackeage.split('.');
-                        for (let componentName of componentNameList) {
-                            if (componentName.trim() === '') {
-                                continue;
-                            }
-                            componentPath += (componentName + '/');
-                        }
-                        let componentControllerPath = componentRoot + componentPath + 'controller.js';
+                        let componentValueMap = fs.getComponentValue(componentPackeage);
+                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
 
-                        fs.singleComponentInsertFunc(fs, dom, componentPath, componentControllerPath, argObj, componentPackeage, cb, errCb, position, viewStr);
+                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
                     } else {
                         if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
                             errCb();
