@@ -2011,6 +2011,142 @@ function ___fairysupport(){
 
     };
 
+    this.appendResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'append');
+    };
+    this.beforeResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'before');
+    };
+    this.afterResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'after');
+    };
+
+    this.resJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let req = this.ajaxByForm(reqUrl, formObj);
+        req.timeout = fsTimeout;
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let json = xhr.response;
+                        fs.loadUniqueComponent(dom, componentPackeage, json, cb, errCb, position);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+
+                }
+            }
+        )(this, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount);
+        req.send();
+
+    };
+
+    this.appendResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'append');
+    };
+    this.beforeResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'before');
+    };
+    this.afterResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'after');
+    };
+
+    this.resHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let req = this.emptyAjax(viewUrl, paramObj);
+        req.timeout = fsTimeout;
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.responseType = 'text';
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let viewStr = xhr.response;
+
+                        let componentValueMap = fs.getComponentValue(componentPackeage);
+                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+
+                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot);
+        req.send();
+
+    };
+
+    this.appendResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'append');
+    };
+    this.beforeResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'before');
+    };
+    this.afterResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'after');
+    };
+
+    this.resHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        let req = this.emptyAjaxByForm(viewUrl, formObj);
+        req.timeout = fsTimeout;
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.responseType = 'text';
+        req.withCredentials = true;
+        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot){
+                return function (e, xhr) {
+                    if (200 === xhr.status) {
+                        let viewStr = xhr.response;
+
+                        let componentValueMap = fs.getComponentValue(componentPackeage);
+                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+
+                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
+                    } else {
+                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
+                            errCb();
+                        }
+                        let failResult = fairysupportComponentFail(retryCount);
+                        if (failResult) {
+                            fs.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, ++retryCount);
+                        }
+                    }
+                }
+            }
+        )(this, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot);
+        req.send();
+
+    };
+
     this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
@@ -2781,34 +2917,41 @@ function ___fairysupport(){
                 if (!('statusDefault' in this.__resFunc['readystatechange'])) {
                     this.__resFunc['readystatechange']['statusDefault'] = Object.create(null);
                 }
-                this.__resFunc['readystatechange']['statusDefault'][state] = fn;
+                this.__resFunc['readystatechange']['statusDefault'][String(state)] = fn;
             } else if (state === null && status !== null) {
                 if (!('stateDefault' in this.__resFunc['readystatechange'])) {
                     this.__resFunc['readystatechange']['stateDefault'] = Object.create(null);
                 }
-                this.__resFunc['readystatechange']['stateDefault'][status] = fn;
+                this.__resFunc['readystatechange']['stateDefault'][String(status)] = fn;
             } else {
                 if (!('fn' in this.__resFunc['readystatechange'])) {
                     this.__resFunc['readystatechange']['fn'] = Object.create(null);
                 }
                 if (!(state in this.__resFunc['readystatechange']['fn'])) {
-                    this.__resFunc['readystatechange']['fn'][state] = Object.create(null);
+                    this.__resFunc['readystatechange']['fn'][String(state)] = Object.create(null);
                 }
-                this.__resFunc['readystatechange']['fn'][state][status] = fn;
+                this.__resFunc['readystatechange']['fn'][String(state)][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
-                                    if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                    if ('statusDefault' in resFunc && xhr.readyState in resFunc['statusDefault']) {
-                                        resFunc['statusDefault'][xhr.readyState](e, xhr);
-                                    }
-                                    if ('stateDefault' in resFunc && xhr.status in resFunc['stateDefault']) {
-                                        resFunc['stateDefault'][xhr.status](e, xhr);
-                                    }
-                                    if ('fn' in resFunc && xhr.readyState in resFunc['fn'] && xhr.status in resFunc['fn'][xhr.readyState]) {
-                                        resFunc['fn'][xhr.readyState][xhr.status](e, xhr);
+                                    let status = String(xhr.status);
+                                    let readyState = String(xhr.readyState);
+                                    
+                                    if ('fn' in resFunc && readyState in resFunc['fn'] && status in resFunc['fn'][readyState]) {
+                                        resFunc['fn'][readyState][status](e, xhr);
+                                    } else {
+                                        let execSomething = false;
+                                        if ('statusDefault' in resFunc && readyState in resFunc['statusDefault']) {
+                                            resFunc['statusDefault'][readyState](e, xhr);
+                                            execSomething = true;
+                                        }
+                                        if ('stateDefault' in resFunc && status in resFunc['stateDefault']) {
+                                            resFunc['stateDefault'][status](e, xhr);
+                                            execSomething = true;
+                                        }
+                                        if (execSomething === false && 'default' in resFunc) {
+                                            resFunc['default'](e, xhr);
+                                        }
                                     }
                                 };
                            })(this.__resFunc['readystatechange']);
@@ -2855,15 +2998,15 @@ function ___fairysupport(){
                 if (!('fn' in this.__resFunc['load'])) {
                     this.__resFunc['load']['fn'] = Object.create(null);
                 }
-                this.__resFunc['load']['fn'][status] = fn;
+                this.__resFunc['load']['fn'][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
-                                    if ('default' in resFunc) {
+                                    let status = String(xhr.status);
+                                    if ('fn' in resFunc && status in resFunc['fn']) {
+                                        resFunc['fn'][status](e, xhr);
+                                    } else if ('default' in resFunc) {
                                         resFunc['default'](e, xhr);
-                                    }
-                                    if ('fn' in resFunc && xhr.status in resFunc['fn']) {
-                                        resFunc['fn'][xhr.status](e, xhr);
                                     }
                                 };
                            })(this.__resFunc['load']);
@@ -2880,15 +3023,15 @@ function ___fairysupport(){
                 if (!('fn' in this.__resFunc['loadend'])) {
                     this.__resFunc['loadend']['fn'] = Object.create(null);
                 }
-                this.__resFunc['loadend']['fn'][status] = fn;
+                this.__resFunc['loadend']['fn'][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
-                                    if ('default' in resFunc) {
+                                    let status = String(xhr.status);
+                                    if ('fn' in resFunc && status in resFunc['fn']) {
+                                        resFunc['fn'][status](e, xhr);
+                                    } else if ('default' in resFunc) {
                                         resFunc['default'](e, xhr);
-                                    }
-                                    if ('fn' in resFunc && xhr.status in resFunc['fn']) {
-                                        resFunc['fn'][xhr.status](e, xhr);
                                     }
                                 };
                            })(this.__resFunc['loadend']);
@@ -2920,15 +3063,15 @@ function ___fairysupport(){
                 if (!('fn' in this.__resFunc['progress'])) {
                     this.__resFunc['progress']['fn'] = Object.create(null);
                 }
-                this.__resFunc['progress']['fn'][status] = fn;
+                this.__resFunc['progress']['fn'][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
-                                    if ('default' in resFunc) {
+                                    let status = String(xhr.status);
+                                    if ('fn' in resFunc && status in resFunc['fn']) {
+                                        resFunc['fn'][status](e, xhr);
+                                    } else if ('default' in resFunc) {
                                         resFunc['default'](e, xhr);
-                                    }
-                                    if ('fn' in resFunc && xhr.status in resFunc['fn']) {
-                                        resFunc['fn'][xhr.status](e, xhr);
                                     }
                                 };
                            })(this.__resFunc['progress']);
