@@ -3184,6 +3184,10 @@ function ___fairysupport(){
         timeLineClazz.execTimer();
     };
 
+    this.envValue = function (name){
+        return envValueObj[name];
+    };
+
     this.msg = function (name, replaceObj){
 
         let reqLang = this.getReqLang();
