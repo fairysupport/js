@@ -1745,7 +1745,7 @@ function ___fairysupport(){
             templatePath += (templateName + '/');
         }
         templatePath = templatePath.substring(0, templatePath.length - 1);
-        let templateViewPath = templateRoot + templatePath + '.js';
+        let templateViewPath = templateRoot + templatePath + '.html';
 
         let req = this.emptyAjax(templateViewPath + '?' + this.version, null, 'GET', 'query');
         req.timeout = fsTimeout;
