@@ -3401,6 +3401,12 @@ function ___fairysupport(){
 
 }
 const $___fairysupport_param = function(v, l, tpl) {
-    return eval(tpl);
+    try {
+        return eval(tpl);
+    } catch (e) {
+        console.error(e);
+        console.error(tpl);
+        throw e;
+    }
 }
 const $f = new ___fairysupport();
