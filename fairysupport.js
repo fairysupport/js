@@ -1379,7 +1379,7 @@ function ___fairysupport(){
                 dataValue = dataset.template;
                 if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                     delete child.dataset.template;
-                    let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                    let value = this.getTplIncludeValue(paramObj, localValue, dataValue);
                     let templateArgs = null;
                     if ('templateArgs' in dataset) {
                         templateArgs = $___fairysupport_param(paramObj, localValue, dataset.templateArgs);
@@ -1658,6 +1658,14 @@ function ___fairysupport(){
                 }
                 child.parentNode.removeChild(child);
             }
+        }
+    };
+    
+    this.getTplIncludeValue = function (v, l, tpl) {
+        try {
+            return $___fairysupport_param(v, l, tpl);
+        } catch (e) {
+            return tpl;
         }
     };
 
