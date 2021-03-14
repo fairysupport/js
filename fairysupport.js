@@ -1694,35 +1694,46 @@ function ___fairysupport(){
         }
     };
 
-    this.appendLoadStringTemplate = function (dom, viewStr, argObj, cb){
-        this.loadStringTemplate(dom, viewStr, argObj, cb, 'append');
+    this.appendLoadStringTemplate = function (dom, viewStr, argObj){
+        return this.loadStringTemplate(dom, viewStr, argObj, 'append');
     };
-    this.beforeLoadStringTemplate = function (dom, viewStr, argObj, cb){
-        this.loadStringTemplate(dom, viewStr, argObj, cb, 'before');
+    this.beforeLoadStringTemplate = function (dom, viewStr, argObj){
+        return this.loadStringTemplate(dom, viewStr, argObj, 'before');
     };
-    this.afterLoadStringTemplate = function (dom, viewStr, argObj, cb){
-        this.loadStringTemplate(dom, viewStr, argObj, cb, 'after');
+    this.afterLoadStringTemplate = function (dom, viewStr, argObj){
+        return this.loadStringTemplate(dom, viewStr, argObj, 'after');
     };
-    this.loadStringTemplate = function (dom, viewStr, argObj, cb, position){
+    this.loadStringTemplate = function (dom, viewStr, argObj, position){
 
-        let viewDom = this.getTplDom(viewStr, argObj);
-        this.addInitFuncForAfterObserver(viewDom, cb);
-
-        if ('before' === position && dom.parentNode) {
-            dom.parentNode.insertBefore(viewDom, dom);
-        } else if ('after' === position && dom.parentNode) {
-            if (dom.nextSibling === null || dom.nextSibling === undefined) {
-                dom.parentNode.appendChild(viewDom);
-            } else {
-                dom.parentNode.insertBefore(viewDom, dom.nextSibling);
-            }
-        } else if ('append' === position) {
-            dom.appendChild(viewDom);
-        } else {
-            dom.innerHTML = "";
-            dom.appendChild(viewDom);
-        }
-
+        return new Promise((function(fs, dom, viewStr, argObj, position){
+                return function (resolve, reject) {
+                    try{
+    
+                        let viewDom = fs.getTplDom(viewStr, argObj);
+                        
+                        fs.addInitFuncForAfterObserver(viewDom, resolve);
+                
+                        if ('before' === position && dom.parentNode) {
+                            dom.parentNode.insertBefore(viewDom, dom);
+                        } else if ('after' === position && dom.parentNode) {
+                            if (dom.nextSibling === null || dom.nextSibling === undefined) {
+                                dom.parentNode.appendChild(viewDom);
+                            } else {
+                                dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                            }
+                        } else if ('append' === position) {
+                            dom.appendChild(viewDom);
+                        } else {
+                            dom.innerHTML = "";
+                            dom.appendChild(viewDom);
+                        }
+                    } catch (e) {
+                        reject(e);
+                    }
+                
+                };
+            })(this, dom, viewStr, argObj, position)
+        );
     };
 
     this.appendLoadTemplate = function (dom, templatePackeage, argObj, cb, errCb){
