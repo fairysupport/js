@@ -1386,14 +1386,14 @@ function ___fairysupport(){
                         templateArgs = $___fairysupport_param(paramObj, localValue, dataset.templateArgs);
                     }
                     let templateCallBack = null;
-                    if ('templateCallBack' in dataset) {
-                        templateCallBack = $___fairysupport_param(paramObj, localValue, dataset.templateCallBack);
+                    if ('then' in dataset) {
+                        templateCallBack = $___fairysupport_param(paramObj, localValue, dataset.then);
                     }
                     let templateError = null;
-                    if ('templateError' in dataset) {
-                        templateError = $___fairysupport_param(paramObj, localValue, dataset.templateError);
+                    if ('catch' in dataset) {
+                        templateError = $___fairysupport_param(paramObj, localValue, dataset.catch);
                     }
-                    this.loadTemplate(child, value, templateArgs, templateCallBack, templateError);
+                    this.loadTemplate(child, value, templateArgs, undefined, undefined).then(templateCallBack).catch(templateError);
                 }
 
                 dataValue = dataset.text;
