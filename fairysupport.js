@@ -755,12 +755,13 @@ function ___fairysupport(){
         .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position))
         .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
                 return function (err) {
-                    if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                        errCb();
-                    }
                     let failResult = fairysupportComponentFail(retryCount);
                     if (failResult) {
                         fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
+                    } else {
+                        if (errCb !== null && errCb !== undefined) {
+                            errCb();
+                        }
                     }
                 }
             }
@@ -1703,16 +1704,18 @@ function ___fairysupport(){
     this.afterLoadStringTemplate = function (dom, viewStr, argObj){
         return this.loadStringTemplate(dom, viewStr, argObj, 'after');
     };
-    this.loadStringTemplate = function (dom, viewStr, argObj, position){
+    this.loadStringTemplate = function (dom, viewStr, argObj, position, timing){
 
-        return new Promise((function(fs, dom, viewStr, argObj, position){
+        return new Promise((function(fs, dom, viewStr, argObj, position, timing){
                 return function (resolve, reject) {
                     try{
     
                         let viewDom = fs.getTplDom(viewStr, argObj);
                         
-                        fs.addInitFuncForAfterObserver(viewDom, resolve);
-                
+                        if (!timing) {
+                            fs.addInitFuncForAfterObserver(viewDom, resolve);
+                        }
+                        
                         if ('before' === position && dom.parentNode) {
                             dom.parentNode.insertBefore(viewDom, dom);
                         } else if ('after' === position && dom.parentNode) {
@@ -1727,28 +1730,31 @@ function ___fairysupport(){
                             dom.innerHTML = "";
                             dom.appendChild(viewDom);
                         }
+                        if (timing) {
+                            resolve();
+                        }
                     } catch (e) {
                         reject(e);
                     }
                 
                 };
-            })(this, dom, viewStr, argObj, position)
+            })(this, dom, viewStr, argObj, position, timing)
         );
     };
 
-    this.appendLoadTemplate = function (dom, templatePackeage, argObj, cb, errCb){
-        this.loadTemplate(dom, templatePackeage, argObj, cb, errCb, 'append');
+    this.appendLoadTemplate = function (dom, templatePackeage, argObj){
+        return this.loadTemplate(dom, templatePackeage, argObj, 'append');
     };
 
-    this.beforeLoadTemplate = function (dom, templatePackeage, argObj, cb, errCb){
-        this.loadTemplate(dom, templatePackeage, argObj, cb, errCb, 'before');
+    this.beforeLoadTemplate = function (dom, templatePackeage, argObj){
+        return this.loadTemplate(dom, templatePackeage, argObj, 'before');
     };
 
-    this.afterLoadTemplate = function (dom, templatePackeage, argObj, cb, errCb){
-        this.loadTemplate(dom, templatePackeage, argObj, cb, errCb, 'after');
+    this.afterLoadTemplate = function (dom, templatePackeage, argObj){
+        return this.loadTemplate(dom, templatePackeage, argObj, 'after');
     };
 
-    this.loadTemplate = function (dom, templatePackeage, argObj, cb, errCb, position, retryCount){
+    this.loadTemplate = function (dom, templatePackeage, argObj, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -1766,200 +1772,220 @@ function ___fairysupport(){
         templatePath = templatePath.substring(0, templatePath.length - 1);
         let templateViewPath = templateRoot + templatePath + '.html';
 
-        let req = this.emptyAjax(templateViewPath + '?' + this.version, null, 'GET', 'query');
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, templatePackeage, argObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-                        fs.loadStringTemplate(dom, viewStr, argObj, cb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportTemplateFail(retryCount);
-                        if (failResult) {
-                            fs.loadTemplate(dom, templatePackeage, argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, templatePackeage, argObj, position, retryCount, timing, templateViewPath){
+            return function (resolve, reject) {
+                let req = fs.emptyAjax(templateViewPath + '?' + fs.version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, templatePackeage, argObj, position, retryCount, timing, resolve, reject){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+                                fs.loadStringTemplate(dom, viewStr, argObj, position, timing).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportTemplateFail(retryCount);
+                                if (failResult) {
+                                    fs.loadTemplate(dom, templatePackeage, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, templatePackeage, argObj, cb, errCb, position, retryCount);
-        req.send();
+                )(fs, dom, templatePackeage, argObj, position, retryCount, timing, resolve, reject);
+                req.send();
 
-    };
-
-    this.appendResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, 'append');
-    };
-    this.beforeResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, 'before');
-    };
-    this.afterResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, 'after');
+            };
+        })(this, dom, templatePackeage, argObj, position, retryCount, timing, templateViewPath));
+        
     };
 
-    this.resJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
+    this.appendResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, 'append');
+    };
+    this.beforeResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, 'before');
+    };
+    this.afterResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, 'after');
+    };
+
+    this.resJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.ajax(reqUrl, paramObj);
-        req.timeout = fsTimeout;
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let json = xhr.response;
-                        fs.loadTemplate(dom, templatePackeage, json, cb, errCb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportTemplateFail(retryCount);
-                        if (failResult) {
-                            fs.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing){
+            return function (resolve, reject) {
+                let req = fs.ajax(reqUrl, paramObj);
+                req.timeout = fsTimeout;
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing, resolve, reject){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                fs.loadTemplate(dom, templatePackeage, json, position, 0, timing).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportTemplateFail(retryCount);
+                                if (failResult) {
+                                    fs.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, templatePackeage, reqUrl, paramObj, cb, errCb, position, retryCount);
-        req.send();
+                )(fs, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing, resolve, reject);
+                req.send();
+                
+            };
+        })(this, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing));
 
     };
 
-    this.appendResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, 'append');
+    this.appendResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, 'append');
     };
-    this.beforeResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, 'before');
+    this.beforeResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, 'before');
     };
-    this.afterResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, 'after');
+    this.afterResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, 'after');
     };
 
-    this.resJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+    this.resJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.ajaxByForm(reqUrl, formObj);
-        req.timeout = fsTimeout;
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, templatePackeage, reqUrl, formObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let json = xhr.response;
-                        fs.loadTemplate(dom, templatePackeage, json, cb, errCb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportTemplateFail(retryCount);
-                        if (failResult) {
-                            fs.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing){
+            return function (resolve, reject) {
+                let req = fs.ajaxByForm(reqUrl, formObj);
+                req.timeout = fsTimeout;
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing, resolve, reject){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                fs.loadTemplate(dom, templatePackeage, json, position, 0, timing).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportTemplateFail(retryCount);
+                                if (failResult) {
+                                    fs.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
+        
                         }
                     }
+                )(fs, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing, resolve, reject);
+                req.send();
 
-                }
-            }
-        )(this, dom, templatePackeage, reqUrl, formObj, cb, errCb, position, retryCount);
-        req.send();
-
+            };
+        })(this, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing));
+        
     };
 
-    this.appendResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, 'append');
+    this.appendResHtmlTemplate = function (dom, viewUrl, paramObj, argObj){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, 'append');
     };
-    this.beforeResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, 'before');
+    this.beforeResHtmlTemplate = function (dom, viewUrl, paramObj, argObj){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, 'before');
     };
-    this.afterResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, 'after');
+    this.afterResHtmlTemplate = function (dom, viewUrl, paramObj, argObj){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, 'after');
     };
 
-    this.resHtmlTemplate = function (dom, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
+    this.resHtmlTemplate = function (dom, viewUrl, paramObj, argObj, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.emptyAjax(viewUrl, paramObj);
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-                        fs.loadStringTemplate(dom, viewStr, argObj, cb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportTemplateFail(retryCount);
-                        if (failResult) {
-                            fs.resHtmlTemplate(dom, viewUrl, paramObj, argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, viewUrl, paramObj, argObj, position, retryCount, timing){
+            return function (resolve, reject) {
+                let req = fs.emptyAjax(viewUrl, paramObj);
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.setRequestHeader('Content-Type', 'application/json');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, viewUrl, paramObj, argObj, position, retryCount, timing, resolve, reject){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+                                fs.loadStringTemplate(dom, viewStr, argObj, position, timing).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportTemplateFail(retryCount);
+                                if (failResult) {
+                                    fs.resHtmlTemplate(dom, viewUrl, paramObj, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, viewUrl, paramObj, argObj, cb, errCb, position, retryCount);
-        req.send();
+                )(fs, dom, viewUrl, paramObj, argObj, position, retryCount, timing, resolve, reject);
+                req.send();
 
-    };
-
-    this.appendResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, 'append');
-    };
-    this.beforeResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, 'before');
-    };
-    this.afterResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, 'after');
+            };
+        })(this, dom, viewUrl, paramObj, argObj, position, retryCount, timing));
+        
     };
 
-    this.resHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
+    this.appendResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, 'append');
+    };
+    this.beforeResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, 'before');
+    };
+    this.afterResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, 'after');
+    };
+
+    this.resHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.emptyAjaxByForm(viewUrl, formObj);
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-                        fs.loadStringTemplate(dom, viewStr, argObj, cb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportTemplateFail(retryCount);
-                        if (failResult) {
-                            fs.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, viewUrl, formObj, argObj, position, retryCount, timing){
+            return function (resolve, reject) {
+                let req = fs.emptyAjaxByForm(viewUrl, formObj);
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, viewUrl, formObj, argObj, position, retryCount, timing){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+                                fs.loadStringTemplate(dom, viewStr, argObj, position, timing).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportTemplateFail(retryCount);
+                                if (failResult) {
+                                    fs.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, viewUrl, formObj, argObj, cb, errCb, position, retryCount);
-        req.send();
+                )(fs, dom, viewUrl, formObj, argObj, position, retryCount, timing);
+                req.send();
 
+            };
+        })(this, dom, viewUrl, formObj, argObj, position, retryCount, timing));
+        
     };
 
     this.execUniqueComponentMethod = function (controllerObj, methodList, methodName, argList){
@@ -1980,19 +2006,19 @@ function ___fairysupport(){
         };
     };
 
-    this.appendLoadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb){
-        this.loadUniqueComponent(dom, componentPackeage, argObj, cb, errCb, 'append');
+    this.appendLoadUniqueComponent = function (dom, componentPackeage, argObj){
+        this.loadUniqueComponent(dom, componentPackeage, argObj, 'append');
     };
 
-    this.beforeLoadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb){
-        this.loadUniqueComponent(dom, componentPackeage, argObj, cb, errCb, 'before');
+    this.beforeLoadUniqueComponent = function (dom, componentPackeage, argObj){
+        this.loadUniqueComponent(dom, componentPackeage, argObj, 'before');
     };
 
-    this.afterLoadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb){
-        this.loadUniqueComponent(dom, componentPackeage, argObj, cb, errCb, 'after');
+    this.afterLoadUniqueComponent = function (dom, componentPackeage, argObj){
+        this.loadUniqueComponent(dom, componentPackeage, argObj, 'after');
     };
 
-    this.loadUniqueComponent = function (dom, componentPackeage, argObj, cb, errCb, position, retryCount){
+    this.loadUniqueComponent = function (dom, componentPackeage, argObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -2002,168 +2028,184 @@ function ___fairysupport(){
         let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
         let componentViewPath = componentRoot + componentValueMap['componentPath'] + 'view.html';
 
-        let req = this.emptyAjax(componentViewPath + '?' + this.version, null, 'GET', 'query');
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, 0);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.loadUniqueComponent(dom, componentValueMap['componentPackeage'], argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, argObj, position, retryCount, componentValueMap, componentControllerPath, componentViewPath){
+            return function (resolve, reject) {
+                let req = fs.emptyAjax(componentViewPath + '?' + fs.version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, argObj, position, retryCount, componentValueMap, componentControllerPath, componentViewPath, resolve, reject){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+                                fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr, 0);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.loadUniqueComponent(dom, componentValueMap['componentPackeage'], argObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount);
-        req.send();
+                )(fs, dom, componentPackeage, argObj, position, retryCount, componentValueMap, componentControllerPath, componentViewPath, resolve, reject);
+                req.send();
 
-    };
-
-    this.appendResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'append');
-    };
-    this.beforeResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'before');
-    };
-    this.afterResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'after');
+            };
+        })(this, dom, componentPackeage, argObj, position, retryCount, componentValueMap, componentControllerPath, componentViewPath));
+        
     };
 
-    this.resJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+    this.appendResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, 'append');
+    };
+    this.beforeResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, 'before');
+    };
+    this.afterResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, 'after');
+    };
+
+    this.resJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.ajaxByForm(reqUrl, formObj);
-        req.timeout = fsTimeout;
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let json = xhr.response;
-                        fs.loadUniqueComponent(dom, componentPackeage, json, cb, errCb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount){
+            return function (resolve, reject) {
+                let req = fs.ajaxByForm(reqUrl, formObj);
+                req.timeout = fsTimeout;
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount, resolve, reject){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                fs.loadUniqueComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
+        
                         }
                     }
+                )(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount, resolve, reject);
+                req.send();
 
-                }
-            }
-        )(this, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount);
-        req.send();
-
+            };
+        })(this, dom, componentPackeage, reqUrl, formObj, position, retryCount));
+        
     };
 
-    this.appendResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'append');
+    this.appendResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'append');
     };
-    this.beforeResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'before');
+    this.beforeResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'before');
     };
-    this.afterResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'after');
+    this.afterResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'after');
     };
 
-    this.resHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
+    this.resHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.emptyAjax(viewUrl, paramObj);
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-
-                        let componentValueMap = fs.getComponentValue(componentPackeage);
-                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
-
-                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+            return function (resolve, reject) {
+                let req = fs.emptyAjax(viewUrl, paramObj);
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.setRequestHeader('Content-Type', 'application/json');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+        
+                                let componentValueMap = fs.getComponentValue(componentPackeage);
+                                let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+        
+                                fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot);
-        req.send();
+                )(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot);
+                req.send();
 
-    };
-
-    this.appendResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'append');
-    };
-    this.beforeResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'before');
-    };
-    this.afterResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'after');
+            };
+        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot));
+        
     };
 
-    this.resHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
+    this.appendResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'append');
+    };
+    this.beforeResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'before');
+    };
+    this.afterResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'after');
+    };
+
+    this.resHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.emptyAjaxByForm(viewUrl, formObj);
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-
-                        let componentValueMap = fs.getComponentValue(componentPackeage);
-                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
-
-                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot){
+            return function (resolve, reject) {
+                let req = fs.emptyAjaxByForm(viewUrl, formObj);
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot, resolve, reject){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+        
+                                let componentValueMap = fs.getComponentValue(componentPackeage);
+                                let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+        
+                                fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot);
-        req.send();
+                )(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot, resolve, reject);
+                req.send();
 
+            };
+        })(this, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot));
+        
     };
 
     this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
@@ -2173,7 +2215,7 @@ function ___fairysupport(){
         }
 
         let func = function () {};
-        if (cb !== null && cb !== undefined && typeof cb === 'function') {
+        if (cb !== null && cb !== undefined) {
             func = cb;
         }
 
@@ -2181,12 +2223,13 @@ function ___fairysupport(){
         .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position))
         .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
                 return function (err) {
-                    if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                        errCb();
-                    }
                     let failResult = fairysupportComponentFail(retryCount);
                     if (failResult) {
                         fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
+                    } else {
+                        if (errCb !== null && errCb !== undefined) {
+                            errCb();
+                        }
                     }
                 }
             }
@@ -2366,19 +2409,19 @@ function ___fairysupport(){
         }
     }
 
-    this.appendLoadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb){
-        this.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, 'append');
+    this.appendLoadSingleComponent = function (dom, componentPackeage, argObj){
+        return this.loadSingleComponent(dom, componentPackeage, argObj, 'append');
     };
 
-    this.beforeLoadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb){
-        this.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, 'before');
+    this.beforeLoadSingleComponent = function (dom, componentPackeage, argObj){
+        return this.loadSingleComponent(dom, componentPackeage, argObj, 'before');
     };
 
-    this.afterLoadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb){
-        this.loadSingleComponent(dom, componentPackeage, argObj, cb, errCb, 'after');
+    this.afterLoadSingleComponent = function (dom, componentPackeage, argObj){
+        return this.loadSingleComponent(dom, componentPackeage, argObj, 'after');
     };
 
-    this.loadSingleComponent = function (dom, componentPackeage, argObj, cb, errCb, position, retryCount){
+    this.loadSingleComponent = function (dom, componentPackeage, argObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -2388,208 +2431,231 @@ function ___fairysupport(){
         let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
         let componentViewPath = componentRoot + componentValueMap['componentPath'] + 'view.html';
 
-        let req = this.emptyAjax(componentViewPath + '?' + this.version, null, 'GET', 'query');
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, 0);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.loadSingleComponent(dom, componentValueMap['componentPackeage'], argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, argObj, position, retryCount, componentValueMap, componentControllerPath, componentViewPath){
+            return function (resolve, reject) {
+                
+                let req = fs.emptyAjax(componentViewPath + '?' + fs.version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentValueMap, argObj, position, componentControllerPath, retryCount, componentValueMap, componentControllerPath, componentViewPath){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+                                fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr, 0);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.loadSingleComponent(dom, componentValueMap['componentPackeage'], argObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, componentValueMap, argObj, cb, errCb, position, componentControllerPath, retryCount);
-        req.send();
+                )(fs, dom, componentValueMap, argObj, position, componentControllerPath, retryCount, componentValueMap, componentControllerPath, componentViewPath);
+                req.send();
 
-    };
-
-    this.appendResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, 'append');
-    };
-    this.beforeResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, 'before');
-    };
-    this.afterResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, 'after');
+            };
+            
+        })(this, dom, componentPackeage, argObj, position, retryCount, componentValueMap, componentControllerPath, componentViewPath));
+        
     };
 
-    this.resJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
+    this.appendResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, 'append');
+    };
+    this.beforeResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, 'before');
+    };
+    this.afterResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, 'after');
+    };
+
+    this.resJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.ajax(reqUrl, paramObj);
-        req.timeout = fsTimeout;
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let json = xhr.response;
-                        fs.loadSingleComponent(dom, componentPackeage, json, cb, errCb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+            return function (resolve, reject) {
+                let req = fs.ajax(reqUrl, paramObj);
+                req.timeout = fsTimeout;
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                fs.loadSingleComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, componentPackeage, reqUrl, paramObj, cb, errCb, position, retryCount);
-        req.send();
+                )(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount);
+                req.send();
 
-    };
-
-    this.appendResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'append');
-    };
-    this.beforeResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'before');
-    };
-    this.afterResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb){
-        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, 'after');
+            };
+        })(this, dom, componentPackeage, reqUrl, paramObj, position, retryCount));
+        
     };
 
-    this.resJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
+    this.appendResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, 'append');
+    };
+    this.beforeResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, 'before');
+    };
+    this.afterResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, 'after');
+    };
+
+    this.resJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.ajaxByForm(reqUrl, formObj);
-        req.timeout = fsTimeout;
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let json = xhr.response;
-                        fs.loadSingleComponent(dom, componentPackeage, json, cb, errCb, position);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount){
+            return function (resolve, reject) {
+                let req = fs.ajaxByForm(reqUrl, formObj);
+                req.timeout = fsTimeout;
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                fs.loadSingleComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
+        
                         }
                     }
+                )(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount);
+                req.send();
 
-                }
-            }
-        )(this, dom, componentPackeage, reqUrl, formObj, cb, errCb, position, retryCount);
-        req.send();
-
+            };
+        })(this, dom, componentPackeage, reqUrl, formObj, position, retryCount));
+        
     };
 
-    this.appendResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'append');
+    this.appendResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'append');
     };
-    this.beforeResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'before');
+    this.beforeResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'before');
     };
-    this.afterResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, 'after');
+    this.afterResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'after');
     };
 
-    this.resHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount){
+    this.resHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.emptyAjax(viewUrl, paramObj);
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-
-                        let componentValueMap = fs.getComponentValue(componentPackeage);
-                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
-
-                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+            return function (resolve, reject) {
+                let req = fs.emptyAjax(viewUrl, paramObj);
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.setRequestHeader('Content-Type', 'application/json');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+        
+                                let componentValueMap = fs.getComponentValue(componentPackeage);
+                                let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+        
+                                fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, componentPackeage, viewUrl, paramObj, argObj, cb, errCb, position, retryCount, componentRoot);
-        req.send();
+                )(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot);
+                req.send();
 
-    };
-
-    this.appendResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'append');
-    };
-    this.beforeResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'before');
-    };
-    this.afterResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb){
-        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, 'after');
+            };
+        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot));
+        
     };
 
-    this.resHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount){
+    this.appendResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'append');
+    };
+    this.beforeResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'before');
+    };
+    this.afterResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'after');
+    };
+
+    this.resHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        let req = this.emptyAjaxByForm(viewUrl, formObj);
-        req.timeout = fsTimeout;
-        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        req.setRequestHeader('Accept', 'text/*');
-        req.responseType = 'text';
-        req.withCredentials = true;
-        req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let viewStr = xhr.response;
-
-                        let componentValueMap = fs.getComponentValue(componentPackeage);
-                        let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
-
-                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
-                    } else {
-                        if (errCb !== null && errCb !== undefined && typeof errCb === 'function') {
-                            errCb();
-                        }
-                        let failResult = fairysupportComponentFail(retryCount);
-                        if (failResult) {
-                            fs.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, ++retryCount);
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot){
+            return function (resolve, reject) {
+                
+                let req = fs.emptyAjaxByForm(viewUrl, formObj);
+                req.timeout = fsTimeout;
+                req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                req.setRequestHeader('Accept', 'text/*');
+                req.responseType = 'text';
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let viewStr = xhr.response;
+        
+                                let componentValueMap = fs.getComponentValue(componentPackeage);
+                                let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
+        
+                                fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
                         }
                     }
-                }
-            }
-        )(this, dom, componentPackeage, viewUrl, formObj, argObj, cb, errCb, position, retryCount, componentRoot);
-        req.send();
+                )(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot);
+                req.send();
 
+            };
+        })(this, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot));
+        
     };
 
     this.paramFmt = function (fmt, paramObj, prefixName) {
