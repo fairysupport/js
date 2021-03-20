@@ -1386,11 +1386,11 @@ function ___fairysupport(){
                         templateArgs = $___fairysupport_param(paramObj, localValue, dataset.templateArgs);
                     }
                     let templateCallBack = null;
-                    if ('then' in dataset) {
+                    if ('templateThen' in dataset) {
                         templateCallBack = $___fairysupport_param(paramObj, localValue, dataset.templateThen);
                     }
                     let templateError = null;
-                    if ('catch' in dataset) {
+                    if ('templateCatch' in dataset) {
                         templateError = $___fairysupport_param(paramObj, localValue, dataset.templateCatch);
                     }
                     this.loadTemplate(child, value, templateArgs, undefined, undefined).then(templateCallBack).catch(templateError);
