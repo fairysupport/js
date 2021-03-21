@@ -1004,7 +1004,7 @@ function ___fairysupport(){
             componentCamel += (componentName.substring(0, 1).toUpperCase() + componentName.substring(1));
             componentHyphen += (componentName + '-');
         }
-        componentCamel = componentCamel.toLowerCase() + componentCamel.substring(1);
+        componentCamel = componentCamel.substring(0, 1).toLowerCase() + componentCamel.substring(1);
         componentHyphen = componentHyphen.substring(0, componentHyphen.length - 1);
         return {'componentPath':componentPath, 'componentPackeage':componentPackeage, 'componentCamel':componentCamel, 'componentHyphen':componentHyphen};
         
@@ -2303,7 +2303,7 @@ function ___fairysupport(){
         if (obj === null || obj === undefined) {
             return;
         }
-        this.bindAllSingle(obj, this.bindUniqueComponentProp(obj, componentValueMap, controllerObj, methodList, eventMethodList));
+        this.bindAllSingle(obj, this.bindUniqueComponentProp(this, obj, componentValueMap, controllerObj, methodList, eventMethodList));
         let childList = obj.childNodes;
         let child = null;
         if (childList !== null && childList !== undefined) {
@@ -2315,31 +2315,29 @@ function ___fairysupport(){
 
     };
 
-    this.bindUniqueComponentProp = function (obj, componentValueMap, controllerObj, methodList, eventMethodList){
-        (function(obj, componentValueMap, controllerObj, methodList, eventMethodList){
-            return function(){
-                let dataset = obj.dataset;
-                if (dataset !== null && dataset !== undefined) {
-        
-                    let bindObj = dataset[componentValueMap['componentCamel'] + 'Obj'];
-                    let bindList = dataset[componentValueMap['componentCamel'] + 'List'];
-                    let name = dataset[componentValueMap['componentCamel'] + 'Name'];
-        
-                    if (bindObj !== null && bindObj !== undefined) {
-                        this.bindUniqueComponentSingleObj(obj, bindObj, controllerObj, methodList);
-                    }
-        
-                    if (bindList !== null && bindList !== undefined) {
-                        this.bindUniqueComponentSingleList(obj, bindList, controllerObj, methodList);
-                    }
-        
-                    if (name !== null && name !== undefined) {
-                        this.bindUniqueComponentSingleEvent(obj, name, controllerObj, methodList, eventMethodList);
-                    }
-        
+    this.bindUniqueComponentProp = function (fs, obj, componentValueMap, controllerObj, methodList, eventMethodList){
+        return function(){
+            let dataset = obj.dataset;
+            if (dataset !== null && dataset !== undefined) {
+    
+                let bindObj = dataset[componentValueMap['componentCamel'] + 'Obj'];
+                let bindList = dataset[componentValueMap['componentCamel'] + 'List'];
+                let name = dataset[componentValueMap['componentCamel'] + 'Name'];
+    
+                if (bindObj !== null && bindObj !== undefined) {
+                    fs.bindUniqueComponentSingleObj(obj, bindObj, controllerObj, methodList);
                 }
-            };
-        })(obj, componentValueMap, controllerObj, methodList, eventMethodList);
+    
+                if (bindList !== null && bindList !== undefined) {
+                    fs.bindUniqueComponentSingleList(obj, bindList, controllerObj, methodList);
+                }
+    
+                if (name !== null && name !== undefined) {
+                    fs.bindUniqueComponentSingleEvent(obj, name, controllerObj, methodList, eventMethodList);
+                }
+    
+            }
+        };
     };
 
     this.bindUniqueComponentSingleObj = function (dom, bindStr, controllerObj, methodList){
