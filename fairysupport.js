@@ -2751,6 +2751,23 @@ function ___fairysupport(){
 
     };
 
+    this.ajaxText = function (reqUrl, paramObj, met = 'POST', fmt = 'json', user = null, password = null){
+
+        let req = this.emptyAjax(reqUrl, paramObj, met, fmt,  user, password);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.responseType = 'text';
+
+        if (fmt.toLowerCase() === 'json') {
+            req.setRequestHeader('Content-Type', 'application/json');
+        } else {
+            req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        }
+
+        return req;
+
+    };
+
     this.emptyAjaxByForm = function (reqUrl, formObj, user = null, password = null){
 
         let req = new this.fairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
@@ -2766,6 +2783,17 @@ function ___fairysupport(){
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Accept', 'application/json');
         req.responseType = 'json';
+
+        return req;
+
+    };
+
+    this.ajaxTextByForm = function (reqUrl, formObj, user = null, password = null){
+
+        let req = this.emptyAjaxByForm(reqUrl, formObj, user, password);
+        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        req.setRequestHeader('Accept', 'text/*');
+        req.responseType = 'text';
 
         return req;
 
