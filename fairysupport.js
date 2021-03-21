@@ -360,8 +360,8 @@ function ___fairysupport(){
                                         throw exception;
                                     }
                                 } finally {
-                                    if (fs.clazz.obj.finalEvent && typeof fs.clazz.obj.finalEvent === 'function') {
-                                        fs.clazz.obj.finalEvent(null, null);
+                                    if (fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
+                                        fs.clazz.obj.finalHandle(null, null);
                                     }
                                 }
                             }
@@ -383,8 +383,8 @@ function ___fairysupport(){
                                         throw exception;
                                     }
                                 } finally {
-                                    if (fs.clazz.obj.finalEvent && typeof fs.clazz.obj.finalEvent === 'function') {
-                                        fs.clazz.obj.finalEvent(null, null);
+                                    if (fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
+                                        fs.clazz.obj.finalHandle(null, null);
                                     }
                                 }
                             }
@@ -570,8 +570,8 @@ function ___fairysupport(){
                         throw exception;
                     }
                 } finally {
-                    if (this.clazz.obj.finalEvent && typeof this.clazz.obj.finalEvent === 'function') {
-                        this.clazz.obj.finalEvent(null, ret);
+                    if (this.clazz.obj.finalHandle && typeof this.clazz.obj.finalHandle === 'function') {
+                        this.clazz.obj.finalHandle(null, ret);
                     }
                 }
                 return ret;
@@ -586,8 +586,8 @@ function ___fairysupport(){
                         throw exception;
                     }
                 } finally {
-                    if (this.clazz.obj.finalEvent && typeof this.clazz.obj.finalEvent === 'function') {
-                        this.clazz.obj.finalEvent(null, ret);
+                    if (this.clazz.obj.finalHandle && typeof this.clazz.obj.finalHandle === 'function') {
+                        this.clazz.obj.finalHandle(null, ret);
                     }
                 }
                 return ret;
@@ -1175,8 +1175,8 @@ function ___fairysupport(){
                                                 throw exception;
                                             }
                                         } finally {
-                                            if (moduleClassObj.finalEvent && typeof moduleClassObj.finalEvent === 'function') {
-                                                moduleClassObj.finalEvent(e, ret);
+                                            if (moduleClassObj.finalHandle && typeof moduleClassObj.finalHandle === 'function') {
+                                                moduleClassObj.finalHandle(e, ret);
                                             }
                                         }
                                     }
@@ -1240,8 +1240,8 @@ function ___fairysupport(){
                                 throw exception;
                             }
                         } finally {
-                            if (moduleClassObj.finalEvent && typeof moduleClassObj.finalEvent === 'function') {
-                                moduleClassObj.finalEvent(e, ret);
+                            if (moduleClassObj.finalHandle && typeof moduleClassObj.finalHandle === 'function') {
+                                moduleClassObj.finalHandle(e, ret);
                             }
                         }
                     }
