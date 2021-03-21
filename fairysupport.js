@@ -2007,15 +2007,15 @@ function ___fairysupport(){
     };
 
     this.appendLoadUniqueComponent = function (dom, componentPackeage, argObj){
-        this.loadUniqueComponent(dom, componentPackeage, argObj, 'append');
+        return this.loadUniqueComponent(dom, componentPackeage, argObj, 'append');
     };
 
     this.beforeLoadUniqueComponent = function (dom, componentPackeage, argObj){
-        this.loadUniqueComponent(dom, componentPackeage, argObj, 'before');
+        return this.loadUniqueComponent(dom, componentPackeage, argObj, 'before');
     };
 
     this.afterLoadUniqueComponent = function (dom, componentPackeage, argObj){
-        this.loadUniqueComponent(dom, componentPackeage, argObj, 'after');
+        return this.loadUniqueComponent(dom, componentPackeage, argObj, 'after');
     };
 
     this.loadUniqueComponent = function (dom, componentPackeage, argObj, position, retryCount){
@@ -2277,7 +2277,7 @@ function ___fairysupport(){
             if (childList !== null && childList !== undefined) {
                 for (let i = 0; i < childList.length; i++) {
                     child = childList.item(i);
-                    this.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, dataNameEventMap);
+                    fs.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, dataNameEventMap);
                 }
             }
             
