@@ -1377,25 +1377,6 @@ function ___fairysupport(){
                     this.setTplProp(child, value);
                 }
 
-                dataValue = dataset.template;
-                if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
-                    delete child.dataset.template;
-                    let value = this.getTplIncludeValue(paramObj, localValue, dataValue);
-                    let templateArgs = null;
-                    if ('templateArgs' in dataset) {
-                        templateArgs = $___fairysupport_param(paramObj, localValue, dataset.templateArgs);
-                    }
-                    let templateCallBack = null;
-                    if ('templateThen' in dataset) {
-                        templateCallBack = $___fairysupport_param(paramObj, localValue, dataset.templateThen);
-                    }
-                    let templateError = null;
-                    if ('templateCatch' in dataset) {
-                        templateError = $___fairysupport_param(paramObj, localValue, dataset.templateCatch);
-                    }
-                    this.loadTemplate(child, value, templateArgs, undefined, undefined).then(templateCallBack).catch(templateError);
-                }
-
                 dataValue = dataset.text;
                 if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                     delete child.dataset.text;
