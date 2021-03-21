@@ -2041,6 +2041,50 @@ function ___fairysupport(){
         
     };
 
+    this.appendResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, 'append');
+    };
+    this.beforeResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, 'before');
+    };
+    this.afterResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, 'after');
+    };
+
+    this.resJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+
+        if (retryCount === undefined || retryCount === null) {
+            retryCount = 0;
+        }
+
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+            return function (resolve, reject) {
+                let req = fs.ajax(reqUrl, paramObj);
+                req.timeout = fsTimeout;
+                req.withCredentials = true;
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                fs.loadUniqueComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, position, ++retryCount).then(resolve).catch(reject);
+                                } else {
+                                    reject();
+                                }
+                            }
+                        }
+                    }
+                )(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount);
+                req.send();
+
+            };
+        })(this, dom, componentPackeage, reqUrl, paramObj, position, retryCount));
+        
+    };
+
     this.appendResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
         return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, 'append');
     };
