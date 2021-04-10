@@ -752,7 +752,7 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position))
+        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb))
         .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount);
@@ -760,7 +760,7 @@ function ___fairysupport(){
                         fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
-                            errCb();
+                            errCb(err);
                         }
                     }
                 }
@@ -770,7 +770,7 @@ function ___fairysupport(){
 
     };
 
-    this.loadSingleComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position){
+    this.loadSingleComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb){
         return function (Module){
             let componentPath = componentValueMap['componentPath'];
             let classFullName = 'components/' + componentPath.substring(0, componentPath.length - 1);
@@ -798,16 +798,16 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentValueMap, viewStr, argObj, func, position);
+            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position){
+    this.getInsertComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb){
         return function (){
 
-            let viewDom = fs.getTplDom(viewStr, argObj);
+            let viewDom = fs.getTplDom(viewStr, argObj, errCb);
 
             let initFunc = fs.getComponentMethod(fs, componentValueMap['componentPath'], 'init', argObj, func);
 
@@ -1305,7 +1305,7 @@ function ___fairysupport(){
         });
     };
 
-    this.getTplDom = function(viewStr, paramObj){
+    this.getTplDom = function(viewStr, paramObj, errCb){
 
         let template = document.createElement('template');
         template.innerHTML = viewStr;
@@ -1691,7 +1691,7 @@ function ___fairysupport(){
                 return function (resolve, reject) {
                     try{
     
-                        let viewDom = fs.getTplDom(viewStr, argObj);
+                        let viewDom = fs.getTplDom(viewStr, argObj, reject);
                         
                         if (!timing) {
                             fs.addInitFuncForAfterObserver(viewDom, resolve);
@@ -1772,7 +1772,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.loadTemplate(dom, templatePackeage, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template : ' + templateViewPath + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -1816,7 +1820,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load json for template : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -1860,7 +1868,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load json for template : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
         
@@ -1909,7 +1921,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resHtmlTemplate(dom, viewUrl, paramObj, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -1956,7 +1972,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2028,7 +2048,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.loadUniqueComponent(dom, componentValueMap['componentPackeage'], argObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template for uniqueComponent : ' + componentViewPath + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2072,7 +2096,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load json for uniqueComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2116,7 +2144,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load json for uniqueComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
         
@@ -2169,7 +2201,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template for uniqueComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2220,7 +2256,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template for uniqueComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2246,14 +2286,14 @@ function ___fairysupport(){
 
         import(componentControllerPath + '?' + fs.version)
         .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position))
-        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
+        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount, errCb){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount);
                     if (failResult) {
                         fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
-                            errCb();
+                            errCb(err);
                         }
                     }
                 }
@@ -2263,7 +2303,7 @@ function ___fairysupport(){
 
     };
 
-    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position){
+    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb){
         return function (Module){
             let uniqueComponentControllerObj = new Module.default();
             let uniqueComponentControllerMethodList = fs.getMethodList(uniqueComponentControllerObj);
@@ -2284,16 +2324,16 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap);
+            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap, errCb);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertUniqueComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap){
+    this.getInsertUniqueComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap, errCb){
         return function (){
 
-            let viewDom = fs.getTplDom(viewStr, argObj);
+            let viewDom = fs.getTplDom(viewStr, argObj, errCb);
             let initFunc = fs.getUniqueComponentMethod(fs, controllerObj, methodList, 'init', argObj, func);
             fs.addInitFuncForAfterObserver(viewDom, initFunc);
 
@@ -2474,7 +2514,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.loadSingleComponent(dom, componentValueMap['componentPackeage'], argObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template for singleComponent : ' + componentViewPath + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2519,7 +2563,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load json for singleComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2563,7 +2611,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load json for singleComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
         
@@ -2616,7 +2668,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template for singleComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
@@ -2668,7 +2724,11 @@ function ___fairysupport(){
                                 if (failResult) {
                                     fs.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
-                                    reject();
+                                    try {
+                                        throw new Error('error : load template for singleComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
+                                    } catch (err) {
+                                        reject(err);
+                                    }
                                 }
                             }
                         }
