@@ -38,6 +38,8 @@ function ___fairysupport(){
     let fsTimeout = ('dataset' in scriptObj && 'timeout' in scriptObj.dataset) ? scriptObj.dataset.timeout : 0;
     fsTimeout = fsTimeout - 0;
 
+    let pageRoot = scriptObj.dataset.pageRoot;
+    
     this.instanceMap = {};
 
     const msgObj = Object.create(null);
@@ -67,12 +69,37 @@ function ___fairysupport(){
         }
     }
 
+    this.getModulePath = function (pageRoot, pageUrl) {
+        
+        let reqPath = pageUrl.origin + pageUrl.pathname.trim();
+
+        let modulePath = '';
+        let reqPathTail = reqPath.substring(pageRoot.length);
+        let pathList = reqPathTail.split('/');
+        for (let pathIdx = 0; pathIdx < pathList.length; pathIdx++) {
+            if (pathList[pathIdx] === '') {
+                continue;
+            }
+            if ((pathIdx + 1) >= pathList.length) {
+                modulePath += pathList[pathIdx].split('.')[0];
+            } else {
+                modulePath += pathList[pathIdx] + '/';
+            }
+        }
+        if (modulePath === '') {
+            modulePath = 'index';
+        }
+
+        return modulePath;
+    };
+
     this.init = function () {
-        this.getLoadEnv(jsRoot, this.version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, 0);
+        let modulePath = this.getModulePath(pageRoot, pageUrl);
+        this.getLoadEnv(jsRoot, this.version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
         return this;
     };
 
-    this.getLoadEnv = function (jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
+    this.getLoadEnv = function (jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
 
         let req = this.emptyAjax(jsRoot + 'env/env.txt' + '?' + version, null, 'GET', 'query');
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -80,159 +107,384 @@ function ___fairysupport(){
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.responseType = 'text';
         req.timeout = fsTimeout;
-        req.onloadend = (function(fs, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
+        req.onloadend = (function(fs, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                 return function (e, xhr) {
                     if (xhr.status === 200) {
                         let envStr = xhr.response;
                         envStr = envStr.trim();
-                        fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, 0);
+                        fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+                    } else if (xhr.status === 404) {
+                        fs.getEnvDefaultValue(jsRoot, '', version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
                     } else {
                         let failResult = fairysupportInitFail(retryCount);
                         if (failResult) {
-                            fs.getLoadEnv(jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                            fs.getLoadEnv(jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, ++retryCount);
                         }
                     }
                 }
             }
-        )(this, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, retryCount);
+        )(this, msgObj, jsRoot, version, msgObj, envValueObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount);
         req.send();
 
     };
 
-    this.getEnvDefaultValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
+    this.getEnvDefaultValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
 
         let req = this.ajax(jsRoot + 'env/envValue.js' + '?' + version, null, 'GET', 'query');
         req.timeout = fsTimeout;
-        req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
+        req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                 return function (e, xhr) {
                     if (200 === xhr.status) {
                         let json = xhr.response;
                         Object.assign(envValueObj, json);
-                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, 0);
+                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+                    } else if (404 === xhr.status) {
+                        fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
                     } else {
                         let failResult = fairysupportInitFail(retryCount);
                         if (failResult) {
-                            fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                            fs.getEnvDefaultValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, ++retryCount);
                         }
                     }
                 }
             }
-        )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount);
+        )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount);
         req.send();
 
     };
 
-    this.getEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
-
-        let req = this.ajax(jsRoot + 'env/envValue.' + envStr + '.js' + '?' + version, null, 'GET', 'query');
-        req.timeout = fsTimeout;
-        req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let json = xhr.response;
-                        Object.assign(envValueObj, json);
-                        fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, 0);
-                    } else {
-                        let failResult = fairysupportInitFail(retryCount);
-                        if (failResult) {
-                            fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
-                        }
-                    }
-                }
-            }
-        )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot);
-        req.send();
-
-    };
-
-    this.getLoadMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, retryCount){
-
-        if (reqLang !== null) {
-            let reqLangAjax = this.ajax(jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version, null, 'GET', 'query');
-            reqLangAjax.timeout = fsTimeout;
-            reqLangAjax.onloadend = (function(msgObj, reqLang, fs, envValueObj, jsRoot, version, confLang, pageUrl, moduleRoot, retryCount){
+    this.getEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
+        
+        if (envStr !== null && envStr !== undefined && envStr !== '') {
+            let queryEnvStr = '.' + envStr;
+            let req = this.ajax(jsRoot + 'env/envValue' + queryEnvStr + '.js' + '?' + version, null, 'GET', 'query');
+            req.timeout = fsTimeout;
+            req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                     return function (e, xhr) {
                         if (200 === xhr.status) {
                             let json = xhr.response;
-                            msgObj[reqLang] =  Object.create(null);
-                            Object.assign(msgObj[reqLang], json);
+                            Object.assign(envValueObj, json);
+                            let moduleSplit = modulePath.split('/');
+                            fs.getModuleDefaultEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, jsRoot + 'env/', moduleSplit, 0);
+                        } else if (404 === xhr.status) {
+                            let moduleSplit = modulePath.split('/');
+                            fs.getModuleDefaultEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, jsRoot + 'env/', moduleSplit, 0);
+                        } else {
+                            let failResult = fairysupportInitFail(retryCount);
+                            if (failResult) {
+                                fs.getEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, ++retryCount);
+                            }
                         }
                     }
                 }
-            )(msgObj, reqLang, this, envValueObj, jsRoot, version, confLang, pageUrl, moduleRoot, retryCount);
-            reqLangAjax.send();
+            )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount);
+            req.send();
+
+        } else {
+            let moduleSplit = modulePath.split('/');
+            this.getModuleDefaultEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, jsRoot + 'env/', moduleSplit, 0);
         }
 
+    };
 
-        let confLangAjax = this.ajax(jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version, null, 'GET', 'query');
-        confLangAjax.timeout = fsTimeout;
-        confLangAjax.onloadend = (function(msgObj, confLang, fs, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount){
-                return function (e, xhr) {
-                    if (200 === xhr.status) {
-                        let json = xhr.response;
-                        msgObj[confLang] =  Object.create(null);
-                        Object.assign(msgObj[confLang], json);
+    this.getModuleDefaultEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, retryCount){
+        
+        let moduleSplitHead = moduleSplit.shift();
+        if (moduleSplitHead === undefined || moduleSplitHead === null || moduleSplitHead === '') {
+            
+            this.loadDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+            
+        } else {
+            
+            let req = this.ajax(moduleEnvRoot + moduleSplitHead + '/envValue.js' + '?' + version, null, 'GET', 'query');
+            req.timeout = fsTimeout;
+            req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, retryCount){
+                    return function (e, xhr) {
+                        if (200 === xhr.status) {
+                            let json = xhr.response;
+                            Object.assign(envValueObj, json);
+                            fs.getModuleEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, 0);
+                        } else if (404 === xhr.status) {
+                            fs.getModuleEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, 0);
+                        } else {
+                            let failResult = fairysupportInitFail(retryCount);
+                            if (failResult) {
+                                moduleSplit.unshift(moduleSplitHead);
+                                fs.getModuleDefaultEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, ++retryCount);
+                            }
+                        }
                     }
                 }
-            }
-        )(msgObj, confLang, this, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount);
-        confLangAjax.send();
+            )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, retryCount);
+            req.send();
 
+        }
+        
+    };
+
+    this.getModuleEnvValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, retryCount){
+        
+        if (moduleSplitHead === undefined || moduleSplitHead === null || moduleSplitHead === '') {
+            
+            this.loadDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+            
+        } else {
+            
+            if (envStr !== null && envStr !== undefined && envStr !== '') {
+                
+                let queryEnvStr = '.' + envStr;
+                let req = this.ajax(moduleEnvRoot + moduleSplitHead + '/envValue' + queryEnvStr + '.js' + '?' + version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                Object.assign(envValueObj, json);
+                                fs.getModuleDefaultEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot + moduleSplitHead + '/', moduleSplit, 0);
+                            } else if (404 === xhr.status) {
+                                fs.getModuleDefaultEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot + moduleSplitHead + '/', moduleSplit, 0);
+                            } else {
+                                let failResult = fairysupportInitFail(retryCount);
+                                if (failResult) {
+                                    fs.getModuleEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, ++retryCount);
+                                }
+                            }
+                        }
+                    }
+                )(this, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, retryCount);
+                req.send();
+
+            } else {
+                this.getModuleDefaultEnvValue(jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot + moduleSplitHead + '/', moduleSplit, 0);
+            }
+            
+        }
+        
+    };
+
+    this.loadDefaultMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
 
         let req = this.ajax(jsRoot + 'msg/msg.js' + '?' + version, null, 'GET', 'query');
         req.timeout = fsTimeout;
-        req.onloadend = (function(fs, version, envValueObj, msgObj, pageUrl, moduleRoot, jsRoot, reqLang, confLang, retryCount){
+        req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                 return function (e, xhr) {
                     if (200 === xhr.status) {
                         let json = xhr.response;
-                        msgObj['__fairysupport_default'] = Object.create(null);
-                        Object.assign(msgObj['__fairysupport_default'], json);
-
-                        let pageRoot = envValueObj['pageRoot'];
-                        let reqPath = pageUrl.origin + pageUrl.pathname.trim();
-
-                        let modulePath = '';
-                        let reqPathTail = reqPath.substring(pageRoot.length);
-                        let pathList = reqPathTail.split('/');
-                        for (let pathIdx = 0; pathIdx < pathList.length; pathIdx++) {
-                            if (pathList[pathIdx] === '') {
-                                continue;
-                            }
-                            if ((pathIdx + 1) >= pathList.length) {
-                                modulePath += pathList[pathIdx].split('.')[0];
-                            } else {
-                                modulePath += pathList[pathIdx] + '/';
-                            }
-                        }
-                        if (modulePath === '') {
-                            modulePath = 'index';
-                        }
-
-                        let moduleFullPath = moduleRoot + modulePath + '.js';
-                        let moduleControllerUrl = moduleFullPath + '?' + version;
-
-                        import(moduleControllerUrl)
-                        .then(fs.getControllerLoader(fs, modulePath))
-                        .catch((function(msgObj, confLang, fs, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount){
-                                return function (err) {
-                                    let failResult = fairysupportInitFail(retryCount);
-                                    if (failResult) {
-                                        fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
-                                    }
-                                }
-                            }
-                        )(msgObj, confLang, fs, envValueObj, jsRoot, version, reqLang, pageUrl, moduleRoot, retryCount))
-                        ;
+                        Object.assign(msgObj, json);
+                        fs.loadBrowserMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+                    } else if (404 === xhr.status) {
+                        fs.loadBrowserMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
                     } else {
                         let failResult = fairysupportInitFail(retryCount);
                         if (failResult) {
-                            fs.getLoadMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, ++retryCount);
+                            fs.loadDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, ++retryCount);
                         }
                     }
                 }
             }
-        )(this, version, envValueObj, msgObj, pageUrl, moduleRoot, jsRoot, reqLang, confLang, retryCount);
+        )(this, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount);
         req.send();
+
+    };
+
+    this.loadBrowserMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
+
+        if (confLang !== null && confLang !== undefined && confLang !== '') {
+            
+            let req = this.ajax(jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version, null, 'GET', 'query');
+            req.timeout = fsTimeout;
+            req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
+                    return function (e, xhr) {
+                        if (200 === xhr.status) {
+                            let json = xhr.response;
+                            Object.assign(msgObj, json);
+                            fs.loadReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+                        } else if (404 === xhr.status) {
+                            fs.loadReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+                        } else {
+                            let failResult = fairysupportInitFail(retryCount);
+                            if (failResult) {
+                                fs.loadBrowserMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, ++retryCount);
+                            }
+                        }
+                    }
+                }
+            )(this, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount);
+            req.send();
+            
+        } else {
+            this.loadReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, 0);
+        }
+        
+    };
+
+    this.loadReqMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
+
+        if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
+            
+            let req = this.ajax(jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version, null, 'GET', 'query');
+            req.timeout = fsTimeout;
+            req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
+                    return function (e, xhr) {
+                        if (200 === xhr.status) {
+                            let json = xhr.response;
+                            Object.assign(msgObj, json);
+                            let moduleSplit = modulePath.split('/');
+                            fs.loadModuleDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, jsRoot + 'msg/', moduleSplit, 0);
+                        } else if (404 === xhr.status) {
+                            let moduleSplit = modulePath.split('/');
+                            fs.loadModuleDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, jsRoot + 'msg/', moduleSplit, 0);
+                        } else {
+                            let failResult = fairysupportInitFail(retryCount);
+                            if (failResult) {
+                                fs.loadReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, ++retryCount);
+                            }
+                        }
+                    }
+                }
+            )(this, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount);
+            req.send();
+            
+        } else {
+            let moduleSplit = modulePath.split('/');
+            this.loadModuleDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, jsRoot + 'msg/', moduleSplit, 0);
+        }
+        
+    };
+
+    this.loadModuleDefaultMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, retryCount){
+        
+        let moduleSplitHead = moduleSplit.shift();
+        if (moduleSplitHead === undefined || moduleSplitHead === null || moduleSplitHead === '') {
+            
+            this.loadModuleController(version, moduleRoot, modulePath, 0);
+            
+        } else {
+            
+            let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg.js' + '?' + version, null, 'GET', 'query');
+            req.timeout = fsTimeout;
+            req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
+                    return function (e, xhr) {
+                        if (200 === xhr.status) {
+                            let json = xhr.response;
+                            Object.assign(msgObj, json);
+                            fs.loadModuleBrowserMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, 0);
+                        } else if (404 === xhr.status) {
+                            fs.loadModuleBrowserMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, 0);
+                        } else {
+                            let failResult = fairysupportInitFail(retryCount);
+                            if (failResult) {
+                                moduleSplit.unshift(moduleSplitHead);
+                                fs.loadModuleDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, ++retryCount);
+                            }
+                        }
+                    }
+                }
+            )(this, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount);
+            req.send();
+
+        }
+        
+    };
+
+    this.loadModuleBrowserMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
+        
+        if (moduleSplitHead === undefined || moduleSplitHead === null || moduleSplitHead === '') {
+            
+            this.loadModuleController(version, moduleRoot, modulePath, 0);
+            
+        } else {
+            
+            if (confLang !== null && confLang !== undefined && confLang !== '') {
+                
+                let queryLangStr = '.' + confLang;
+                let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg' + queryLangStr + '.js' + '?' + version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                Object.assign(msgObj, json);
+                                fs.loadModuleReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, 0);
+                            } else if (404 === xhr.status) {
+                                fs.loadModuleReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, 0);
+                            } else {
+                                let failResult = fairysupportInitFail(retryCount);
+                                if (failResult) {
+                                    fs.loadModuleBrowserMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, ++retryCount);
+                                }
+                            }
+                        }
+                    }
+                )(this, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount);
+                req.send();
+
+            } else {
+                this.loadModuleReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, 0);
+            }
+            
+        }
+        
+    };
+
+    this.loadModuleReqMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
+        
+        if (moduleSplitHead === undefined || moduleSplitHead === null || moduleSplitHead === '') {
+            
+            this.loadModuleController(version, moduleRoot, modulePath, 0);
+            
+        } else {
+            
+            if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
+                
+                let queryLangStr = '.' + reqLang;
+                let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg' + queryLangStr + '.js' + '?' + version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                Object.assign(msgObj, json);
+                                fs.loadModuleDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot + moduleSplitHead + '/', moduleSplit, 0);
+                            } else if (404 === xhr.status) {
+                                fs.loadModuleDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot + moduleSplitHead + '/', moduleSplit, 0);
+                            } else {
+                                let failResult = fairysupportInitFail(retryCount);
+                                if (failResult) {
+                                    fs.loadModuleReqMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, ++retryCount);
+                                }
+                            }
+                        }
+                    }
+                )(this, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount);
+                req.send();
+
+            } else {
+                this.loadModuleDefaultMsg(jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot + moduleSplitHead + '/', moduleSplit, 0);
+            }
+            
+        }
+        
+    };
+
+
+    this.loadModuleController = function (version, moduleRoot, modulePath, retryCount){
+
+        let moduleFullPath = moduleRoot + modulePath + '.js';
+        let moduleControllerUrl = moduleFullPath + '?' + version;
+
+        import(moduleControllerUrl)
+        .then(this.getControllerLoader(this, modulePath))
+        .catch((function(version, moduleRoot, modulePath, retryCount){
+                return function (err) {
+                    let failResult = fairysupportInitFail(retryCount);
+                    if (failResult) {
+                        fs.loadModuleController(version, moduleRoot, modulePath, ++retryCount);
+                    }
+                }
+            }
+        )(version, moduleRoot, modulePath, retryCount))
+        ;
 
     };
 
@@ -3501,19 +3753,9 @@ function ___fairysupport(){
     };
 
     this.msg = function (name, replaceObj){
-
-        let reqLang = this.getReqLang();
-        let confLang = this.getConfLang();
-
-        let str = null;
-        if (('__fairysupport_default' in msgObj) && (name in msgObj['__fairysupport_default'])) {
-            str = msgObj['__fairysupport_default'][name];
-        }
-        if (confLang !== null && (confLang in msgObj) && (name in msgObj[confLang])) {
-            str = msgObj[confLang][name];
-        }
-        if (reqLang !== null && (reqLang in msgObj) && (name in msgObj[reqLang])) {
-            str = msgObj[reqLang][name];
+        let str = '';
+        if (name in msgObj) {
+            str = msgObj[name];
         }
 
         for (const [key, value] of Object.entries(replaceObj)) {
