@@ -1578,6 +1578,17 @@ function ___fairysupport(){
         this.developTpl(viewDom, paramObj, localValue, retObj, errCb, cb);
 
     };
+    
+    this.getTplChildNodeList = function* (childNodesContainer){
+        for (childNodesContainer['i'] = 0; childNodesContainer['i'] < childNodesContainer['childNodes'].length; childNodesContainer['i']++) {
+            yield childNodesContainer.childNodes.item(childNodesContainer['i']);
+        }
+        
+        if (childNodesContainer['cb'] !== undefined && childNodesContainer['cb'] !== null) {
+            childNodesContainer['cb'](childNodesContainer['dom']);
+        }
+        
+    };
 
     this.developTpl = async function(dom, paramObj, localValue, retObj, errCb, cb){
         
@@ -1596,9 +1607,9 @@ function ___fairysupport(){
     
             let childList = dom.childNodes;
             let child = null;
+            let childNodesContainer = {'childNodes' : childList, 'i': 0, 'cb': cb, 'dom': dom};
             if (childList !== null && childList !== undefined) {
-                for (let i = 0; i < childList.length; i++) {
-                    child = childList.item(i);
+                for await (child of this.getTplChildNodeList(childNodesContainer)) {
     
                     if ('continueVal' in retObj && retObj.continueVal > 0) {
                         this.selfAndNextDelete(child);
@@ -1766,7 +1777,7 @@ function ___fairysupport(){
                         let firstElement = null;
                         for ($___fairysupport_param(paramObj, localValue, forStart); $___fairysupport_param(paramObj, localValue, forEnd); $___fairysupport_param(paramObj, localValue, forStep)) {
                             let newChild = child.cloneNode(true)
-                            this.developTpl(newChild, paramObj, localValue, retObj, errCb);
+                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb);
                             skipObjMap.set(newChild, newChild);
                             child.parentNode.insertBefore(newChild, child);
                             if (firstFlg) {
@@ -1823,7 +1834,7 @@ function ___fairysupport(){
                             localValue[foreachKey] = localForeachKey;
                             localValue[foreachValue] = localForeachValue;
                             let newChild = child.cloneNode(true)
-                            this.developTpl(newChild, paramObj, localValue, retObj, errCb);
+                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb);
                             skipObjMap.set(newChild, newChild);
                             child.parentNode.insertBefore(newChild, child);
                             if (firstFlg) {
@@ -1874,7 +1885,7 @@ function ___fairysupport(){
                         let firstElement = null;
                         while ($___fairysupport_param(paramObj, localValue, whileValue)) {
                             let newChild = child.cloneNode(true)
-                            this.developTpl(newChild, paramObj, localValue, retObj, errCb);
+                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb);
                             skipObjMap.set(newChild, newChild);
                             child.parentNode.insertBefore(newChild, child);
                             if (firstFlg) {
@@ -1920,18 +1931,14 @@ function ___fairysupport(){
     
                     let deleteTagResult = this.deleteTag(child, tag);
                     if (deleteTagResult) {
-                        i--;
+                        childNodesContainer['i']--;
                     }
     
                     if (child !== null && child !== undefined && !skipObjMap.has(child)) {
-                        this.developTpl(child, paramObj, localValue, retObj, errCb);
+                        await this.developTpl(child, paramObj, localValue, retObj, errCb);
                     }
-    
+                    
                 }
-            }
-            
-            if (cb !== undefined && cb !== null) {
-                cb(dom);
             }
             
         } catch(error) {
@@ -2013,7 +2020,6 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.responseType = 'text';
-                req.withCredentials = true;
                 req.onloadend = (function(fs, templatePackeage, retryCount, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
@@ -2122,7 +2128,6 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.responseType = 'text';
-                req.withCredentials = true;
                 req.onloadend = (function(fs, dom, templatePackeage, argObj, position, retryCount, timing, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
@@ -2150,28 +2155,30 @@ function ___fairysupport(){
         
     };
 
-    this.appendResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, 'append');
+    this.appendResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, 'append');
     };
-    this.beforeResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, 'before');
+    this.beforeResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, 'before');
     };
-    this.afterResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, 'after');
+    this.afterResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, 'after');
     };
 
-    this.resJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing){
+    this.resJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing){
+        return new Promise((function(fs, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing){
             return function (resolve, reject) {
                 let req = fs.ajax(reqUrl, paramObj);
                 req.timeout = fsTimeout;
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing, resolve, reject){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let json = xhr.response;
@@ -2179,7 +2186,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportTemplateFail(retryCount);
                                 if (failResult) {
-                                    fs.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                    fs.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load json for template : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2190,36 +2197,38 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing, resolve, reject);
+                )(fs, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing, resolve, reject);
                 req.send();
                 
             };
-        })(this, dom, templatePackeage, reqUrl, paramObj, position, retryCount, timing));
+        })(this, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing));
 
     };
 
-    this.appendResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj){
-        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, 'append');
+    this.appendResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, withCredentials, 'append');
     };
-    this.beforeResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj){
-        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, 'before');
+    this.beforeResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, withCredentials, 'before');
     };
-    this.afterResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj){
-        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, 'after');
+    this.afterResJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, withCredentials, 'after');
     };
 
-    this.resJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, position, retryCount, timing){
+    this.resJsonTemplateByForm = function (dom, templatePackeage, reqUrl, formObj, withCredentials, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing){
+        return new Promise((function(fs, dom, templatePackeage, reqUrl, formObj, withCredentials, position, retryCount, timing){
             return function (resolve, reject) {
                 let req = fs.ajaxByForm(reqUrl, formObj);
                 req.timeout = fsTimeout;
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing, resolve, reject){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, templatePackeage, reqUrl, formObj, withCredentials, position, retryCount, timing, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let json = xhr.response;
@@ -2227,7 +2236,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportTemplateFail(retryCount);
                                 if (failResult) {
-                                    fs.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                    fs.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load json for template : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2239,31 +2248,31 @@ function ___fairysupport(){
         
                         }
                     }
-                )(fs, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing, resolve, reject);
+                )(fs, dom, templatePackeage, reqUrl, formObj, withCredentials, position, retryCount, timing, resolve, reject);
                 req.send();
 
             };
-        })(this, dom, templatePackeage, reqUrl, formObj, position, retryCount, timing));
+        })(this, dom, templatePackeage, reqUrl, formObj, withCredentials, position, retryCount, timing));
         
     };
 
-    this.appendResHtmlTemplate = function (dom, viewUrl, paramObj, argObj){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, 'append');
+    this.appendResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, 'append');
     };
-    this.beforeResHtmlTemplate = function (dom, viewUrl, paramObj, argObj){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, 'before');
+    this.beforeResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, 'before');
     };
-    this.afterResHtmlTemplate = function (dom, viewUrl, paramObj, argObj){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, 'after');
+    this.afterResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, 'after');
     };
 
-    this.resHtmlTemplate = function (dom, viewUrl, paramObj, argObj, position, retryCount, timing){
+    this.resHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, viewUrl, paramObj, argObj, position, retryCount, timing){
+        return new Promise((function(fs, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing){
             return function (resolve, reject) {
                 let req = fs.emptyAjax(viewUrl, paramObj);
                 req.timeout = fsTimeout;
@@ -2271,8 +2280,10 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/json');
                 req.responseType = 'text';
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, viewUrl, paramObj, argObj, position, retryCount, timing, resolve, reject){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
@@ -2280,7 +2291,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportTemplateFail(retryCount);
                                 if (failResult) {
-                                    fs.resHtmlTemplate(dom, viewUrl, paramObj, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                    fs.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load template : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2291,39 +2302,41 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, viewUrl, paramObj, argObj, position, retryCount, timing, resolve, reject);
+                )(fs, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing, resolve, reject);
                 req.send();
 
             };
-        })(this, dom, viewUrl, paramObj, argObj, position, retryCount, timing));
+        })(this, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing));
         
     };
 
-    this.appendResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj){
-        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, 'append');
+    this.appendResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, withCredentials, 'append');
     };
-    this.beforeResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj){
-        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, 'before');
+    this.beforeResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, withCredentials, 'before');
     };
-    this.afterResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj){
-        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, 'after');
+    this.afterResHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, withCredentials, 'after');
     };
 
-    this.resHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, position, retryCount, timing){
+    this.resHtmlTemplateByForm = function (dom, viewUrl, formObj, argObj, withCredentials, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, viewUrl, formObj, argObj, position, retryCount, timing){
+        return new Promise((function(fs, dom, viewUrl, formObj, argObj, withCredentials, position, retryCount, timing){
             return function (resolve, reject) {
                 let req = fs.emptyAjaxByForm(viewUrl, formObj);
                 req.timeout = fsTimeout;
                 req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 req.setRequestHeader('Accept', 'text/*');
                 req.responseType = 'text';
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, viewUrl, formObj, argObj, position, retryCount, timing){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, viewUrl, formObj, argObj, withCredentials, position, retryCount, timing){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
@@ -2331,7 +2344,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportTemplateFail(retryCount);
                                 if (failResult) {
-                                    fs.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                    fs.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load template : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2342,11 +2355,11 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, viewUrl, formObj, argObj, position, retryCount, timing);
+                )(fs, dom, viewUrl, formObj, argObj, withCredentials, position, retryCount, timing);
                 req.send();
 
             };
-        })(this, dom, viewUrl, formObj, argObj, position, retryCount, timing));
+        })(this, dom, viewUrl, formObj, argObj, withCredentials, position, retryCount, timing));
         
     };
 
@@ -2398,7 +2411,6 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.responseType = 'text';
-                req.withCredentials = true;
                 req.onloadend = (function(fs, dom, componentPackeage, argObj, position, retryCount, componentValueMap, componentControllerPath, componentViewPath, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
@@ -2426,28 +2438,30 @@ function ___fairysupport(){
         
     };
 
-    this.appendResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj){
-        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, 'append');
+    this.appendResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'append');
     };
-    this.beforeResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj){
-        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, 'before');
+    this.beforeResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'before');
     };
-    this.afterResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj){
-        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, 'after');
+    this.afterResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'after');
     };
 
-    this.resJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+    this.resJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
             return function (resolve, reject) {
                 let req = fs.ajax(reqUrl, paramObj);
                 req.timeout = fsTimeout;
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let json = xhr.response;
@@ -2455,7 +2469,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load json for uniqueComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2466,36 +2480,38 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount);
+                )(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, reqUrl, paramObj, position, retryCount));
+        })(this, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount));
         
     };
 
-    this.appendResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
-        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, 'append');
+    this.appendResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, 'append');
     };
-    this.beforeResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
-        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, 'before');
+    this.beforeResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, 'before');
     };
-    this.afterResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
-        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, 'after');
+    this.afterResJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, 'after');
     };
 
-    this.resJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, position, retryCount){
+    this.resJsonUniqueComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount){
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount){
             return function (resolve, reject) {
                 let req = fs.ajaxByForm(reqUrl, formObj);
                 req.timeout = fsTimeout;
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount, resolve, reject){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let json = xhr.response;
@@ -2503,7 +2519,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load json for uniqueComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2515,31 +2531,31 @@ function ___fairysupport(){
         
                         }
                     }
-                )(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount, resolve, reject);
+                )(fs, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount, resolve, reject);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, reqUrl, formObj, position, retryCount));
+        })(this, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount));
         
     };
 
-    this.appendResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'append');
+    this.appendResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'append');
     };
-    this.beforeResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'before');
+    this.beforeResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'before');
     };
-    this.afterResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'after');
+    this.afterResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'after');
     };
 
-    this.resHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount){
+    this.resHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot){
             return function (resolve, reject) {
                 let req = fs.emptyAjax(viewUrl, paramObj);
                 req.timeout = fsTimeout;
@@ -2547,8 +2563,10 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/json');
                 req.responseType = 'text';
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
@@ -2560,7 +2578,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load template for uniqueComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2571,39 +2589,41 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot);
+                )(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot));
+        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot));
         
     };
 
-    this.appendResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
-        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'append');
+    this.appendResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, 'append');
     };
-    this.beforeResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
-        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'before');
+    this.beforeResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, 'before');
     };
-    this.afterResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
-        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'after');
+    this.afterResHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, 'after');
     };
 
-    this.resHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount){
+    this.resHtmlUniqueComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot){
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot){
             return function (resolve, reject) {
                 let req = fs.emptyAjaxByForm(viewUrl, formObj);
                 req.timeout = fsTimeout;
                 req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 req.setRequestHeader('Accept', 'text/*');
                 req.responseType = 'text';
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot, resolve, reject){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot, resolve, reject){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
@@ -2615,7 +2635,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load template for uniqueComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2626,11 +2646,11 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot, resolve, reject);
+                )(fs, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot, resolve, reject);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot));
+        })(this, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot));
         
     };
 
@@ -2871,7 +2891,6 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.responseType = 'text';
-                req.withCredentials = true;
                 req.onloadend = (function(fs, dom, componentValueMap, argObj, position, componentControllerPath, retryCount, componentValueMap, componentControllerPath, componentViewPath){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
@@ -2900,28 +2919,30 @@ function ___fairysupport(){
         
     };
 
-    this.appendResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, 'append');
+    this.appendResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'append');
     };
-    this.beforeResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, 'before');
+    this.beforeResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'before');
     };
-    this.afterResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, 'after');
+    this.afterResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'after');
     };
 
-    this.resJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+    this.resJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
             return function (resolve, reject) {
                 let req = fs.ajax(reqUrl, paramObj);
                 req.timeout = fsTimeout;
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let json = xhr.response;
@@ -2929,7 +2950,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load json for singleComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2940,36 +2961,38 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, componentPackeage, reqUrl, paramObj, position, retryCount);
+                )(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, reqUrl, paramObj, position, retryCount));
+        })(this, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount));
         
     };
 
-    this.appendResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
-        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, 'append');
+    this.appendResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, 'append');
     };
-    this.beforeResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
-        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, 'before');
+    this.beforeResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, 'before');
     };
-    this.afterResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj){
-        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, 'after');
+    this.afterResJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials){
+        return this.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, 'after');
     };
 
-    this.resJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, position, retryCount){
+    this.resJsonSingleComponentByForm = function (dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount){
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount){
             return function (resolve, reject) {
                 let req = fs.ajaxByForm(reqUrl, formObj);
                 req.timeout = fsTimeout;
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let json = xhr.response;
@@ -2977,7 +3000,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load json for singleComponent : ' + reqUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2989,31 +3012,31 @@ function ___fairysupport(){
         
                         }
                     }
-                )(fs, dom, componentPackeage, reqUrl, formObj, position, retryCount);
+                )(fs, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, reqUrl, formObj, position, retryCount));
+        })(this, dom, componentPackeage, reqUrl, formObj, withCredentials, position, retryCount));
         
     };
 
-    this.appendResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'append');
+    this.appendResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'append');
     };
-    this.beforeResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'before');
+    this.beforeResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'before');
     };
-    this.afterResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, 'after');
+    this.afterResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'after');
     };
 
-    this.resHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount){
+    this.resHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot){
             return function (resolve, reject) {
                 let req = fs.emptyAjax(viewUrl, paramObj);
                 req.timeout = fsTimeout;
@@ -3021,8 +3044,10 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/json');
                 req.responseType = 'text';
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
@@ -3034,7 +3059,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load template for singleComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -3045,31 +3070,31 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot);
+                )(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, position, retryCount, componentRoot));
+        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot));
         
     };
 
-    this.appendResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
-        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'append');
+    this.appendResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, 'append');
     };
-    this.beforeResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
-        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'before');
+    this.beforeResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, 'before');
     };
-    this.afterResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj){
-        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, 'after');
+    this.afterResHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials){
+        return this.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, 'after');
     };
 
-    this.resHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount){
+    this.resHtmlSingleComponentByForm = function (dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot){
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot){
             return function (resolve, reject) {
                 
                 let req = fs.emptyAjaxByForm(viewUrl, formObj);
@@ -3077,8 +3102,10 @@ function ___fairysupport(){
                 req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 req.setRequestHeader('Accept', 'text/*');
                 req.responseType = 'text';
-                req.withCredentials = true;
-                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot){
+                if (withCredentials) {
+                    req.withCredentials = true;
+                }
+                req.onloadend = (function(fs, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
@@ -3090,7 +3117,7 @@ function ___fairysupport(){
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
-                                    fs.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, position, ++retryCount).then(resolve).catch(reject);
+                                    fs.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load template for singleComponent : ' + viewUrl + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -3101,11 +3128,11 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot);
+                )(fs, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot);
                 req.send();
 
             };
-        })(this, dom, componentPackeage, viewUrl, formObj, argObj, position, retryCount, componentRoot));
+        })(this, dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, retryCount, componentRoot));
         
     };
 
