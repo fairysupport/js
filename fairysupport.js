@@ -1658,7 +1658,14 @@ function ___fairysupport(){
                     dataValue = dataset.template;
                     if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                         delete child.dataset.template;
-                        let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        
+                        let value = "";
+                        try {
+                            value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        } catch (templateError) {
+                            value = dataValue;
+                        }
+                        
                         let tpl = "";
                         try {
                             tpl = await this.getTemplate(value);
@@ -1671,7 +1678,13 @@ function ___fairysupport(){
                     dataValue = dataset.text;
                     if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                         delete child.dataset.text;
-                        let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        let value = "";
+                        try {
+                            value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        } catch (textError) {
+                            value = dataValue;
+                        }
+                        
                         child.innerHTML = '';
                         child.appendChild(document.createTextNode(value));
                     }
@@ -1679,7 +1692,12 @@ function ___fairysupport(){
                     dataValue = dataset.html;
                     if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
                         delete child.dataset.html;
-                        let value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        let value = "";
+                        try {
+                            value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        } catch (htmlError) {
+                            value = dataValue;
+                        }
                         child.innerHTML = value;
                     }
     
@@ -3985,8 +4003,6 @@ const $___fairysupport_param = function(v, l, tpl) {
     try {
         return eval(tpl);
     } catch (e) {
-        console.error(e);
-        console.error(tpl);
         throw e;
     }
 }
