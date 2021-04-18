@@ -40,6 +40,8 @@ function ___fairysupport(){
 
     let pageRoot = scriptObj.dataset.pageRoot;
     
+    let envTxt = "";
+    
     this.instanceMap = {};
 
     const msgObj = Object.create(null);
@@ -67,7 +69,11 @@ function ___fairysupport(){
     let fairysupportClear = class FairysupportClear {
         constructor() {
         }
-    }
+    };
+
+    this.getEnv = function () {
+        return envTxt;
+    };
 
     this.getModulePath = function (pageRoot, pageUrl) {
         
@@ -130,6 +136,7 @@ function ___fairysupport(){
 
     this.getEnvDefaultValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
 
+        envTxt = envStr;
         let req = this.ajax(jsRoot + 'env/envValue.js' + '?' + version, null, 'GET', 'query');
         req.timeout = fsTimeout;
         req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
