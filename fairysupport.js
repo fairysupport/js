@@ -47,6 +47,9 @@ function ___fairysupport(){
     const msgObj = Object.create(null);
     const envValueObj = Object.create(null);
 
+    const componentMsgObj = Object.create(null);
+    const componentEnvValueObj = Object.create(null);
+
     if (!('fairysupportInitFail' in window)) {
         window.fairysupportInitFail = function (retryCount) {
             alert('network error');
@@ -999,7 +1002,267 @@ function ___fairysupport(){
         }
     };
 
-    this.singleComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
+    this.getComponentDefaultEnvValue = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
+        
+        let componentSplitHead = null;
+        if (firstFlg) {
+            componentSplitHead = '';
+        } else {
+            componentSplitHead = componentSplit.shift();
+        }
+        
+        if (!firstFlg && (componentSplitHead === undefined || componentSplitHead === null || componentSplitHead === '')) {
+            
+            let componentSplitInit = componentValueMap['componentPath'].split('/');
+            this.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplitInit, componentRoot, true, nextFunc, 0);
+            
+        } else {
+            
+            let componentTailUrl = firstFlg ? 'envValue.js' : componentSplitHead + '/envValue.js';
+            let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
+            req.timeout = fsTimeout;
+            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentEnvValueObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
+                    return function (e, xhr) {
+                        if (200 === xhr.status) {
+                            let json = xhr.response;
+                            if (!(componentValueMap['componentPackeage'] in componentEnvValueObj)) {
+                                componentEnvValueObj[componentValueMap['componentPackeage']] = Object.create(null);
+                            }
+                            Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], json);
+                            fs.getComponentEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, 0);
+                        } else if (404 === xhr.status) {
+                            fs.getComponentEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, 0);
+                        } else {
+                            let failResult = fairysupportComponentFail(retryCount);
+                            if (failResult) {
+                                if (!firstFlg) {
+                                    componentSplit.unshift(componentSplitHead);
+                                }
+                                fs.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, firstFlg, nextFunc, ++retryCount);
+                            }
+                        }
+                    }
+                }
+            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentEnvValueObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount);
+            req.send();
+
+        }
+        
+    };
+
+    this.getComponentEnvValue = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, retryCount){
+        
+        if (!firstFlg && (componentSplitHead === undefined || componentSplitHead === null || componentSplitHead === '')) {
+            
+            let componentSplitInit = componentValueMap['componentPath'].split('/');
+            this.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplitInit, componentRoot, true, nextFunc, 0);
+            
+        } else {
+            
+            let envStr = fs.getEnv();
+            if (envStr !== null && envStr !== undefined && envStr !== '') {
+            
+                let queryEnvStr = '.' + envStr;
+                let componentTailUrl = firstFlg ? ('envValue' + queryEnvStr + '.js') : (componentSplitHead + '/envValue' + queryEnvStr + '.js');
+                let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentEnvValueObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                if (!(componentValueMap['componentPackeage'] in componentEnvValueObj)) {
+                                    componentEnvValueObj[componentValueMap['componentPackeage']] = Object.create(null);
+                                }
+                                Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], json);
+                                if (firstFlg) {
+                                    fs.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, false, nextFunc, 0);
+                                } else {
+                                    fs.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot + componentSplitHead + '/', false, nextFunc, 0);
+                                }
+                            } else if (404 === xhr.status) {
+                                if (firstFlg) {
+                                    fs.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, false, nextFunc, 0);
+                                } else {
+                                    fs.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot + componentSplitHead + '/', false, nextFunc, 0);
+                                }
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.getComponentEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, ++retryCount);
+                                }
+                            }
+                        }
+                    }
+                )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentEnvValueObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount);
+                req.send();
+                
+            } else {
+                if (firstFlg) {
+                    fs.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, false, nextFunc, 0);
+                } else {
+                    fs.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot + componentSplitHead + '/', false, nextFunc, 0);
+                }
+            }
+            
+        }
+        
+    };
+
+    this.loadComponentDefaultMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
+        
+        let componentSplitHead = null;
+        if (firstFlg) {
+            componentSplitHead = '';
+        } else {
+            componentSplitHead = componentSplit.shift();
+        }
+        
+        if (!firstFlg && (componentSplitHead === undefined || componentSplitHead === null || componentSplitHead === '')) {
+            
+            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
+            
+        } else {
+            
+            let componentTailUrl = firstFlg ? 'msg.js' : componentSplitHead + '/msg.js';
+            let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
+            req.timeout = fsTimeout;
+            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
+                    return function (e, xhr) {
+                        if (200 === xhr.status) {
+                            let json = xhr.response;
+                            if (!(componentValueMap['componentPackeage'] in componentMsgObj)) {
+                                componentMsgObj[componentValueMap['componentPackeage']] = Object.create(null);
+                            }
+                            Object.assign(componentMsgObj[componentValueMap['componentPackeage']], json);
+                            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, 0);
+                        } else if (404 === xhr.status) {
+                            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, 0);
+                        } else {
+                            let failResult = fairysupportComponentFail(retryCount);
+                            if (failResult) {
+                                if (!firstFlg) {
+                                    componentSplit.unshift(componentSplitHead);
+                                }
+                                fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, firstFlg, nextFunc, ++retryCount);
+                            }
+                        }
+                    }
+                }
+            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount);
+            req.send();
+
+        }
+        
+    };
+
+    this.loadComponentBrowserMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, retryCount){
+        
+        if (!firstFlg && (componentSplitHead === undefined || componentSplitHead === null || componentSplitHead === '')) {
+            
+            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
+            
+        } else {
+            
+            if (confLang !== null && confLang !== undefined && confLang !== '') {
+            
+                let queryLangStr = '.' + confLang;
+                let componentTailUrl = firstFlg ? ('msg' + queryLangStr + '.js') : (componentSplitHead + '/msg' + queryLangStr + '.js');
+                let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                if (!(componentValueMap['componentPackeage'] in componentMsgObj)) {
+                                    componentMsgObj[componentValueMap['componentPackeage']] = Object.create(null);
+                                }
+                                Object.assign(componentMsgObj[componentValueMap['componentPackeage']], json);
+                                fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, 0);
+                            } else if (404 === xhr.status) {
+                                fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, 0);
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.getComponentEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, ++retryCount);
+                                }
+                            }
+                        }
+                    }
+                )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount);
+                req.send();
+                
+            } else {
+                fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, 0);
+            }
+            
+        }
+        
+    };
+
+    this.loadComponentReqMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, retryCount){
+        
+        if (!firstFlg && (componentSplitHead === undefined || componentSplitHead === null || componentSplitHead === '')) {
+            
+            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr);
+            
+        } else {
+            
+            if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
+            
+                let queryLangStr = '.' + reqLang;
+                let componentTailUrl = firstFlg ? ('msg' + queryLangStr + '.js') : (componentSplitHead + '/msg' + queryLangStr + '.js');
+                let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
+                req.timeout = fsTimeout;
+                req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
+                        return function (e, xhr) {
+                            if (200 === xhr.status) {
+                                let json = xhr.response;
+                                if (!(componentValueMap['componentPackeage'] in componentMsgObj)) {
+                                    componentMsgObj[componentValueMap['componentPackeage']] = Object.create(null);
+                                }
+                                Object.assign(componentMsgObj[componentValueMap['componentPackeage']], json);
+                                if (firstFlg) {
+                                    fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, false, nextFunc, 0);
+                                } else {
+                                    fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot + componentSplitHead + '/', false, nextFunc, 0);
+                                }
+                            } else if (404 === xhr.status) {
+                                if (firstFlg) {
+                                    fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, false, nextFunc, 0);
+                                } else {
+                                    fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot + componentSplitHead + '/', false, nextFunc, 0);
+                                }
+                            } else {
+                                let failResult = fairysupportComponentFail(retryCount);
+                                if (failResult) {
+                                    fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, componentSplitHead, firstFlg, nextFunc, ++retryCount);
+                                }
+                            }
+                        }
+                    }
+                )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount);
+                req.send();
+                
+            } else {
+                if (firstFlg) {
+                    fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot, false, nextFunc, 0);
+                } else {
+                    fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentDefaultEnvRoot + componentSplitHead + '/', false, nextFunc, 0);
+                }
+            }
+            
+        }
+        
+    };
+
+    this.singleComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr){
+        
+        let componentSplit = componentValueMap['componentPath'].split('/');
+        this.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentRoot, true, this.singleComponentInsertFuncExec.bind(fs), 0);
+
+    };
+
+    this.singleComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -1016,7 +1279,7 @@ function ___fairysupport(){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount);
                     if (failResult) {
-                        fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
+                        fs.singleComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
                             errCb(err);
@@ -2440,7 +2703,7 @@ function ___fairysupport(){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
-                                fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr, 0);
+                                fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
@@ -2679,7 +2942,14 @@ function ___fairysupport(){
         
     };
 
-    this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
+    this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr){
+        
+        let componentSplit = componentValueMap['componentPath'].split('/');
+        this.getComponentDefaultEnvValue(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentRoot, true, this.uniqueComponentInsertFuncExec.bind(fs), 0);
+
+    };
+
+    this.uniqueComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -2696,7 +2966,7 @@ function ___fairysupport(){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount);
                     if (failResult) {
-                        fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
+                        fs.uniqueComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, ++retryCount);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
                             errCb(err);
@@ -2920,7 +3190,7 @@ function ___fairysupport(){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
-                                fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr, 0);
+                                fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
                             } else {
                                 let failResult = fairysupportComponentFail(retryCount);
                                 if (failResult) {
@@ -3808,6 +4078,31 @@ function ___fairysupport(){
         let str = '';
         if (name in msgObj) {
             str = msgObj[name];
+        }
+
+        for (const [key, value] of Object.entries(replaceObj)) {
+            let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
+            str = str.replace(re, value);
+            str = str.replace("\\${" + key + "}", "${" + key + "}");
+        }
+        return str;
+
+    };
+
+    this.componentEnvValue = function (componentPackeage, name){
+        if (!(componentPackeage in componentEnvValueObj)) {
+            return null;
+        }
+        return componentEnvValueObj[componentPackeage][name];
+    };
+
+    this.componentMsg = function (componentPackeage, name, replaceObj){
+        if (!(componentPackeage in componentMsgObj)) {
+            return null;
+        }
+        let str = '';
+        if (name in componentMsgObj[componentPackeage]) {
+            str = componentMsgObj[componentPackeage][name];
         }
 
         for (const [key, value] of Object.entries(replaceObj)) {
