@@ -4,7 +4,8 @@
   "description": "",
   "main": "fairysupport.min.js",
   "scripts": {
-    "build": "terser -c -m -o fairysupport.min.js -- fairysupport.js"
+    "build": "terser -c -m -o fairysupport.min.js -- fairysupport.js",
+    "build_no_bundle": "terser -c -m -o fairysupport_no_bundle.min.js -- fairysupport_no_bundle.js"
   },
   "keywords": [],
   "author": "fairysupport",
