@@ -1,16 +1,17 @@
 {
-  "name": "fairysupportjs",
+  "name": "fairysupport_js_entity",
   "version": "1.0.0",
   "description": "",
   "main": "fairysupport.min.js",
   "scripts": {
-    "build": "terser -c -m -o fairysupport.min.js -- fairysupport.js",
-    "build_no_bundle": "terser -c -m -o fairysupport_no_bundle.min.js -- fairysupport_no_bundle.js"
+    "build": "grunt uglify"
   },
   "keywords": [],
   "author": "fairysupport",
   "license": "MIT",
   "devDependencies": {
-    "terser": "^5.6.1"
+    "grunt": "^1.4.0",
+    "grunt-cli": "^1.4.2",
+    "grunt-contrib-uglify": "^5.0.1"
   }
 }
