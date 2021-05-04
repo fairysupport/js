@@ -140,7 +140,7 @@ function ___fairysupport(){
     this.getEnvDefaultValue = function (jsRoot, envStr, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
 
         envTxt = envStr;
-        let req = this.ajax(jsRoot + 'env/envValue.js' + '?' + version, null, 'GET', 'query');
+        let req = this.ajax(jsRoot + 'env/envValue.json' + '?' + version, null, 'GET', 'query');
         req.timeout = fsTimeout;
         req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                 return function (e, xhr) {
@@ -167,7 +167,7 @@ function ___fairysupport(){
         
         if (envStr !== null && envStr !== undefined && envStr !== '') {
             let queryEnvStr = '.' + envStr;
-            let req = this.ajax(jsRoot + 'env/envValue' + queryEnvStr + '.js' + '?' + version, null, 'GET', 'query');
+            let req = this.ajax(jsRoot + 'env/envValue' + queryEnvStr + '.json' + '?' + version, null, 'GET', 'query');
             req.timeout = fsTimeout;
             req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                     return function (e, xhr) {
@@ -206,7 +206,7 @@ function ___fairysupport(){
             
         } else {
             
-            let req = this.ajax(moduleEnvRoot + moduleSplitHead + '/envValue.js' + '?' + version, null, 'GET', 'query');
+            let req = this.ajax(moduleEnvRoot + moduleSplitHead + '/envValue.json' + '?' + version, null, 'GET', 'query');
             req.timeout = fsTimeout;
             req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, retryCount){
                     return function (e, xhr) {
@@ -243,7 +243,7 @@ function ___fairysupport(){
             if (envStr !== null && envStr !== undefined && envStr !== '') {
                 
                 let queryEnvStr = '.' + envStr;
-                let req = this.ajax(moduleEnvRoot + moduleSplitHead + '/envValue' + queryEnvStr + '.js' + '?' + version, null, 'GET', 'query');
+                let req = this.ajax(moduleEnvRoot + moduleSplitHead + '/envValue' + queryEnvStr + '.json' + '?' + version, null, 'GET', 'query');
                 req.timeout = fsTimeout;
                 req.onloadend = (function(fs, envValueObj, jsRoot, envStr, version, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleEnvRoot, moduleSplit, moduleSplitHead, retryCount){
                         return function (e, xhr) {
@@ -274,7 +274,7 @@ function ___fairysupport(){
 
     this.loadDefaultMsg = function (jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
 
-        let req = this.ajax(jsRoot + 'msg/msg.js' + '?' + version, null, 'GET', 'query');
+        let req = this.ajax(jsRoot + 'msg/msg.json' + '?' + version, null, 'GET', 'query');
         req.timeout = fsTimeout;
         req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                 return function (e, xhr) {
@@ -301,7 +301,7 @@ function ___fairysupport(){
 
         if (confLang !== null && confLang !== undefined && confLang !== '') {
             
-            let req = this.ajax(jsRoot + 'msg/msg.' + confLang + '.js' + '?' + version, null, 'GET', 'query');
+            let req = this.ajax(jsRoot + 'msg/msg.' + confLang + '.json' + '?' + version, null, 'GET', 'query');
             req.timeout = fsTimeout;
             req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                     return function (e, xhr) {
@@ -332,7 +332,7 @@ function ___fairysupport(){
 
         if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
             
-            let req = this.ajax(jsRoot + 'msg/msg.' + reqLang + '.js' + '?' + version, null, 'GET', 'query');
+            let req = this.ajax(jsRoot + 'msg/msg.' + reqLang + '.json' + '?' + version, null, 'GET', 'query');
             req.timeout = fsTimeout;
             req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, retryCount){
                     return function (e, xhr) {
@@ -371,7 +371,7 @@ function ___fairysupport(){
             
         } else {
             
-            let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg.js' + '?' + version, null, 'GET', 'query');
+            let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg.json' + '?' + version, null, 'GET', 'query');
             req.timeout = fsTimeout;
             req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
                     return function (e, xhr) {
@@ -408,7 +408,7 @@ function ___fairysupport(){
             if (confLang !== null && confLang !== undefined && confLang !== '') {
                 
                 let queryLangStr = '.' + confLang;
-                let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg' + queryLangStr + '.js' + '?' + version, null, 'GET', 'query');
+                let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg' + queryLangStr + '.json' + '?' + version, null, 'GET', 'query');
                 req.timeout = fsTimeout;
                 req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
                         return function (e, xhr) {
@@ -448,7 +448,7 @@ function ___fairysupport(){
             if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
                 
                 let queryLangStr = '.' + reqLang;
-                let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg' + queryLangStr + '.js' + '?' + version, null, 'GET', 'query');
+                let req = this.ajax(moduleMsgRoot + moduleSplitHead + '/msg' + queryLangStr + '.json' + '?' + version, null, 'GET', 'query');
                 req.timeout = fsTimeout;
                 req.onloadend = (function(fs, jsRoot, version, envValueObj, msgObj, reqLang, confLang, pageUrl, moduleRoot, pageRoot, modulePath, moduleMsgRoot, moduleSplit, moduleSplitHead, retryCount){
                         return function (e, xhr) {
@@ -1018,7 +1018,7 @@ function ___fairysupport(){
             
         } else {
             
-            let componentTailUrl = firstFlg ? 'envValue.js' : componentSplitHead + '/envValue.js';
+            let componentTailUrl = firstFlg ? 'envValue.json' : componentSplitHead + '/envValue.json';
             let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
             req.timeout = fsTimeout;
             req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentEnvValueObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
@@ -1063,7 +1063,7 @@ function ___fairysupport(){
             if (envStr !== null && envStr !== undefined && envStr !== '') {
             
                 let queryEnvStr = '.' + envStr;
-                let componentTailUrl = firstFlg ? ('envValue' + queryEnvStr + '.js') : (componentSplitHead + '/envValue' + queryEnvStr + '.js');
+                let componentTailUrl = firstFlg ? ('envValue' + queryEnvStr + '.json') : (componentSplitHead + '/envValue' + queryEnvStr + '.json');
                 let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
                 req.timeout = fsTimeout;
                 req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentEnvValueObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
@@ -1123,7 +1123,7 @@ function ___fairysupport(){
             
         } else {
             
-            let componentTailUrl = firstFlg ? 'msg.js' : componentSplitHead + '/msg.js';
+            let componentTailUrl = firstFlg ? 'msg.json' : componentSplitHead + '/msg.json';
             let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
             req.timeout = fsTimeout;
             req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
@@ -1166,7 +1166,7 @@ function ___fairysupport(){
             if (confLang !== null && confLang !== undefined && confLang !== '') {
             
                 let queryLangStr = '.' + confLang;
-                let componentTailUrl = firstFlg ? ('msg' + queryLangStr + '.js') : (componentSplitHead + '/msg' + queryLangStr + '.js');
+                let componentTailUrl = firstFlg ? ('msg' + queryLangStr + '.json') : (componentSplitHead + '/msg' + queryLangStr + '.json');
                 let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
                 req.timeout = fsTimeout;
                 req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
@@ -1210,7 +1210,7 @@ function ___fairysupport(){
             if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
             
                 let queryLangStr = '.' + reqLang;
-                let componentTailUrl = firstFlg ? ('msg' + queryLangStr + '.js') : (componentSplitHead + '/msg' + queryLangStr + '.js');
+                let componentTailUrl = firstFlg ? ('msg' + queryLangStr + '.json') : (componentSplitHead + '/msg' + queryLangStr + '.json');
                 let req = this.ajax(componentDefaultEnvRoot + componentTailUrl + '?' + fs.version, null, 'GET', 'query');
                 req.timeout = fsTimeout;
                 req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentSplit, componentSplitHead, componentMsgObj, componentDefaultEnvRoot, firstFlg, nextFunc, retryCount){
