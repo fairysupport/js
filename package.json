@@ -1,12 +1,14 @@
 {
-  "name": "fairysupport_js_entity",
+  "name": "fairysupport_js",
   "version": "1.0.0",
   "description": "",
-  "main": "fairysupport.min.js",
+  "bin": {
+    "fairysupport_js": "bin/fairysupport_js_build.js"
+  },
   "scripts": {
     "build": "grunt uglify"
   },
-  "keywords": [],
+  "keywords": ["JavaScript", "framework"],
   "author": "fairysupport",
   "license": "MIT",
   "devDependencies": {

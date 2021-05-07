@@ -3,7 +3,7 @@ module.exports = function(grunt){
     uglify: {
         files: { 
             cwd: '.',
-            src: ['fairysupport.js', 'fairysupport_no_bundle.js'],
+            src: ['fairysupport.js'],
             dest: '.',
             expand: true,
             ext: '.min.js'
