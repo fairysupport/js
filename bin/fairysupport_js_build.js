@@ -421,7 +421,8 @@ function bundleToolReplaceForFrame(pageContent, frameDirPath, pageFilePath) {
             console.error('Error');
             console.error('Not Found ' + framePath);
             console.error('$frame(' + useFrameObj['frameName'] +  ') in ' + pageFilePath);
-            throw new Error('Error : Not Found ' + framePath + ' $frame(' + useFrameObj['frameName'] +  ') in ' + pageFilePath);
+            let errorMessage = 'Error : Not Found ' + framePath + ' $frame(' + useFrameObj['frameName'] + ') in ' + pageFilePath;
+            throw new Error(errorMessage);
         }
     }
     return pageContent;
@@ -462,7 +463,8 @@ function getBundleToolReplaceFuncForEmbed(useEmbedObj) {
             console.error('Error');
             console.error('Not Found ' + embedPath);
             console.error('$embed(' + useEmbedObj['embedName'] +  ') in ' + useEmbedObj['pageFilePath']);
-            throw new Error('Error : Not Found ' + embedPath + ' $embed(' + useEmbedObj['embedName'] +  ') in ' + useEmbedObj['pageFilePath']);
+            let errorMessage = 'Error : Not Found ' + embedPath + ' $embed(' + useEmbedObj['embedName'] + ') in ' + useEmbedObj['pageFilePath'];
+            throw new Error(errorMessage);
         }
     };
 }
@@ -497,5 +499,150 @@ function bundlePageEmbed(distWorkPage, distWorkEmbed) {
 const distWorkEmbed = createDir(distWork, "embed");
 bundlePageEmbed(distWorkPage, distWorkEmbed);
 rmAll(distWorkEmbed)
+
+
+function insertCssPageHead(distWorkCss, distWorkPage) {
+    
+    if (fs.statSync(distWorkPage).isFile()) {
+        const curAppCssFilePath = path.join(distWorkCss, "app.css");
+        if (fs.existsSync(curAppCssFilePath) && fs.statSync(curAppCssFilePath).isFile()) {
+            let curPageContent = fs.readFileSync(distWorkPage).toString();
+            let curCssContent = fs.readFileSync(curAppCssFilePath);
+            curPageContent = curPageContent.replace('</head>', '<style type="text/css">' + "\n" + curCssContent + "\n" + '</style>' + "\n" + '</head>');
+            fs.writeFileSync(distWorkPage, curPageContent);
+        }
+        return;
+    }
+    
+    const fileList = fs.readdirSync(distWorkPage);
+    for (const fileName of fileList) {
+        const pageFilePath = path.join(distWorkPage, fileName);
+        const pageFileStat = fs.statSync(pageFilePath);
+        if (pageFileStat.isFile()) {
+            const fileNameOnly = fileName.split('.')[0];
+            const cssDirPath = createDir(distWorkCss, fileNameOnly);
+            insertCssPageHead(cssDirPath, pageFilePath);
+        } else if (pageFileStat.isDirectory()) {
+            const cssFilePath = createDir(distWorkCss, fileName);
+            insertCssPageHead(cssFilePath, pageFilePath);
+        }
+    };
+}
+
+insertCssPageHead(distWorkCss, distWorkPage);
+
+
+
+function getBundleToolReplaceFuncForEnvValue(useEnvValueObj, envValueDestObj) {
+    return function (match) {
+        let matchSplitHead = match.split('(');
+        let matchSplitTail = matchSplitHead[1].split(')');
+        useEnvValueObj['envValueName'] = matchSplitTail[0];
+        if (useEnvValueObj['envValueName'] in envValueDestObj) {
+            return envValueDestObj[useEnvValueObj['envValueName']];
+        } else {
+            console.error('Error');
+            console.error('Not Found ' + useEnvValueObj['envValueName']);
+            console.error('$envValue(' + useEnvValueObj['envValueName'] +  ') in ' + useEnvValueObj['filePath']);
+            let errorMessage = 'Error : Not Found ' + useEnvValueObj['envValueName'] + ' $envValue(' + useEnvValueObj['envValueName'] + ') in ' + useEnvValueObj['filePath'];
+            throw new Error(errorMessage);
+        }
+    };
+}
+function bundleToolReplaceForEnvValue(content, envValueDestObj, filePath) {
+    
+    let useEnvValueObj = Object.create(null);
+    useEnvValueObj['filePath'] = filePath;
+    let replaceFunc = getBundleToolReplaceFuncForEnvValue(useEnvValueObj, envValueDestObj);
+    
+    let re = new RegExp("(?<!\\\\)\\$envValue\\([^\\)]+\\)", "g");
+    let replacedContent = content.replace(re, replaceFunc);
+    replacedContent = replacedContent.replace("\\$envValue(" + useEnvValueObj['envValueName'] + ")", "$envValue(" + useEnvValueObj['envValueName'] + ")");
+    
+    return replacedContent;
+}
+function bundlePageEnvJson(envTxt, envValueDestObj, distWorkPage, distWorkPageEnv) {
+    let first = true;
+    const fileList = fs.readdirSync(distWorkPage);
+    for (const fileName of fileList) {
+        if (first) {
+            const objDefaultPath = path.join(distWorkPageEnv, "envValue.json");
+            const objEnvValuePath = path.join(distWorkPageEnv, "envValue." + envTxt + ".json");
+            
+            if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
+                Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+            }
+            if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
+                Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+            }
+        }
+        first = false;
+        
+        const pageFilePath = path.join(distWorkPage, fileName);
+        const pageFileStat = fs.statSync(pageFilePath);
+        if (pageFileStat.isDirectory()) {
+            const envFilePath = createDir(distWorkPageEnv, fileName);
+            bundlePageEnvJson(envTxt, JSON.parse(JSON.stringify(envValueDestObj)), pageFilePath, envFilePath);
+        } else if (pageFileStat.isFile()) {
+            
+            let envValueParentObj = JSON.parse(JSON.stringify(envValueDestObj));
+            
+            const fileNameOnly = fileName.split('.')[0];
+            const objEndDefaultPath = path.join(distWorkPageEnv, fileNameOnly, "envValue.json");
+            const objEndEnvValuePath = path.join(distWorkPageEnv, fileNameOnly, "envValue." + envTxt + ".json");
+            
+            if (fs.existsSync(objEndDefaultPath) && fs.statSync(objEndDefaultPath).isFile()) {
+                Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndDefaultPath)));
+            }
+            if (fs.existsSync(objEndEnvValuePath) && fs.statSync(objEndEnvValuePath).isFile()) {
+                Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndEnvValuePath)));
+            }
+            
+            let content = fs.readFileSync(pageFilePath).toString();
+            content = bundleToolReplaceForEnvValue(content, envValueParentObj, pageFilePath);
+            fs.writeFileSync(pageFilePath, content);
+            
+        }
+        
+    };
+}
+function bundleCssEnvJson(envTxt, envValueDestObj, distWorkCss, distWorkPageEnv) {
+    let first = true;
+    const fileList = fs.readdirSync(distWorkCss);
+    for (const fileName of fileList) {
+        if (first) {
+            const objDefaultPath = path.join(distWorkPageEnv, "envValue.json");
+            const objEnvValuePath = path.join(distWorkPageEnv, "envValue." + envTxt + ".json");
+            
+            if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
+                Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+            }
+            if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
+                Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+            }
+        }
+        first = false;
+        
+        const pageFilePath = path.join(distWorkCss, fileName);
+        const pageFileStat = fs.statSync(pageFilePath);
+        if (pageFileStat.isDirectory()) {
+            const envFilePath = createDir(distWorkPageEnv, fileName);
+            bundleCssEnvJson(envTxt, JSON.parse(JSON.stringify(envValueDestObj)), pageFilePath, envFilePath);
+        } else if (pageFileStat.isFile() && 'app.css' === fileName.toString()) {
+            
+            let content = fs.readFileSync(pageFilePath).toString();
+            content = bundleToolReplaceForEnvValue(content, envValueDestObj, pageFilePath);
+            fs.writeFileSync(pageFilePath, content);
+            
+        }
+        
+    };
+}
+
+const distWorkPageEnv = createDir(distWork, "env");
+let pageEnvValueDestObj = Object.create(null);
+bundleCssEnvJson(envTxt, pageEnvValueDestObj, distWorkCss, distWorkPageEnv);
+bundlePageEnvJson(envTxt, pageEnvValueDestObj, distWorkPage, distWorkPageEnv);
+rmAll(distWorkPageEnv)
 
 
