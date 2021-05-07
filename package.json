@@ -8,7 +8,10 @@
   "scripts": {
     "build": "grunt uglify"
   },
-  "keywords": ["JavaScript", "framework"],
+  "keywords": [
+    "JavaScript",
+    "framework"
+  ],
   "author": "fairysupport",
   "license": "MIT",
   "devDependencies": {
