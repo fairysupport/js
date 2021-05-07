@@ -2242,6 +2242,10 @@ function ___fairysupport(){
         })(this, dom, viewUrl, formObj, argObj, withCredentials, position, retryCount, timing));
         
     };
+    
+    this.useDomAsTemplate = function (dom, argObj){
+        return this.loadStringTemplate(dom, dom.innerHTML, argObj);
+    };
 
     this.execUniqueComponentMethod = function (controllerObj, methodList, methodName, argList){
         return this.execMethod(controllerObj, methodList, methodName, argList);

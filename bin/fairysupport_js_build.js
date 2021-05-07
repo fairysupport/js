@@ -39,6 +39,12 @@ function rmAll(dir) {
 
 const curDir = process.cwd();
 
+let envTxt = "";
+if (process.argv.length >= 3) {
+    envTxt = process.argv[2].toString().trim();
+}
+
+
 const src = path.join(curDir, "src");
 rmAll(path.join(curDir, "distWork"));
 const distWork = createDir(curDir, "distWork");
@@ -106,8 +112,7 @@ function bundleEnvJson(envTxt, envValueDestObj, distWorkModules, distWorkEnv) {
                 Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndEnvValuePath)));
             }
             
-            let controllerContent = fs.readFileSync(moduleFilePath);
-            fs.writeFileSync(moduleFilePath, controllerContent + " \n\n export const envTxt = '" + envTxt + "';" + " \n\n export const envValueObj = " + JSON.stringify(envValueParentObj) + ";\n");
+            fs.appendFileSync(moduleFilePath, " \n\n export const envTxt = '" + envTxt + "';" + " \n\n export const envValueObj = " + JSON.stringify(envValueParentObj) + ";\n");
             
         }
         
@@ -118,12 +123,6 @@ const distWorkJs = createDir(distWork, "js");
 const distWorkEnv = createDir(distWorkJs, "env");
 const distWorkModules = createDir(distWorkJs, "modules");
 
-let envTxt = "";
-const envTxtPath = path.join(distWorkEnv, "env.txt");
-if (fs.existsSync(envTxtPath) && fs.statSync(envTxtPath).isFile()) {
-    envTxt = fs.readFileSync(envTxtPath).toString().trim();
-    fs.unlinkSync(envTxtPath);
-}
 let envValueDestObj = Object.create(null);
 bundleEnvJson(envTxt, envValueDestObj, distWorkModules, distWorkEnv);
 rmAll(distWorkEnv)
@@ -237,8 +236,7 @@ function bundleComponentEnvJson(envTxt, envValueDestObj, distWorkComponents) {
                 }
                 
                 let envValueBundleObj = JSON.parse(JSON.stringify(envValueDestObj));
-                let controllerContent = fs.readFileSync(componentFilePath);
-                fs.writeFileSync(componentFilePath, controllerContent + " \n\n export const envValueObj = " + JSON.stringify(envValueBundleObj) + ";" + " \n\n export const viewStr = `" + viewContent + "`;\n");
+                fs.appendFileSync(componentFilePath, " \n\n export const envValueObj = " + JSON.stringify(envValueBundleObj) + ";" + " \n\n export const viewStr = `" + viewContent + "`;\n");
                 
             }
         }
@@ -396,14 +394,14 @@ function bundleToolReplace(content, replaceStr, funcName, argVal) {
     return content;
 }
 function getBundleToolReplaceFunc(useFrameObj) {
-    return function replacer2(match) {
+    return function (match) {
         let matchSplitHead = match.split('(');
         let matchSplitTail = matchSplitHead[1].split(')');
         useFrameObj['frameName'] = matchSplitTail[0];
         return '';
     };
 }
-function bundleToolReplaceForFrame(pageContent, frameDirPath) {
+function bundleToolReplaceForFrame(pageContent, frameDirPath, pageFilePath) {
     
     let useFrameObj = Object.create(null);
     let replaceFunc = getBundleToolReplaceFunc(useFrameObj);
@@ -419,6 +417,11 @@ function bundleToolReplaceForFrame(pageContent, frameDirPath) {
             let frameContent = fs.readFileSync(framePath);
             let replacedContent = bundleToolReplace(frameContent.toString(), pageContent, 'page', '');
             return replacedContent;
+        } else {
+            console.error('Error');
+            console.error('Not Found ' + framePath);
+            console.error('$frame(' + useFrameObj['frameName'] +  ') in ' + pageFilePath);
+            throw new Error('Error : Not Found ' + framePath + ' $frame(' + useFrameObj['frameName'] +  ') in ' + pageFilePath);
         }
     }
     return pageContent;
@@ -431,10 +434,10 @@ function bundlePageFrame(distWorkPage, distWorkFrame) {
         const pageFileStat = fs.statSync(pageFilePath);
         if (pageFileStat.isFile()) {
             let pageContent = fs.readFileSync(pageFilePath);
-            let framePageContent = bundleToolReplaceForFrame(pageContent.toString(), distWorkFrame);
+            let framePageContent = bundleToolReplaceForFrame(pageContent.toString(), distWorkFrame, pageFilePath);
             fs.writeFileSync(pageFilePath, framePageContent);
         } else if (pageFileStat.isDirectory()) {
-            bundlePageFrame(pageFilePath);
+            bundlePageFrame(pageFilePath, distWorkFrame);
         }
     };
 }
@@ -443,5 +446,56 @@ const distWorkFrame = createDir(distWork, "frame");
 bundlePageFrame(distWorkPage, distWorkFrame);
 rmAll(distWorkFrame)
 
+
+function getBundleToolReplaceFuncForEmbed(useEmbedObj) {
+    return function (match) {
+        let matchSplitHead = match.split('(');
+        let matchSplitTail = matchSplitHead[1].split(')');
+        useEmbedObj['embedName'] = matchSplitTail[0];
+        let embedPathSplit = matchSplitTail[0].split('.');
+        embedPathSplit[embedPathSplit.length - 1] = embedPathSplit[embedPathSplit.length - 1] + '.html';
+        const embedPath = path.join(useEmbedObj['embedDirPath'], ...embedPathSplit);
+        if (fs.existsSync(embedPath) && fs.statSync(embedPath).isFile()) {
+            let embedContent = fs.readFileSync(embedPath);
+            return embedContent;
+        } else {
+            console.error('Error');
+            console.error('Not Found ' + embedPath);
+            console.error('$embed(' + useEmbedObj['embedName'] +  ') in ' + useEmbedObj['pageFilePath']);
+            throw new Error('Error : Not Found ' + embedPath + ' $embed(' + useEmbedObj['embedName'] +  ') in ' + useEmbedObj['pageFilePath']);
+        }
+    };
+}
+function bundleToolReplaceForEmbed(pageContent, embedDirPath, pageFilePath) {
+    
+    let useEmbedObj = Object.create(null);
+    useEmbedObj['pageFilePath'] = pageFilePath;
+    useEmbedObj['embedDirPath'] = embedDirPath;
+    let replaceFunc = getBundleToolReplaceFuncForEmbed(useEmbedObj);
+    
+    let re = new RegExp("(?<!\\\\)\\$embed\\([^\\)]+\\)", "g");
+    let replacedContent = pageContent.replace(re, replaceFunc);
+    replacedContent = replacedContent.replace("\\$embed(" + useEmbedObj['embedName'] + ")", "$embed(" + useEmbedObj['embedName'] + ")");
+    
+    return replacedContent;
+}
+function bundlePageEmbed(distWorkPage, distWorkEmbed) {
+    const fileList = fs.readdirSync(distWorkPage);
+    for (const fileName of fileList) {
+        const pageFilePath = path.join(distWorkPage, fileName);
+        const pageFileStat = fs.statSync(pageFilePath);
+        if (pageFileStat.isFile()) {
+            let pageContent = fs.readFileSync(pageFilePath);
+            let embedPageContent = bundleToolReplaceForEmbed(pageContent.toString(), distWorkEmbed, pageFilePath);
+            fs.writeFileSync(pageFilePath, embedPageContent);
+        } else if (pageFileStat.isDirectory()) {
+            bundlePageEmbed(pageFilePath, distWorkEmbed);
+        }
+    };
+}
+
+const distWorkEmbed = createDir(distWork, "embed");
+bundlePageEmbed(distWorkPage, distWorkEmbed);
+rmAll(distWorkEmbed)
 
 
