@@ -646,3 +646,142 @@ bundlePageEnvJson(envTxt, pageEnvValueDestObj, distWorkPage, distWorkPageEnv);
 rmAll(distWorkPageEnv)
 
 
+function rmImgEncodeInfo(distWorkImg) {
+    
+    const fileList = fs.readdirSync(distWorkImg);
+    for (const fileName of fileList) {
+        const filePath = path.join(distWorkImg, fileName);
+        const fileStat = fs.statSync(filePath);
+        if (fileStat.isFile()) {
+            let fileSplit = fileName.split('.');
+            if (fileSplit[0] === 'domain' && fileSplit[fileSplit.length - 1] === 'txt') {
+                fs.unlinkSync(filePath);
+            } else if (fileSplit[0] === 'maxSize' && fileSplit[fileSplit.length - 1] === 'txt') {
+                fs.unlinkSync(filePath);
+            }
+        }
+    };
+    
+}
+function getImgEncodeInfo(envTxt, distWorkImg) {
+    
+    let domainPath = null;
+    if ('' === envTxt) {
+        domainPath = path.join(distWorkImg, "domain.txt");
+    } else {
+        domainPath = path.join(distWorkImg, "domain." + envTxt + ".txt");
+        if (!fs.existsSync(domainPath)) {
+            domainPath = path.join(distWorkImg, "domain.txt");
+        }
+    }
+    let domainStr = null;
+    if (fs.existsSync(domainPath) && fs.statSync(domainPath).isFile()) {
+        domainStr = fs.readFileSync(domainPath).toString().trim();
+    }
+    
+    let maxSizePath = null;
+    if ('' === envTxt) {
+        maxSizePath = path.join(distWorkImg, "maxSize.txt");
+    } else {
+        maxSizePath = path.join(distWorkImg, "maxSize." + envTxt + ".txt");
+        if (!fs.existsSync(maxSizePath)) {
+            maxSizePath = path.join(distWorkImg, "maxSize.txt");
+        }
+    }
+    let maxSizeStr = null;
+    if (fs.existsSync(maxSizePath) && fs.statSync(maxSizePath).isFile()) {
+        maxSizeStr = fs.readFileSync(maxSizePath).toString().trim();
+        maxSizeStr = maxSizeStr - 0;
+    }
+    
+    let imgEncodeInfo = {"domain" : domainStr, "maxSize" : maxSizeStr};
+    return imgEncodeInfo;
+    
+}
+function getReplaceImgEncodeFunc(useValueObj) {
+    return function (match) {
+        let matchSplitHead = match.split('(');
+        let matchSplitTail = matchSplitHead[1].split(')');
+        useValueObj['imgName'] = matchSplitTail[0];
+        
+        const pageFilePath = path.join(useValueObj['distWorkImg'], useValueObj['imgName']);
+        
+        if (!fs.existsSync(pageFilePath)) {
+            console.error('Error');
+            console.error('Not Found ' + pageFilePath);
+            console.error('$img(' + useValueObj['imgName'] +  ') in ' + useValueObj['contentFilePath']);
+            let errorMessage = 'Error : Not Found ' + pageFilePath + ' $img(' + useValueObj['imgName'] + ') in ' + useValueObj['contentFilePath'];
+            throw new Error(errorMessage);
+        }
+        
+        const imgNameSplit = useValueObj['imgName'].split('.');
+        let mineType = null;
+        const ext = imgNameSplit[imgNameSplit.length - 1];
+        if ('jpg' === ext || 'jpeg' === ext || 'jfif' === ext || 'pjpeg' === ext || 'pjp' === ext) {
+            mineType = 'image/jpeg';
+        } else if ('svg' === ext) {
+            mineType = 'image/svg+xml';
+        } else {
+            mineType = 'image/' + ext;
+        }
+        
+        const pageFileStat = fs.statSync(pageFilePath);
+        if (useValueObj['imgEncodeInfo']["maxSize"] !== null && pageFileStat.size <= useValueObj['imgEncodeInfo']["maxSize"]) {
+            
+            let img = fs.readFileSync(pageFilePath);
+            let imgBase64 = img.toString('base64');
+            
+            return 'data:' + mineType + ';base64,' + imgBase64;
+            
+        } else {
+            
+            return useValueObj['imgEncodeInfo']["domain"] + useValueObj['imgName'];
+            
+        }
+        
+    };
+}
+function replaceImgEncode(content, contentFilePath, imgEncodeInfo, distWorkImg) {
+    
+    let useValueObj = Object.create(null);
+    useValueObj['contentFilePath'] = contentFilePath.toString();
+    useValueObj['distWorkImg'] = distWorkImg.toString();
+    useValueObj['imgEncodeInfo'] = imgEncodeInfo;
+    let replaceFunc = getReplaceImgEncodeFunc(useValueObj);
+    
+    let re = new RegExp("(?<!\\\\)\\$img\\([^\\)]+\\)", "g");
+    let replacedContent = content.replace(re, replaceFunc);
+    replacedContent = replacedContent.replace("\\$img(" + useValueObj['imgName'] + ")", "$img(" + useValueObj['imgName'] + ")");
+    
+    return replacedContent;
+}
+function replaceImgEncodeDir(imgEncodeInfo, distWorkPage, distWorkImg) {
+    
+    const fileList = fs.readdirSync(distWorkPage);
+    for (const fileName of fileList) {
+        const pageFilePath = path.join(distWorkPage, fileName);
+        const pageFileStat = fs.statSync(pageFilePath);
+        if (pageFileStat.isFile()) {
+            let replaceContent = replaceImgEncode(fs.readFileSync(pageFilePath).toString(), pageFilePath, imgEncodeInfo, distWorkImg);
+            fs.writeFileSync(pageFilePath, replaceContent);
+        } else if (pageFileStat.isDirectory()) {
+            replaceImgEncodeDir(imgEncodeInfo, pageFilePath, distWorkImg);
+        }
+    };
+    
+}
+
+const distWorkImg = createDir(distWork, "img");
+let imgEncodeInfo = getImgEncodeInfo(envTxt, distWorkImg);
+if (imgEncodeInfo["domain"] !== null && imgEncodeInfo["maxSize"] !== null) {
+    replaceImgEncodeDir(imgEncodeInfo, distWorkPage, distWorkImg);
+    replaceImgEncodeDir(imgEncodeInfo, distWorkJs, distWorkImg);
+    replaceImgEncodeDir(imgEncodeInfo, distWorkCss, distWorkImg);
+    rmImgEncodeInfo(distWorkImg);
+}
+
+
+const fsFilePath = path.join(__dirname, 'fairysupport.js');
+fs.copyFileSync(fsFilePath, path.join(distWorkJs, 'fairysupport.js'));
+
+

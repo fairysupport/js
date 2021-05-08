@@ -2,9 +2,9 @@ module.exports = function(grunt){
   grunt.initConfig({
     uglify: {
         files: { 
-            cwd: '.',
+            cwd: 'bin',
             src: ['fairysupport.js'],
-            dest: '.',
+            dest: 'bin',
             expand: true,
             ext: '.min.js'
         }
