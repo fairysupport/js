@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
+console.log((new Date()).toISOString());
+
+
 const fs = require('fs');
 const path = require('path');
-
-console.log(__filename);
-console.log(__dirname);
 
 function createDir(parentDir, dir) {
     const newDir = path.join(parentDir, dir);
@@ -119,6 +119,9 @@ function bundleEnvJson(envTxt, envValueDestObj, distWorkModules, distWorkEnv) {
     };
 }
 
+
+console.log('start bundle module');
+
 const distWorkJs = createDir(distWork, "js");
 const distWorkEnv = createDir(distWorkJs, "env");
 const distWorkModules = createDir(distWorkJs, "modules");
@@ -126,6 +129,8 @@ const distWorkModules = createDir(distWorkJs, "modules");
 let envValueDestObj = Object.create(null);
 bundleEnvJson(envTxt, envValueDestObj, distWorkModules, distWorkEnv);
 rmAll(distWorkEnv)
+
+console.log('end bundle module');
 
 
 function bundleMsgJson(msgDestObjList, distWorkModules, distWorkMsg) {
@@ -195,9 +200,13 @@ function bundleMsgJson(msgDestObjList, distWorkModules, distWorkMsg) {
     };
 }
 
+console.log('start bundle msg');
+
 const distWorkMsg = createDir(distWorkJs, "msg");
 let msgDestObjList = Object.create(null);
 bundleMsgJson(msgDestObjList, distWorkModules, distWorkMsg);
+
+console.log('end bundle msg');
 
 
 function bundleComponentEnvJson(envTxt, envValueDestObj, distWorkComponents) {
@@ -244,9 +253,13 @@ function bundleComponentEnvJson(envTxt, envValueDestObj, distWorkComponents) {
     };
 }
 
+console.log('start bundle component');
+
 const distWorkComponents = createDir(distWorkJs, "components");
 let envComponentValueDestObj = Object.create(null);
 bundleComponentEnvJson(envTxt, envComponentValueDestObj, distWorkComponents);
+
+console.log('end bundle component');
 
 
 function bundleComponentMsgJson(msgDestObjList, distWorkComponents) {
@@ -284,8 +297,12 @@ function bundleComponentMsgJson(msgDestObjList, distWorkComponents) {
     };
 }
 
+console.log('start bundle component msg');
+
 let msgComponentDestObjList = Object.create(null);
 bundleComponentMsgJson(msgComponentDestObjList, distWorkComponents);
+
+console.log('end bundle component msg');
 
 
 function bundleCss(cssContent, distWorkCss) {
@@ -378,12 +395,16 @@ function bundlePageCss(distWorkCss, distWorkPage) {
     };
 }
 
+console.log('start bundle css');
+
 const distWorkCss = createDir(distWork, "css");
 const distWorkPage = createDir(distWork, "page");
 
 bundleCss('', distWorkCss);
 bundleModulesCss(distWorkCss, distWorkModules);
 bundlePageCss(distWorkCss, distWorkPage);
+
+console.log('end bundle css');
 
 
 
@@ -443,9 +464,13 @@ function bundlePageFrame(distWorkPage, distWorkFrame) {
     };
 }
 
+console.log('start page insert into frame');
+
 const distWorkFrame = createDir(distWork, "frame");
 bundlePageFrame(distWorkPage, distWorkFrame);
 rmAll(distWorkFrame)
+
+console.log('end page insert into frame');
 
 
 function getBundleToolReplaceFuncForEmbed(useEmbedObj) {
@@ -496,10 +521,13 @@ function bundlePageEmbed(distWorkPage, distWorkEmbed) {
     };
 }
 
+console.log('start embed insert into page');
+
 const distWorkEmbed = createDir(distWork, "embed");
 bundlePageEmbed(distWorkPage, distWorkEmbed);
 rmAll(distWorkEmbed)
 
+console.log('end embed insert into page');
 
 function insertCssPageHead(distWorkCss, distWorkPage) {
     
@@ -529,7 +557,11 @@ function insertCssPageHead(distWorkCss, distWorkPage) {
     };
 }
 
+console.log('start css insert into page');
+
 insertCssPageHead(distWorkCss, distWorkPage);
+
+console.log('end css insert into page');
 
 
 
@@ -639,11 +671,15 @@ function bundleCssEnvJson(envTxt, envValueDestObj, distWorkCss, distWorkPageEnv)
     };
 }
 
+console.log('start replace envValue in page and css');
+
 const distWorkPageEnv = createDir(distWork, "env");
 let pageEnvValueDestObj = Object.create(null);
 bundleCssEnvJson(envTxt, pageEnvValueDestObj, distWorkCss, distWorkPageEnv);
 bundlePageEnvJson(envTxt, pageEnvValueDestObj, distWorkPage, distWorkPageEnv);
 rmAll(distWorkPageEnv)
+
+console.log('end replace envValue in page and css');
 
 
 function rmImgEncodeInfo(distWorkImg) {
@@ -771,6 +807,8 @@ function replaceImgEncodeDir(imgEncodeInfo, distWorkPage, distWorkImg) {
     
 }
 
+console.log('start replace img in page and css and js');
+
 const distWorkImg = createDir(distWork, "img");
 let imgEncodeInfo = getImgEncodeInfo(envTxt, distWorkImg);
 if (imgEncodeInfo["domain"] !== null && imgEncodeInfo["maxSize"] !== null) {
@@ -780,8 +818,20 @@ if (imgEncodeInfo["domain"] !== null && imgEncodeInfo["maxSize"] !== null) {
     rmImgEncodeInfo(distWorkImg);
 }
 
+console.log('end replace img in page and css and js');
+
+
+
+console.log('start create fairysupport.js');
+
 
 const fsFilePath = path.join(__dirname, 'fairysupport.js');
 fs.copyFileSync(fsFilePath, path.join(distWorkJs, 'fairysupport.js'));
 
+console.log('end create fairysupport.js');
+
+
+console.log('complete');
+
+console.log((new Date()).toISOString());
 
