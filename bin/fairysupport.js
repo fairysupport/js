@@ -238,10 +238,12 @@ function ___fairysupport(){
             let classFullName = 'modules/' + modulePath;
             if (!fs.instanceMap[classFullName]) {
                 
-                fs.initEnvTxt(Module.envTxt);
-                fs.initEnvValueObj(Module.envValueObj);
+                fs.initEnvTxt(Module.__fairysupport__envTxt);
+                fs.initEnvValueObj(Module.__fairysupport__envValueObj);
 
-                fs.clazz.obj = new Module.default();
+                let modulePathSplit = modulePath.split('/');
+                let moduleClass = fs.getCamel(modulePathSplit[modulePathSplit.length - 1]);
+                fs.clazz.obj = new Module[moduleClass]();
                 fs.instanceMap[classFullName] = fs.clazz.obj;
                 fs.controllerMethodList = fs.getMethodList(fs.clazz.obj);
 
@@ -880,16 +882,19 @@ function ___fairysupport(){
             if (!(componentValueMap['componentPackeage'] in componentEnvValueObj)) {
                 componentEnvValueObj[componentValueMap['componentPackeage']] = Object.create(null);
             }
-            Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], Module.envValueObj);
+            Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], Module.__fairysupport__envValueObj);
             
             if (viewStr === undefined || viewStr === null) {
-                viewStr = Module.viewStr;
+                viewStr = Module.__fairysupport__viewStr;
             }
             
             let componentPath = componentValueMap['componentPath'];
             let classFullName = 'components/' + componentPath.substring(0, componentPath.length - 1);
             if (!fs.instanceMap[classFullName]) {
-                fs.componentControllerList[componentPath] = new Module.default();
+                
+                let componentPathSplit = componentPath.split('/');
+                let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 1]);
+                fs.componentControllerList[componentPath] = new Module[componentClass]();
                 fs.instanceMap[classFullName] = fs.componentControllerList[componentPath];
                 fs.componentControllerMethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
 
@@ -2549,13 +2554,15 @@ function ___fairysupport(){
             if (!(componentValueMap['componentPackeage'] in componentEnvValueObj)) {
                 componentEnvValueObj[componentValueMap['componentPackeage']] = Object.create(null);
             }
-            Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], Module.envValueObj);
+            Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], Module.__fairysupport__envValueObj);
             
             if (viewStr === undefined || viewStr === null) {
-                viewStr = Module.viewStr;
+                viewStr = Module.__fairysupport__viewStr;
             }
             
-            let uniqueComponentControllerObj = new Module.default();
+            let componentPathSplit = componentValueMap['componentPath'].split('/');
+            let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 1]);
+            let uniqueComponentControllerObj = new Module[componentClass]();
             let uniqueComponentControllerMethodList = fs.getMethodList(uniqueComponentControllerObj);
             let uniqueDataNameEventMap = {};
             
@@ -3837,7 +3844,20 @@ function ___fairysupport(){
 
     this.store = function () {
         return storeInstance;
-    }
+    };
+    
+    this.getCamelCb = function () {
+        return function (match) {
+            return match.substring(match.length - 1, match.length).toUpperCase();
+        };
+    };
+    this.getCamel = function (str){
+        let re = new RegExp("[_\\-].", "g");
+        str = str.replace(re, this.getCamelCb());
+        str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
+        return str;
+
+    };
 
     this.init();
 
