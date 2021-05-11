@@ -34,7 +34,12 @@ function rmAll(dir) {
             rmAll(fullFileNamePath);
         }
     });
-    fs.rmdirSync(dir);
+    try {
+        fs.rmdirSync(dir);
+    } catch (e) {
+        
+    }
+    
 }
 
 const curDir = process.cwd();
@@ -112,7 +117,7 @@ function bundleEnvJson(envTxt, envValueDestObj, distWorkModules, distWorkEnv) {
                 Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndEnvValuePath)));
             }
             
-            fs.appendFileSync(moduleFilePath, " \n\n export const envTxt = '" + envTxt + "';" + " \n\n export const envValueObj = " + JSON.stringify(envValueParentObj) + ";\n");
+            fs.appendFileSync(moduleFilePath, " \n\n export const __fairysupport__envTxt = '" + envTxt + "';" + " \n\n export const __fairysupport__envValueObj = " + JSON.stringify(envValueParentObj) + ";\n");
             
         }
         
@@ -245,7 +250,7 @@ function bundleComponentEnvJson(envTxt, envValueDestObj, distWorkComponents) {
                 }
                 
                 let envValueBundleObj = JSON.parse(JSON.stringify(envValueDestObj));
-                fs.appendFileSync(componentFilePath, " \n\n export const envValueObj = " + JSON.stringify(envValueBundleObj) + ";" + " \n\n export const viewStr = `" + viewContent + "`;\n");
+                fs.appendFileSync(componentFilePath, " \n\n export const __fairysupport__envValueObj = " + JSON.stringify(envValueBundleObj) + ";" + " \n\n export const __fairysupport__viewStr = `" + viewContent + "`;\n");
                 
             }
         }
@@ -825,8 +830,8 @@ console.log('end replace img in page and css and js');
 console.log('start create fairysupport.js');
 
 
-const fsFilePath = path.join(__dirname, 'fairysupport.js');
-fs.copyFileSync(fsFilePath, path.join(distWorkJs, 'fairysupport.js'));
+const fsFilePath = path.join(__dirname, 'fairysupport.min.js');
+fs.copyFileSync(fsFilePath, path.join(distWorkJs, 'fairysupport.min.js'));
 
 console.log('end create fairysupport.js');
 
