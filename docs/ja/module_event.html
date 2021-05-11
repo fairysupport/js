@@ -1,0 +1,510 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js moduleのイベント処理
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">moduleのイベント処理</div>
+     <article class="article">
+         <section>
+             <h1>単一処理</h1>
+             <p>
+                 <span><a href="start.html">前ページ</a>で解凍したディレクトリ内を見てみましょう</span><br>
+             </p>
+             <pre class="code-view">
+解凍したディレクトリ
+|-- distWork
+|-- src
+|   |-- js
+|   |  `-- modules
+|   |      `-- index.js
+|   `-- page
+|      `-- index.html
+|-- Gruntfile.js
+`-- package.json</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+}
+</pre>
+
+             <p>
+                 <span>index.htmlの内容</span><br>
+                 <span>&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;でフレームワークを読み込みます</span><br>
+                 <span>fairysupport.min.jsはdistWork/jsの中に入っています</span><br>
+                 <span><a href="start.html">前ページ</a>で実行したnpm run watch_localは、srcディレクトリからdistWorkを自動生成するコマンドを、srcディレクトリに変更があるたびに実行する命令です</span><br>
+                 <span><a href="start.html">前ページ</a>で実行したnpm run serverは、distWorkディレクトリを公開ディレクトリとしてポート8000でhttpサーバを起動する命令です</span><br>
+                 <span>どちらもpackage.jsonに定義されています。これらビルドの詳細に関しては、また別ページで説明します</span><br>
+                 <span>フレームワークを読み込むscriptタグにid=&quot;fs-js&quot;を書くのはこのフレームワークの規則です</span><br>
+                 <span>フレームワークを読み込むscriptタグにdata-page-root属性を書くのはこのフレームワークの規則です</span><br>
+                 <span>data-page-root属性値はこのフレームワークを使うwebページのrootを書きます</span><br>
+                 <span>&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;</span><br>
+                 <span>buttonタグにdata-name属性が定義されています。これについては下のindex.jsの内容で解説します</span><br>
+             </p>
+             <br>
+
+             <p>
+                 <span>index.jsの内容</span><br>
+                 <span>webページと同じ名前で拡張子jsにするのはこのフレームワークの規則です</span><br>
+                 <span>js/modules配下に作成するのはこのフレームワークの規則です</span><br>
+                 <span>例えば、http://localhost:8000/page/sub/index.htmlでこのフレームワークを使用したい場合、</span><br>
+                 <span>data-page-root=&quot;http://localhost:8000/page&quot;ならば、src/page/sub/index.htmlとsrc/js/modules/sub/index.jsを作成することになります</span><br>
+                 <span>export classにするのはこのフレームワークの規則です</span><br>
+                 <span>クラス名をjsファイル名の先頭大文字キャメルケースにするのはこのフレームワークの規則です</span><br>
+                 <span>もしファイル名がabc-def.jsならば、export class AbcDefになります</span><br>
+                 <span>もしファイル名がabc_def.jsでも、export class AbcDefになります</span><br>
+                 <span>&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;がクリックされるとsample_clickメソッドが実行されます</span><br>
+                 <span>このフレームワークは、data-name属性が設定されたタグでイベントが発生するとjsファイルのメソッドが実行されるようにつくられています</span><br>
+                 <span>メソッドの引数にはイベントオブジェクトが渡されます</span><br>
+                 <span>_の左側をdata-name属性値にするのはこのフレームワークの規則です</span><br>
+                 <span>_の右側をイベント名にするのはこのフレームワークの規則です</span><br>
+             </p>
+             <br>
+
+             <p>
+                 <span>フレームワークの動き</span><br>
+                 <span>このフレームワークは設定でなく規則に基づいて動きます</span><br>
+                 <span>現在のURLとdata-page-root属性値から対応するjsファイルをmodulesディレクトリからimportします</span><br>
+                 <span>modulesディレクトリはfairysupport.min.jsと同階層に存在しなければなりません</span><br>
+                 <span>fairysupport.min.jsはnpm run watch_localによってdistWork/js直下に自動的に生成されます</span><br>
+                 <span>src/js/modulesディレクトリはnpm run watch_localによってdistWork/jsに移されます</span><br>
+                 <span>したがって、開発者はmodulesディレクトリをsrc/js直下に作成しなければなりません</span><br>
+                 <span>このフレームワークはmodulesディレクトリ配下のwebページに対応するjsをimportすると、webページ内のdata-name属性値を持つタグとjsクラスのメソッドを結びつけます</span><br>
+                 <span>[data-name属性値_イベント名]という名前のメソッドを用意しておけば、このフレームワークが自動的にwebページ内のdata-name属性値を持つタグと結びつけます</span><br>
+             </p>
+             <br>
+
+             <h1>複数処理</h1>
+             
+             <p>
+                 <span>index.jsにメソッドを増やして、data-nameにカンマ区切りで追記してみましょう</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample,second&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>second_clickメソッドを増やしました</span><br>
+                 <span>data-name属性に,secondを追記しました</span><br>
+                 <span>npm run watch_local、npm run serverを起動して動作確認してみましょう</span><br>
+                 <span>Hello fairysupportとsecondのalertが出力されるはずです</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span>sample_clickの戻り値をfalseにしてみる</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+        return false;
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+
+             <p>
+                 <span>data-name属性にカンマ区切りで複数メソッドを結びつけた場合</span><br>
+                 <span>前に実行されたメソッドがfalseを返した場合、後のメソッドが実行されなくなります</span><br>
+             </p>
+             <br>
+             
+             <h1>前処理、後処理</h1>
+             <p>
+                 <span>sample_click、second_clickと2つメソッドを定義しましたが、共通の前処理と後処理を定義できます</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeEvent(event) {
+        console.log("beforeEvent");
+        console.log(event);
+    }
+    
+    afterEvent(event, result) {
+        console.log("afterEvent");
+        console.log(event);
+        console.log(result);
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             <p>
+                 <span>beforeEventを作成しました。引数はイベントオブジェクトが渡されます</span><br>
+                 <span>beforeEventはイベントの共通前処理となります</span><br>
+                 <span>beforeEventというメソッド名にするのはこのフレームワークの規則です</span><br>
+                 <span>afterEventを作成しました。第一引数はイベントオブジェクト、第二引数はsample_clickやsecond_clickの戻り値です</span><br>
+                 <span>afterEventはイベントの共通後処理となります</span><br>
+                 <span>afterEventというメソッド名にするのはこのフレームワークの規則です</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span>index.jsは普通のJavaScriptなので、共通処理を親クラスに定義しておくこともできます</span><br>
+             </p>
+             <span class="code-title">src/js/base/parentController.js</span>
+             <br>
+             <pre class="code-view">
+export class ParentController {
+
+    constructor() {
+    }
+
+    beforeEvent(event) {
+        console.log("beforeEvent");
+        console.log(event);
+    }
+    
+    afterEvent(event, result) {
+        console.log("afterEvent");
+        console.log(event);
+        console.log(result);
+    }
+
+}
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+import {ParentController} from "../base/parentController.js";
+
+export class Index extends ParentController {
+
+    constructor() {
+        super();
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             
+             <h1>結びつけられる時の前処理、後処理</h1>
+             <p>
+                 <span>data-name属性を持つタグとこのクラスのメソッドが結びつけられるときの前処理と後処理を定義できます</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeName(data) {
+        console.log("beforeName");
+        console.log(data);
+    }
+    afterName(data) {
+        console.log("afterName");
+        console.log(data);
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             <p>
+                 <span>beforeNameを作成しました。引数はname:data-name属性値、event:イベント名、value:data-name属性を持つタグのDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>beforeNameは結びつけられる時の前処理となります</span><br>
+                 <span>beforeNameというメソッド名にするのはこのフレームワークの規則です</span><br>
+                 <span>afterNameを作成しました。引数はname:data-name属性値、event:イベント名、value:data-name属性を持つタグのDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>afterNameは結びつけられる時の後処理となります</span><br>
+                 <span>afterNameというメソッド名にするのはこのフレームワークの規則です</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>結びつけが解除される時の前処理、後処理</h1>
+             <p>
+                 <span>data-name属性を持つタグとこのクラスのメソッドの結びつけが解除される時の前処理と後処理を定義できます</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button id=&quot;sample&quot; data-name=&quot;sample,second&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;remove&quot;&gt;remove&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeRemoveName(data) {
+        console.log("beforeRemoveName");
+        console.log(data);
+    }
+    afterRemoveName(data) {
+        console.log("afterRemoveName");
+        console.log(data);
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+    remove_click(event) {
+        delete document.getElementById('sample').dataset.name;
+    }
+
+}
+</pre>
+             <p>
+                 <span>beforeRemoveNameを作成しました。引数はname:data-name属性値、event:イベント名、value:結びつけが解除されるDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>beforeRemoveNameは結びつけが解除される時の前処理となります</span><br>
+                 <span>beforeRemoveNameというメソッド名にするのはこのフレームワークの規則です</span><br>
+                 <span>afterRemoveNameを作成しました。引数はname:data-name属性値、event:イベント名、value:data-name結びつけが解除されるDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>afterRemoveNameは結びつけが解除される時の後処理となります</span><br>
+                 <span>afterRemoveNameというメソッド名にするのはこのフレームワークの規則です</span><br>
+                 <span>removeボタンをクリックすると結びつけが解除され、sampleボタンをクリックしても反応が無くなります</span><br>
+             </p>
+             <br>
+             <p>
+             </p>
+             
+             <h1>エラー処理</h1>
+             <p>
+                 <span>イベント処理で例外がthrowされたときに実行されるメソッドを定義できます</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button id=&quot;sample&quot; data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        throw "error";
+    }
+
+    errorHandle(event, exception) {
+        console.log("errorHandle");
+        console.log(event);
+        console.log(exception);
+    }
+    
+}
+</pre>
+             <p>
+                 <span>errorHandleを作成しました。引数はイベントオブジェクト、throwされた例外が渡されます</span><br>
+                 <span>errorHandleというメソッド名にするのはこのフレームワークの規則です</span><br>
+             </p>
+             <br>
+             
+             <h1>終了処理</h1>
+             <p>
+                 <span>イベント処理が成功しても例外がthrowされても実行されるメソッドを定義できます</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample2&quot;&gt;sample2&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        return "sample";
+    }
+
+    sample2_click(event) {
+        throw "sample2";
+    }
+
+    errorHandle(event, exception) {
+        console.log("errorHandle");
+        console.log(event);
+        console.log(exception);
+    }
+    
+    finalHandle(event, returnValue) {
+        console.log("finalHandle");
+        console.log(event);
+        console.log(returnValue);
+    }
+}
+</pre>
+             <p>
+                 <span>finalHandleを作成しました。引数はイベントオブジェクト、最終的にイベントが処理されたメソッドの戻り値が渡されます</span><br>
+                 <span>finalHandleというメソッド名にするのはこのフレームワークの規則です</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="module_prop.html">次ページ</a>moduleのプロパティと画面上の要素の紐づけ</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

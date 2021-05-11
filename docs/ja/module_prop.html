@@ -1,0 +1,428 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js moduleのプロパティと画面上の要素の紐づけ
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">moduleのプロパティと画面上の要素の紐づけ</div>
+     <article class="article">
+         <section>
+             <h1>単一紐づけ</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+    }
+
+}
+</pre>
+             
+             <p>
+                 <span>index.htmlにdata-obj属性を付けたタグを作成しました</span><br>
+                 <span>実行して、画面上のテキストフィールドに値を入力すると、data-obj=&quot;obj&quot;が付いたタグに入力した値が表示されます</span><br>
+                 <span>このフレームワークはwebページ内のdata-obj属性値を持つタグとwebページに対応するjsクラスのプロパティを自動的に結びつけます</span><br>
+                 <span>index.js内のthis.objはdata-obj=&quot;obj&quot;が付いたタグのオブジェクトとなります</span><br>
+                 <span>data-obj属性はdata-name属性とは違い、カンマ区切りで複数指定できません</span><br>
+             </p>
+             <br>
+             
+             <h1>複数紐づけ</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+        /*
+        これでも全く同じです
+        this.list.forEach((item) => {
+            item.textContent = event.target.value;
+        });
+        */
+        
+    }
+
+}
+</pre>
+             
+             <p>
+                 <span>index.htmlにdata-list属性を付けたタグを作成しました</span><br>
+                 <span>実行して、画面上のテキストフィールドに値を入力すると、data-list=&quot;obj&quot;が付いたタグに入力した値が表示されます</span><br>
+                 <span>このフレームワークはwebページ内のdata-list属性値を持つタグとwebページに対応するjsクラスのプロパティを自動的に結びつけます</span><br>
+                 <span>data-objとの違いは、data-objは同一値が画面上に1つであるのに対して、data-listは画面上に同一値が複数存在可能であることです</span><br>
+                 <span>js内でdata-listの付いたオブジェクトを取得するには、valuesメソッドを実行しforで1つづつ処理していくことになります</span><br>
+                 <span>または、forEachメソッドを使い、引数に関数を渡して処理していくこともできます</span><br>
+                 <span>data-list属性はdata-name属性とは違い、カンマ区切りで複数指定できません</span><br>
+             </p>
+             <br>
+             
+             
+             
+             <h1>結びつけられる時の前処理、後処理</h1>
+             <p>
+                 <span>data-obj、data-list属性を持つタグとこのクラスのプロパティが結びつけられるときの前処理と後処理を定義できます</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeBindObj(data) {
+        console.log("beforeBindObj");
+        console.log(data);
+    }
+    afterBindObj(data) {
+        console.log("afterBindObj");
+        console.log(data);
+    }
+
+    beforeBindList(data) {
+        console.log("beforeBindList");
+        console.log(data);
+    }
+    afterBindList(data) {
+        console.log("afterBindList");
+        console.log(data);
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+                 <span>beforeBindObjを作成しました。引数はname:data-obj属性値、value:data-obj属性を持つタグのDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>beforeBindObjは結びつけられる時の前処理となります</span><br>
+                 <span>afterBindObjを作成しました。引数はname:data-obj属性値、value:data-obj属性を持つタグのDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>afterBindObjは結びつけられる時の後処理となります</span><br>
+                 
+                 <span>beforeBindListを作成しました。引数はname:data-list属性値、value:data-list属性を持つタグのDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>beforeBindListは結びつけられる時の前処理となります</span><br>
+                 <span>afterBindListを作成しました。引数はname:data-list属性値、value:data-list属性を持つタグのDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>afterBindListは結びつけられる時の後処理となります</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>結びつけが解除される時の前処理、後処理</h1>
+             <p>
+                 <span>data-obj、data-list属性を持つタグとこのクラスのプロパティの結びつけが解除される時の前処理と後処理を定義できます</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;remove&quot;&gt;remove&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeRemoveObj(data) {
+        console.log("beforeRemoveObj");
+        console.log(data);
+    }
+    afterRemoveObj(data) {
+        console.log("afterRemoveObj");
+        console.log(data);
+    }
+
+    beforeRemoveList(data) {
+        console.log("beforeRemoveList");
+        console.log(data);
+    }
+    afterRemoveList(data) {
+        console.log("afterRemoveList");
+        console.log(data);
+    }
+
+    sample_input(event) {
+        if (this.obj) {
+            this.obj.textContent = event.target.value;
+        }
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+    remove_click(event) {
+        if (this.obj) {
+            delete this.obj.dataset.obj;
+        }
+        for (const item of this.list.values()) {
+            delete item.dataset.list;
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+                 <span>beforeRemoveObjを作成しました。引数はname:data-obj属性値、value:結びつけが解除されるDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>beforeRemoveObjは結びつけが解除される時の前処理となります</span><br>
+                 <span>afterRemoveObjを作成しました。引数はname:data-obj属性値、value:結びつけが解除されるDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>afterRemoveObjは結びつけが解除される時の後処理となります</span><br>
+                 
+                 <span>beforeRemoveListを作成しました。引数はname:data-list属性値、value:結びつけが解除されるDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>beforeRemoveListは結びつけが解除される時の前処理となります</span><br>
+                 <span>afterRemoveListを作成しました。引数はname:data-list属性値、value:結びつけが解除されるDOMを要素に持つオブジェクトが渡されます</span><br>
+                 <span>afterRemoveListは結びつけが解除される時の後処理となります</span><br>
+             </p>
+             <br>
+             <p>
+             </p>
+             
+             <h1>削除処理</h1>
+             <p>
+                 <span>data-obj、data-list属性を持つタグを画面上から削除できます</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;remove&quot;&gt;remove&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        if (this.obj) {
+            this.obj.textContent = event.target.value;
+        }
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+    remove_click(event) {
+        if (this.obj) {
+            this.obj = null;
+        }
+        for (const item of this.list.values()) {
+            this.list.remove(item);
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+                 <span>remove_click内にて</span><br>
+                 <span>data-objと紐づいたプロパティにnullを格納しています</span><br>
+                 <span>data-listと紐づいたプロパティのremoveメソッドを実行しています</span><br>
+                 <span>removeボタンをクリックするとdata-obj、data-list属性を持つタグが画面から除去されます</span><br>
+             </p>
+             <br>
+             
+             <h1>置換処理</h1>
+             <p>
+                 <span>data-obj、data-list属性を持つタグを入れ替えできます</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;replace&quot;&gt;replace&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        if (this.obj) {
+            this.obj.textContent = event.target.value;
+        }
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+    replace_click(event) {
+        let div = document.createElement('DIV');
+        div.dataset.obj = 'obj';
+        div.textContent = 'replace';
+        this.obj = div;
+        
+        for (const item of this.list.values()) {
+            div = document.createElement('DIV');
+            div.dataset.list = 'list';
+            div.textContent = 'replace';
+            this.list.replace(item, div);
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+                 <span>replaceボタンを設置しました</span><br>
+                 <span>data-objと紐づいたプロパティにcreateElementで新たに作成したオブジェクトを格納しています</span><br>
+                 <span>data-listと紐づいたプロパティのreplaceメソッドを実行し、createElementで新たに作成したオブジェクトと入れ替えています</span><br>
+             </p>
+             <br>
+             
+             <h1>data-list属性を持つタグと紐づいたプロパティのメソッド</h1>
+             <p>
+                 <span>data-list属性を持つタグと紐づいたプロパティはvalues、forEach、remove、replaceの他にsizeメソッドとhasメソッドを持ちます</span><br>
+                 <span>sizeメソッドは引数無しで、このプロパティに紐づいているタグの数を返します</span><br>
+                 <span>hasメソッドは引数が1つ必要で、DOMを渡してください。渡されたDOMがこのプロパティに含まれている場合、trueを返します</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="env_value.html">次ページ</a>定数</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
