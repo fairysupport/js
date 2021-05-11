@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-console.log((new Date()).toISOString());
+console.log((new Date()).toLocaleString());
 
 
 const fs = require('fs');
@@ -838,5 +838,5 @@ console.log('end create fairysupport.js');
 
 console.log('complete');
 
-console.log((new Date()).toISOString());
+console.log((new Date()).toLocaleString());
 
