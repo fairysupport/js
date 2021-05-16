@@ -3863,10 +3863,15 @@ function ___fairysupport(){
 
 }
 const $___fairysupport_param = function(v, l, tpl) {
+    let returnVal = null;
     try {
-        return eval(tpl);
+        returnVal = eval(tpl);
     } catch (e) {
-        throw e;
+        throw new Error(tpl + "\n" + e.toString());
     }
+    if (returnVal === undefined) {
+        throw new Error("Error :" + tpl + " is undefined");
+    }
+    return returnVal;
 }
 const $f = new ___fairysupport();
