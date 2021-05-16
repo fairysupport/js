@@ -1,0 +1,190 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js 定数
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">定数</div>
+     <article class="article">
+         <section>
+             <h1>システム全体</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert($f.envValue("key1") + ' ' + $f.envValue("key2") + ' ' + $f.envValue("key3"));
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/js/env/envValue.json、src/js/env/envValue.local.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;value1&quot;
+    ,&quot;key2&quot; : &quot;value2&quot;
+}
+</pre>
+             <span class="code-title">envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key2&quot; : &quot;value2_local&quot;
+    ,&quot;key3&quot; : &quot;value3_local&quot;
+}
+</pre>
+             
+             <p>
+                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
+                 <span>value1&nbsp;value2_local&nbsp;value3_localとalertが出力されます</span><br>
+                 <span>index.js内で実行している$f.envValue("key1")は</span><br>
+                 <span>$fがこのフレームワークのオブジェクトです</span><br>
+                 <span>envValueメソッドはsrc/js/env配下のjsonの値を返すメソッドです</span><br>
+                 <span>定数を定義したい場合は、envValue.jsonに定義し、envValueメソッドで取得します</span><br>
+                 <span>envValue.jsonはjsonなのでキー、値はダブルクォートで囲います。シングルクォートではありません</span><br>
+                 <span>envValue.jsonはsrc/js/env配下に作成します。これはフレームワークの規則です</span><br>
+                 <span>また、envValue.jsonだけでなく、envValue.{環境}.jsonを用意できます</span><br>
+                 <span>環境はpackage.jsonのscriptsでfairysupport_jsの引数として定義します</span><br>
+                 <span>package.jsonのscriptsのwatch_localを見てみましょう</span><br>
+                 <span>&quot;watch_local&quot;: &quot;watch \&quot;npm run build_local\&quot; ./src&quot;となっており、build_localを実行しているのがわかります</span><br>
+                 <span>&quot;build_local&quot;: &quot;fairysupport_js local&quot;ここで環境を引数で渡しています。ここではlocalが渡されています</span><br>
+                 <span>したがって、envValue.jsonだけでなく、envValue.local.jsonが使われます</span><br>
+                 <span>envValue.json、envValue.local.json両方に同じキーがある場合、envValue.local.jsonが優先されます</span><br>
+                 <span>環境は$f.getEnv()で取得できます</span><br>
+             </p>
+             <br>
+             
+             <h1>ページ固有</h1>
+
+             <p>
+                 <span>src/page/sub/index.html、src/js/modules/sub/index.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/sub/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">src/js/modules/sub/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert($f.envValue(&quot;key1&quot;) + ' ' + $f.envValue(&quot;sub_key&quot;) + ' ' + $f.envValue(&quot;sub_index_key&quot;));
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/js/env/sub/envValue.json、src/js/env/sub/envValue.local.json、src/js/env/sub/index/envValue.json、src/js/env/sub/index/envValue.local.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/env/sub/envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sub_key&quot; : &quot;sub_value&quot;
+}
+</pre>
+             <span class="code-title">src/js/env/sub/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sub_key&quot; : &quot;sub_value_local&quot;
+}
+</pre>
+             <span class="code-title">src/js/env/sub/index/envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sub_index_key&quot; : &quot;sub_index_value&quot;
+}
+</pre>
+             <span class="code-title">src/js/env/sub/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sub_index_key&quot; : &quot;sub_index_value_local&quot;
+}
+</pre>
+             
+             
+             <p>
+                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
+                 <span>value1&nbsp;sub_value_local&nbsp;sub_index_value_localとalertが出力されます</span><br>
+                 <span>src/js/env/sub配下に作成したenvValue.jsonは、webページに対応するjsファイルがsrc/js/modules/sub配下または、src/js/modules/sub.jsである場合にのみ使用できます</span><br>
+                 <span>src/js/env/sub/index配下に作成したenvValue.jsonは、webページに対応するjsファイルがsrc/js/modules/sub/index配下または、src/js/modules/sub/index.jsである場合にのみ使用できます</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="msg.html">次ページ</a>メッセージ</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

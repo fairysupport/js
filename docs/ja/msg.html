@@ -1,0 +1,206 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js メッセージ
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">メッセージ</div>
+     <article class="article">
+         <section>
+             <h1>システム全体</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind2&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        this.bind1.textContent = $f.msg('key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind2.textContent = $f.msg('key2', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/js/msg/msg.json、src/js/msg/msg.ja.json、src/js/msg/msg.ja-JP.json、src/js/msg/msg.en.json、src/js/msg/msg.en-US.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">msg.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.ja.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.ja-JP.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.en-US.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             
+             <p>
+                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
+                 <span>sampleボタンの上にsrc/js/msg配下に作成したjsonファイル内の値が出力されます</span><br>
+                 <span>index.js内で実行している$f.msg('key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});は</span><br>
+                 <span>$fがこのフレームワークのオブジェクトです</span><br>
+                 <span>msgメソッドはsrc/js/msg配下に作成したjsonファイル内の値を返すメソッドです</span><br>
+                 <span>msgメソッドの第2引数はjson内の${}で囲われた箇所を置換する値です。置換したくない場合は\を付けてください</span><br>
+                 <span>メッセージを定義したい場合は、msg.jsonに定義し、msgメソッドで取得します</span><br>
+                 <span>msg.jsonはjsonなのでキー、値はダブルクォートで囲います。シングルクォートではありません</span><br>
+                 <span>msg.jsonはsrc/js/msg配下に作成します。これはフレームワークの規則です</span><br>
+                 <span>また、msg.jsonだけでなく、msg.{使用する言語}.jsonを用意できます</span><br>
+                 <span>使用する言語はクエリパラメーターlangの値、navigator.languageの値の優先順で適用されます</span><br>
+                 <span>したがって、URLに?lang=enを付けてアクセスするとmsg.en.jsonに定義した値が出力されます</span><br>
+                 <span>msg.{使用する言語}.jsonが存在しない場合、msg.jsonが適用されます</span><br>
+                 <span>したがって、msg.ja.json、msg.ja-JP.json、msg.en.json、msg.en-US.jsonを削除してアクセスするとmsg.jsonに定義した値が出力されます</span><br>
+             </p>
+             <br>
+             
+             <h1>ページ固有</h1>
+
+             <p>
+                 <span>src/page/sub/index.html、src/js/modules/sub/index.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/sub/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind2&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind3&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind4&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">src/js/modules/sub/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        this.bind1.textContent = $f.msg('key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind2.textContent = $f.msg('key2', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind3.textContent = $f.msg('key_sub', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind4.textContent = $f.msg('key_sub_index', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/js/msg/sub/msg.en.json、src/js/msg/sub/index/msg.en.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/msg/sub/msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key_sub&quot; : &quot;key_sub => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">src/js/msg/sub/index/msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key_sub_index&quot; : &quot;key_sub_index => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             
+             <p>
+                 <span>sub/index.htmlに?lang=enを付けてアクセスしてみましょう</span><br>
+                 <span>sampleボタンをクリックすると、sampleボタンの上に定義したメッセージが出力されます</span><br>
+                 <span>src/js/msg/sub配下に作成したmsg.jsonは、webページに対応するjsファイルがsrc/js/modules/sub配下または、src/js/modules/sub.jsである場合にのみ使用できます</span><br>
+                 <span>src/js/msg/sub/index配下に作成したmsg.jsonは、webページに対応するjsファイルがsrc/js/modules/sub/index配下または、src/js/modules/sub/index.jsである場合にのみ使用できます</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="tpl.html">次ページ</a>テンプレート</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

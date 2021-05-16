@@ -1,0 +1,319 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js テンプレート
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">テンプレート</div>
+     <article class="article">
+         <section>
+             <h1>String</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadStringTemplate(this.obj, this.template(), {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+    
+    success() {
+        alert(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+    template() {
+        return `
+            &lt;div&gt;--data-text--&lt;/div&gt;
+            &lt;div data-text='v.key1'&gt;&lt;/div&gt;
+            &lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+            
+            &lt;div&gt;--data-html--&lt;/div&gt;
+            &lt;div data-html='v.key1'&gt;&lt;/div&gt;
+            
+            &lt;div&gt;--data-js--&lt;/div&gt;
+            &lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+            &lt;div data-text='l.var'&gt;&lt;/div&gt;
+            
+            &lt;div&gt;--data-attr--&lt;/div&gt;
+            &lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+            &lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+            &lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+            
+            &lt;div&gt;--data-prop--&lt;/div&gt;
+            &lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+            &lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+            &lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+            
+            &lt;div&gt;--data-if--&lt;/div&gt;
+            &lt;div data-if='v.key2.val1 === 1'&gt;
+                v.key2.val1 === 1
+            &lt;/div&gt;
+            &lt;div data-elseif='v.key2.val1 === 2'&gt;
+                v.key2.val1 === 2
+            &lt;/div&gt;
+            &lt;div data-else=''&gt;
+                else
+            &lt;/div&gt;
+            
+            &lt;div&gt;--data-for--&lt;/div&gt;
+            &lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+                &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;div data-text='l.i'&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;div&gt;--data-foreach--&lt;/div&gt;
+            &lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+                &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+                &lt;span&gt;:&lt;/span&gt;
+                &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+            &lt;/div&gt;
+            
+            &lt;div&gt;--data-while--&lt;/div&gt;
+            &lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+            &lt;div data-while='l.whileCount &lt; 8'&gt;
+                &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+                &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+                &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+                &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;input data-name='sample2' type='text'&gt;
+            &lt;div data-obj='obj2'&gt;&lt;/div&gt;
+        `;
+    }
+
+}
+</pre>
+             
+             <p>
+                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
+                 <span>index.jsのtemplateメソッドの戻り値に、$f.loadStringTemplateの第三引数の値が埋め込まれて出力されます</span><br>
+                 <span>loadStringTemplateメソッドは、第二引数に渡された文字列に、第三引数に渡された値を埋め込んで、第一引数のボディ部を置換するメソッドです</span><br>
+                 <span>戻り値はPromiseです。テンプレートがwebページに埋め込まれ、新たに埋め込まれたテンプレートがjsと結びつけできたらresolveされます</span><br>
+                 <span>loadStringTemplateメソッドの第二引数をつくっているindex.jsのtemplateメソッドを見てみましょう</span><br>
+                 <span>ただのテンプレートリテラルを返しています</span><br>
+                 <span>data-ではじまる属性をタグにつけることで、loadStringTemplateに渡された第三引数をいろいろな形で埋め込むことができます</span><br>
+                 <span>loadStringTemplateメソッドの第二引数に渡す文字列では、loadStringTemplateメソッドの第三引数をvという変数名で使うことができます。これはこのフレームワークの規則です</span><br>
+                 <span>したがって、&lt;div data-text='v.key1'&gt;&lt;/div&gt;は、loadStringTemplateメソッドの第三引数のkey1要素をこのタグのボディ部にHTMLエスケープして出力することになります</span><br>
+                 <span>data-tag='hidden'はこのタグのボディ部だけを出力して、タグは出力しません</span><br>
+                 <span>data-htmlは与えられた値をhtmlエスケープせずに出力します</span><br>
+                 <span>data-jsは与えられた値をJavaScriptとして解釈します</span><br>
+                 <span>テンプレート内ではlというローカル変数を使用できます。lはオブジェクトです。これはこのフレームワークの規則です</span><br>
+                 <span>data-attrは与えられた値をsetAttributeを使って属性の値を設定します</span><br>
+                 <span>data-propは与えられた値を=演算子を使ってDOMに設定します。ネストされたオブジェクトを指定可能です</span><br>
+                 <span>data-ifは与えられた値がtrueの場合、ボディ部を出力します</span><br>
+                 <span>data-elseifは前のdata-ifの値がfalseの場合、実行され、与えられた値がtrueの場合、ボディ部を出力します</span><br>
+                 <span>data-elseは前のdata-if、data-elseifの値がfalseの場合、ボディ部を出力します</span><br>
+                 <span>data-for-start、data-for-end、data-for-stepはセットで使います。data-for-startが最初に評価され、data-for-endがtrueの間は繰り返しボディ部が出力されます。ボディ部が出力されるたびにdata-for-stepが評価されます</span><br>
+                 <span>data-continueはループの先頭に戻ります。設定する値は何個上のループに戻るかを指定します。二重ループの最上位ループ先頭に戻る場合は2を指定します</span><br>
+                 <span>data-breakはループのから抜けます。設定する値は何個上のループに戻るかを指定します。二重ループの最上位ループ先頭に戻る場合は2を指定します</span><br>
+                 <span>data-foreach、data-foreach-key、data-foreach-valueはセットで使います。data-foreachに指定された配列やオブジェクトを繰り返し処理します。data-foreach-keyに指定した文字列がローカル変数lのキーとなり、そこにdata-foreachに指定された配列やオブジェクトのキーが格納されます。data-foreach-valueに指定した文字列がローカル変数lのキーとなり、そこにdata-foreachに指定された配列やオブジェクトの要素値が格納されます。</span><br>
+                 <span>data-whileは指定された式がtrueの間、ボディ部を繰り返し出力します</span><br>
+                 <span>data-name、data-obj、data-listなど、jsに結びつく属性があれば、フレームワークによって自動的に結びつけられます</span><br>
+                 <span>loadStringTemplateではなく、appendLoadStringTemplateにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>loadStringTemplateではなく、beforeLoadStringTemplateにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>loadStringTemplateではなく、afterLoadStringTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             <h1>テンプレートを別ファイルにする</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadTemplate(this.obj, 'tpl', {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+    
+    success() {
+        alert(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <p>
+                 <span>src/js/templates/tpl.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">tpl.html</span>
+             <br>
+             <pre class="code-view">
+
+&lt;div&gt;--data-text--&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-html--&lt;/div&gt;
+&lt;div data-html='v.key1'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-js--&lt;/div&gt;
+&lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+&lt;div data-text='l.var'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-attr--&lt;/div&gt;
+&lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+&lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+&lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+
+&lt;div&gt;--data-prop--&lt;/div&gt;
+&lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+&lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+&lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+
+&lt;div&gt;--data-if--&lt;/div&gt;
+&lt;div data-if='v.key2.val1 === 1'&gt;
+    v.key2.val1 === 1
+&lt;/div&gt;
+&lt;div data-elseif='v.key2.val1 === 2'&gt;
+    v.key2.val1 === 2
+&lt;/div&gt;
+&lt;div data-else=''&gt;
+    else
+&lt;/div&gt;
+
+&lt;div&gt;--data-for--&lt;/div&gt;
+&lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+    &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;div data-text='l.i'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-foreach--&lt;/div&gt;
+&lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+    &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+    &lt;span&gt;:&lt;/span&gt;
+    &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-while--&lt;/div&gt;
+&lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+&lt;div data-while='l.whileCount &lt; 8'&gt;
+    &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;input data-name='sample2' type='text'&gt;
+&lt;div data-obj='obj2'&gt;&lt;/div&gt;
+
+</pre>
+             <p>
+                 <span>loadStringTemplateではテンプレートを直接文字列で渡しましたが、loadTemplateを使うとテンプレートを別ファイルにできます</span><br>
+                 <span>テンプレートはsrc/js/templates配下に拡張子htmlで作成します。これは、このフレームワークの規則です</span><br>
+                 <span>loadTemplateの第二引数にsrc/js/templates配下のファイル名を与えます</span><br>
+                 <span>src/js/templates配下にサブディレクトリを作成することもできます。その場合、loadTemplateの第二引数にはピリオド区切りで文字列を渡します</span><br>
+                 <span>例えば、src/js/templates/sub/tpl.htmlを作成した場合、loadTemplateの第二引数には'sub.tpl'を渡します</span><br>
+                 <span>loadTemplateではなく、appendLoadTemplateにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>loadTemplateではなく、beforeLoadTemplateにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>loadTemplateではなく、afterLoadTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             
+             
+             
+             
+             <p>
+                 <span><a href="component.html">次ページ</a>コンポーネント</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
