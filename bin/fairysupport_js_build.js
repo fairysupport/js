@@ -510,8 +510,10 @@ try {
         
         let re = new RegExp("(?<!\\\\)\\$embed\\([^\\)]+\\)", "g");
         let replacedContent = pageContent.replace(re, replaceFunc);
-        replacedContent = replacedContent.replace("\\$embed(" + useEmbedObj['embedName'] + ")", "$embed(" + useEmbedObj['embedName'] + ")");
-        
+        if ('embedName' in useEmbedObj) {
+            replacedContent = bundleToolReplaceForEmbed(replacedContent.toString(), embedDirPath, pageFilePath);
+            replacedContent = replacedContent.replace("\\$embed(" + useEmbedObj['embedName'] + ")", "$embed(" + useEmbedObj['embedName'] + ")");
+        }
         return replacedContent;
     }
     function bundlePageEmbed(distWorkPage, distWorkEmbed) {
@@ -597,8 +599,9 @@ try {
         
         let re = new RegExp("(?<!\\\\)\\$envValue\\([^\\)]+\\)", "g");
         let replacedContent = content.replace(re, replaceFunc);
-        replacedContent = replacedContent.replace("\\$envValue(" + useEnvValueObj['envValueName'] + ")", "$envValue(" + useEnvValueObj['envValueName'] + ")");
-        
+        if ('envValueName' in useEnvValueObj) {
+            replacedContent = replacedContent.replace("\\$envValue(" + useEnvValueObj['envValueName'] + ")", "$envValue(" + useEnvValueObj['envValueName'] + ")");
+        }
         return replacedContent;
     }
     function bundlePageEnvJson(envTxt, envValueDestObj, distWorkPage, distWorkPageEnv) {
@@ -795,8 +798,9 @@ try {
         
         let re = new RegExp("(?<!\\\\)\\$img\\([^\\)]+\\)", "g");
         let replacedContent = content.replace(re, replaceFunc);
-        replacedContent = replacedContent.replace("\\$img(" + useValueObj['imgName'] + ")", "$img(" + useValueObj['imgName'] + ")");
-        
+        if ('imgName' in useValueObj) {
+            replacedContent = replacedContent.replace("\\$img(" + useValueObj['imgName'] + ")", "$img(" + useValueObj['imgName'] + ")");
+        }
         return replacedContent;
     }
     function replaceImgEncodeDir(imgEncodeInfo, distWorkPage, distWorkImg) {
