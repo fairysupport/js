@@ -297,8 +297,497 @@ export class Index {
              <br>
              
              
+             <h1>テンプレートに渡す変数をサーバーから受け取る。その1</h1>
+
+             <p>
+                 <span>これまでテンプレート内でvという変数名で使うことができる値をjsonで与えていましたが、これをサーバーから受信したjsonにすることができます</span><br>
+                 <span>src/js/env/env.txt、src/js/env/envValue.local.jsonを作成し、index.jsを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">src/js/env/env.txt</span>
+             <br>
+             <pre class="code-view">local</pre>
+
+             
+             <span class="code-title">src/js/env/envValue.local.json</span>
+             <br>
+             <pre class="code-view">{
+    "apiRoot" : "http://localhost:8080"
+}</pre>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resJsonTemplate(this.obj, 'tpl', $f.envValue('apiRoot') + '/tpl.php', {'sample_key': 'sample_value'})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+    
+    success() {
+        alert(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <p>
+                 <span>tpl.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
+                 <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
+                 <span>ここでは例をしてCORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+             </p>
+             <span class="code-title">tpl.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $jsonRequest['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>例としてPHPでjsonを返すサーバープログラムを示しました。これがドキュメントルート直下に設置されているとします</span><br>
+                 <span>loadTemplateではなく、resJsonTemplateを使います</span><br>
+                 <span>第二引数にsrc/js/templates配下のファイル名を与えます</span><br>
+                 <span>第三引数にjsonを返すURLを与えます</span><br>
+                 <span>第四引数にjsonを返すURLに送信するリクエストパラメーターを与えます</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第五引数にtrueを与えます</span><br>
+                 <span>resJsonTemplateは第三引数で与えられたURLに第四引数に与えられたデータをPOST送信します。そのレスポンスのJSONをテンプレートに渡します</span><br>
+                 <span>resJsonTemplateではなく、appendResJsonTemplateにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resJsonTemplateではなく、beforeResJsonTemplateにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resJsonTemplateではなく、afterResJsonTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
              
              
+             
+             <h1>テンプレートに渡す変数をサーバーから受け取る。その2</h1>
+
+             <p>
+                 <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
+                 <span>index.js、index.html、tpl.phpを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resJsonTemplateByForm(this.obj, 'tpl', $f.envValue('apiRoot') + '/tpl.php', this.sampleForm)
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+    
+    success() {
+        alert(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">tpl.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $_REQUEST['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>index.htmlにformタグを追加し、data-obj=&quot;sampleForm&quot;を付けました</span><br>
+                 <span>index.jsではresJsonTemplateではなく、resJsonTemplateByFormを使います</span><br>
+                 <span>第四引数にjsonを返すURLに送信するformオブジェクトを与えます</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第五引数にtrueを与えます</span><br>
+                 <span>resJsonTemplateByFormは第三引数で与えられたURLに第四引数に与えられたformをPOST送信します。そのレスポンスのJSONをテンプレートに渡します</span><br>
+                 <span>resJsonTemplateByFormではなく、appendResJsonTemplateByFormにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resJsonTemplateByFormではなく、beforeResJsonTemplateByFormにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resJsonTemplateByFormではなく、afterResJsonTemplateByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>テンプレートをサーバーから受け取る。その1</h1>
+
+             <p>
+                 <span>テンプレートを外部のサーバーから取得します</span><br>
+                 <span>index.js、index.htmlを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resHtmlTemplate(this.obj, 
+                           $f.envValue('apiRoot') + '/tpl2.php', 
+                           {'sample_key': 'sample_value'}, 
+                           {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+    
+    success() {
+        alert(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>tpl2.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
+             </p>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo htmlspecialchars($jsonRequest['sample_key'], ENT_QUOTES)?&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-text--&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-html--&lt;/div&gt;
+&lt;div data-html='v.key1'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-js--&lt;/div&gt;
+&lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+&lt;div data-text='l.var'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-attr--&lt;/div&gt;
+&lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+&lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+&lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+
+&lt;div&gt;--data-prop--&lt;/div&gt;
+&lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+&lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+&lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+
+&lt;div&gt;--data-if--&lt;/div&gt;
+&lt;div data-if='v.key2.val1 === 1'&gt;
+    v.key2.val1 === 1
+&lt;/div&gt;
+&lt;div data-elseif='v.key2.val1 === 2'&gt;
+    v.key2.val1 === 2
+&lt;/div&gt;
+&lt;div data-else=''&gt;
+    else
+&lt;/div&gt;
+
+&lt;div&gt;--data-for--&lt;/div&gt;
+&lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+    &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;div data-text='l.i'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-foreach--&lt;/div&gt;
+&lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+    &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+    &lt;span&gt;:&lt;/span&gt;
+    &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-while--&lt;/div&gt;
+&lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+&lt;div data-while='l.whileCount &lt; 8'&gt;
+    &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;input data-name='sample2' type='text'&gt;
+&lt;div data-obj='obj2'&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>resHtmlTemplateを使います</span><br>
+                 <span>第二引数にテンプレートを返すURLを与えます</span><br>
+                 <span>第三引数にテンプレートを返すURLに送信するリクエストパラメーターを与えます</span><br>
+                 <span>第四引数にテンプレート内でvという変数名で使うオブジェクトを渡します</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第五引数にtrueを与えます</span><br>
+                 <span>resHtmlTemplateは第二引数で与えられたURLに第三引数に与えられたデータをPOST送信します。そのレスポンスをテンプレートにします</span><br>
+                 <span>resHtmlTemplateではなく、appendResHtmlTemplateにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resHtmlTemplateではなく、beforeResHtmlTemplateにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resHtmlTemplateではなく、afterResHtmlTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             <h1>テンプレートをサーバーから受け取る。その2</h1>
+
+             <p>
+                 <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
+                 <span>index.js、index.html、tpl2.phpを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        
+        $f.resHtmlTemplateByForm(this.obj, 
+                                 $f.envValue('apiRoot') + '/tpl2.php', 
+                                 this.sampleForm, 
+                                 {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+    
+    success() {
+        alert(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo $_REQUEST['sample_key']?&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-text--&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-html--&lt;/div&gt;
+&lt;div data-html='v.key1'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-js--&lt;/div&gt;
+&lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+&lt;div data-text='l.var'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-attr--&lt;/div&gt;
+&lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+&lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+&lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+
+&lt;div&gt;--data-prop--&lt;/div&gt;
+&lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+&lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+&lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+
+&lt;div&gt;--data-if--&lt;/div&gt;
+&lt;div data-if='v.key2.val1 === 1'&gt;
+    v.key2.val1 === 1
+&lt;/div&gt;
+&lt;div data-elseif='v.key2.val1 === 2'&gt;
+    v.key2.val1 === 2
+&lt;/div&gt;
+&lt;div data-else=''&gt;
+    else
+&lt;/div&gt;
+
+&lt;div&gt;--data-for--&lt;/div&gt;
+&lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+    &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;div data-text='l.i'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-foreach--&lt;/div&gt;
+&lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+    &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+    &lt;span&gt;:&lt;/span&gt;
+    &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-while--&lt;/div&gt;
+&lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+&lt;div data-while='l.whileCount &lt; 8'&gt;
+    &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;input data-name='sample2' type='text'&gt;
+&lt;div data-obj='obj2'&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>index.htmlにformタグを追加し、data-obj=&quot;sampleForm&quot;を付けました</span><br>
+                 <span>index.jsではresHtmlTemplateではなく、resHtmlTemplateByFormを使います</span><br>
+                 <span>第三引数にテンプレートを返すURLに送信するformオブジェクトを与えます</span><br>
+                 <span>第四引数にテンプレート内でvという変数名で使うオブジェクトを渡します</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第五引数にtrueを与えます</span><br>
+                 <span>resHtmlTemplateByFormは第二引数で与えられたURLに第三引数に与えられたformをPOST送信します。そのレスポンスをテンプレートとします</span><br>
+                 <span>resHtmlTemplateByFormではなく、appendResHtmlTemplateByFormにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resHtmlTemplateByFormではなく、beforeResHtmlTemplateByFormにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resHtmlTemplateByFormではなく、afterResHtmlTemplateByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
              
              <p>
                  <span><a href="component.html">次ページ</a>コンポーネント</span>
