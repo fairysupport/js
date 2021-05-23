@@ -1,0 +1,147 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js シングルコンポーネントのプロパティと画面上の要素の紐づけ
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">シングルコンポーネントのプロパティと画面上の要素の紐づけ</div>
+     <article class="article">
+         <section>
+             
+             <h1>単一紐づけ</h1>
+
+             <p>
+                 <span>src/js/components/sample/controller.js、src/js/components/sample/view.htmlを変更しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+    }
+
+}
+</pre>
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>view.htmlにdata-sample-obj属性を付けたタグを作成しました</span><br>
+                 <span>実行して、画面上のテキストフィールドに値を入力すると、data-sample-obj=&quot;obj&quot;が付いたタグに入力した値が表示されます</span><br>
+                 <span>このフレームワークはview.html内のdata-コンポーネント名-obj属性値を持つタグとcontroller.jsクラスのプロパティを自動的に結びつけます</span><br>
+                 <span>controller.js内のthis.objはdata-コンポーネント名-obj=&quot;obj&quot;が付いたタグのオブジェクトとなります</span><br>
+                 <span>data-コンポーネント名-obj属性はdata-コンポーネント名-name属性とは違い、カンマ区切りで複数指定できません</span><br>
+             </p>
+             <br>
+             
+             <h1>複数紐づけ</h1>
+
+             <p>
+                 <span>src/js/components/sample/controller.js、src/js/components/sample/view.htmlを変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+        /*
+        これでも全く同じです
+        this.list.forEach((item) => {
+            item.textContent = event.target.value;
+        });
+        */
+        
+    }
+
+}
+</pre>
+
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-list=&quot;list&quot;&gt;&lt;/div&gt;
+&lt;div data-sample-list=&quot;list&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+
+             
+             <p>
+                 <span>view.htmlにdata-sample-list属性を付けたタグを作成しました</span><br>
+                 <span>実行して、画面上のテキストフィールドに値を入力すると、data-sample-list=&quot;list&quot;が付いたタグに入力した値が表示されます</span><br>
+                 <span>このフレームワークはwebページ内のdata-コンポーネント名-list属性値を持つタグとcontroller.jsクラスのプロパティを自動的に結びつけます</span><br>
+                 <span>data-コンポーネント名-objとの違いは、data-コンポーネント名-objは同一値が画面上に1つであるのに対して、data-コンポーネント名-listは画面上に同一値が複数存在可能であることです</span><br>
+                 <span>js内でdata-コンポーネント名-listの付いたオブジェクトを取得するには、valuesメソッドを実行しforで1つづつ処理していくことになります</span><br>
+                 <span>または、forEachメソッドを使い、引数に関数を渡して処理していくこともできます</span><br>
+                 <span>data-コンポーネント名-list属性はdata-コンポーネント名-name属性とは違い、カンマ区切りで複数指定できません</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>結びつけられる時の前処理、後処理</h1>
+             <p>
+                 <span>moduleと同じでbeforeBindObj、afterBindObj、beforeBindList、afterBindListメソッドで結びつけられる時の前処理、後処理を定義できます</span>
+             </p>
+             
+             <h1>結びつけが解除される時の前処理、後処理</h1>
+             <p>
+                 <span>moduleと同じでbeforeRemoveObj、afterRemoveObj、beforeRemoveList、afterRemoveListメソッドで結びつけが解除される時の前処理、後処理を定義できます</span><br>
+             </p>
+             
+             <h1>削除処理</h1>
+             <p>
+                 <span>moduleと全く同じです。<a href="module_prop.html">module</a>を参照してください</span><br>
+             </p>
+             
+             <h1>置換処理</h1>
+             <p>
+                 <span>moduleと全く同じです。<a href="module_prop.html">module</a>を参照してください</span><br>
+             </p>
+             
+             <br>
+             
+             <p>
+                 <span><a href="single_component_init.html">次ページ</a>シングルコンポーネントの初期処理</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

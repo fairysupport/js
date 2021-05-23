@@ -1,0 +1,166 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js シングルコンポーネントのイベント処理
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">シングルコンポーネントのイベント処理</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>このフレームワークにおいてコンポーネントとはテンプレートとJavaScriptがセットになったものです</span><br>
+             </p>
+             
+             <h1>イベント処理</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadSingleComponent(this.obj, 'sample', {'key1': 'val1'})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <p>
+                 <span>src/js/components/sample/controller.js、src/js/components/sample/view.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert(&quot;Hello component&quot;);
+    }
+
+}
+</pre>
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;button data-sample-name=&quot;sample&quot;&gt;click&lt;/button&gt;
+</pre>
+             <p>
+                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
+                 <span>src/js/components/sample/view.htmlに、$f.loadSingleComponentの第三引数の値が埋め込まれて出力されます</span><br>
+                 <span>loadSingleComponentの第二引数にはsrc/js/components配下のディレクトリ名を与えます</span><br>
+                 <span>src/js/components配下のディレクトリ名のことをこれ以降コンポーネント名と呼びます</span><br>
+                 <span>コンポーネントはsrc/js/components配下にcontroller.js、view.htmlの2ファイルをセットで作成します。これは、このフレームワークの規則です</span><br>
+                 <span>loadSingleComponentメソッドは、src/js/components/コンポーネント名/view.htmlを読み込み、src/js/components/コンポーネント名/controller.jsをimportします</span><br>
+                 <span>そして、view.html内のdata-コンポーネント名-name属性値を持つタグとcontroller.jsクラスのメソッドを結びつけます</span><br>
+                 <span>controller.jsに[data-コンポーネント名-name属性値_イベント名]という名前のメソッドを用意しておけば、このフレームワークが自動的にview.html内のdata-コンポーネント名-name属性値を持つタグと結びつけます</span><br>
+                 <span>さらに、view.htmlに、第三引数に渡された値を埋め込んで、第一引数のボディ部を置換します</span><br>
+                 <span>loadSingleComponentの戻り値はPromiseです。view.htmlがwebページに埋め込まれ、controller.jsと結びつけできたらresolveされます</span><br>
+                 <span>view.htmlは<a href="tpl.html">テンプレート</a>として処理されます</span><br>
+                 <span>テンプレート内ではloadSingleComponentメソッドの第三引数をvという変数名で使うことができます</span><br>
+                 <span>controller.jsのクラス名をディレクトリ名の先頭大文字キャメルケースにするのはこのフレームワークの規則です</span><br>
+                 <span>loadSingleComponentではなく、appendLoadSingleComponentにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>loadSingleComponentではなく、beforeLoadSingleComponentにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>loadSingleComponentではなく、afterLoadSingleComponentにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+                 <span>src/js/components配下にサブディレクトリを作成することもできます。その場合、loadSingleComponentの第二引数にはピリオド区切りで文字列を渡します。data-コンポーネント名-name属性はハイフンつなぎにします。</span><br>
+                 <span>例えば、src/js/components/sub/sample/controller.js、view.htmlを作成した場合、loadSingleComponentの第二引数には'sub.sample'を渡します。data-コンポーネント名-name属性はdata-sub-sample-nameとなります。controller.jsのクラス名はSampleとなります</span><br>
+                 <span>コンポーネント名がキャメルケースの場合、loadSingleComponentの第二引数にはキャメルケースのまま文字列を渡します。data-コンポーネント名-name属性はハイフンつなぎにします</span><br>
+                 <span>例えば、src/js/components/sampleCamel/controller.js、view.htmlを作成した場合、loadSingleComponentの第二引数には'sampleCamel'を渡します。data-コンポーネント名-name属性はdata-sample-camel-nameとなります。controller.jsのクラス名はSampleCamelとなります</span><br>
+             </p>
+             <br>
+             
+             <h1>複数処理</h1>
+             
+             <p>
+                 <span>moduleと同じでカンマ区切りで複数メソッドを結びつけることができます</span><br>
+             </p>
+             
+             <h1>前処理、後処理</h1>
+             <p>
+                 <span>moduleと同じでbeforeEvent、afterEventメソッドでイベントの共通前処理、後処理を定義できます</span><br>
+                 <span>前に実行されたメソッドがfalseを返した場合、後のメソッドが実行されなくなります</span><br>
+             </p>
+             
+             <h1>結びつけられる時の前処理、後処理</h1>
+             <p>
+                 <span>moduleと同じでbeforeName、afterNameメソッドでdata-コンポーネント名-name属性を持つタグとこのクラスのメソッドが結びつけられるときの前処理、後処理を定義できます</span><br>
+             </p>
+             
+             <h1>結びつけが解除される時の前処理、後処理</h1>
+             <p>
+                 <span>moduleと同じでbeforeRemoveName、afterRemoveNameメソッドでdata-コンポーネント名-name属性を持つタグとこのクラスのメソッドの結びつけが解除される時の前処理、後処理を定義できます</span><br>
+             </p>
+             
+             <h1>エラー処理</h1>
+             <p>
+                 <span>moduleにerrorHandleメソッドが定義されていると、処理で例外がthrowされたときはmoduleのerrorHandleメソッドが実行されます</span><br>
+             </p>
+             
+             <h1>終了処理</h1>
+             <p>
+                 <span>moduleにfinalHandleメソッドが定義されていると、コンポーネントの処理が成功しても例外がthrowされてもmoduleのfinalHandleメソッドが実行されます</span><br>
+             </p>
+             <br>
+             <p>
+                 <span><a href="single_component_prop.html">次ページ</a>シングルコンポーネントのプロパティと画面上の要素の紐づけ</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

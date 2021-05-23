@@ -1,0 +1,70 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js シングルコンポーネントの初期処理
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">シングルコンポーネントの初期処理</div>
+     <article class="article">
+         <section>
+             <h1>初期処理</h1>
+
+             <p>
+                 <span>src/js/components/sample/controller.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    init(data) {
+        console.log(&quot;init&quot;);
+        console.log(data);
+    }
+
+    sample_input(event) {
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+}
+</pre>
+             
+             <p>
+                 <span>constructorではまだ、view.htmlとcontroller.jsは結びつけられていません</span><br>
+                 <span>view.htmlとcontroller.jsが結びつけられると、フレームワークはinitメソッドを呼び出します。initメソッドの引数はview.html内でvという変数名で使うことができるオブジェクトです</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="unique_component.html">次ページ</a>ユニークコンポーネント</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

@@ -296,6 +296,12 @@ export class Index {
              </p>
              <br>
              
+             <h1>テンプレートのネスト</h1>
+             
+             <p>
+                 <span>data-template属性を設定するとテンプレートからテンプレートを呼び出せます</span><br>
+                 <span>data-template属性値はloadTemplateの第二引数と同じです</span><br>
+             </p>
              
              <h1>テンプレートに渡す変数をサーバーから受け取る。その1</h1>
 
@@ -789,8 +795,74 @@ header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
              </p>
              <br>
              
+             
+             <h1>画面に表示されているDOMをテンプレートとして使う</h1>
+
              <p>
-                 <span><a href="component.html">次ページ</a>コンポーネント</span>
+                 <span>index.js、index.htmlを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    init() {
+        $f.useDomAsTemplate(this.obj, {'key': {'val1': 2}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        this.obj.style.display = &quot;block&quot;;
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot; style=&quot;display:none&quot;&gt;
+        &lt;div data-if='v.key.val1 === 1'&gt;
+            v.key.val1 === 1
+        &lt;/div&gt;
+        &lt;div data-elseif='v.key.val1 === 2'&gt;
+            v.key.val1 === 2
+        &lt;/div&gt;
+        &lt;div data-else=''&gt;
+            else
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>index.jsではuseDomAsTemplateを使います</span><br>
+                 <span>第一引数に与えたDOM配下をテンプレートとして扱います</span><br>
+                 <span>第二引数にテンプレート内でvという変数名で使うオブジェクトを渡します</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="single_component_event.html">次ページ</a>シングルコンポーネントのイベント処理</span>
                  <br>
                  <br>
                  <span><a href="index.html">目次</a></span>

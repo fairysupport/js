@@ -1,0 +1,49 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js シングルコンポーネントとユニークコンポーネントの違い
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">シングルコンポーネントとユニークコンポーネントの違い</div>
+     <article class="article">
+         <section>
+             
+             <p>
+                 <span>シングルコンポーネントはloadSingleComponentを複数回実行したとしても、システム内にcontroller.jsのインスタンスは1つになります</span><br>
+                 <span>シングルコンポーネントのcontroller.jsのインスタンスは最初にnewされたものが使いまわされます</span><br>
+                 <span>view.htmlにdata-コンポーネント名-objを使っている場合、loadSingleComponentを複数回実行すると、controller.jsに紐づくのは最後に読み込まれたview.html内のdata-コンポーネント名-objになります</span><br>
+                 <span>シングルコンポーネントは読み込みまれた後、画面上のDOMにdata-コンポーネント名-name、data-コンポーネント名-obj、data-コンポーネント名-list属性が現れると、自動的にcontroller.jsと結びつけます</span><br>
+                 <span>シングルコンポーネントは$f.getComponentController('コンポーネント名')でインスタンスをどこからでも取得できます。引数はloadSingleComponentの第二引数と同じものです</span><br>
+                 <br>
+                 <span>ユニークコンポーネントはloadUniqueComponentを複数回実行するたびに新しいインスタンスが作成されます</span><br>
+                 <span>ユニークコンポーネントは読み込みまれた後、画面上のDOMにdata-コンポーネント名-name、data-コンポーネント名-obj、data-コンポーネント名-list属性が現れても、controller.jsと結びつけません</span><br>
+                 <span>ユニークコンポーネントは$f.getComponentController('コンポーネント名')でインスタンスを取得できません</span><br>
+                 
+             </p>
+             <br>
+             <p>
+                 <span><a href="component_env_value.html">次ページ</a>コンポーネントの定数</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
