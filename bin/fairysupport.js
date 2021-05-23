@@ -25,6 +25,7 @@ function ___fairysupport(){
     this.componentDomInitFuncMap = new Map();
     this.componentDomInitCntMap = new Map();
     this.componentDomInitTotalMap = new Map();
+    this.componentDomComponentInitMarkMap = new Map();
     this.componentPackageList = {};
     this.eventMap = new Map();
     this.eventNameDataNameMap = new Map();
@@ -32,6 +33,7 @@ function ___fairysupport(){
     this.bindDomInitFuncMap = new Map();
     this.bindDomInitCntMap = new Map();
     this.bindDomInitTotalMap = new Map();
+    this.bindDomComponentInitMarkMap = new Map();
 
     let metaMap = new Map();
 
@@ -266,8 +268,23 @@ function ___fairysupport(){
 
             fs.binder(fs);
             let moduleControllerInitFunc = fs.getControllerMethod(fs, 'init', null);
-            moduleControllerInitFunc();
 
+            let moduleInitMark = ('init' in fs.controllerMethodList ? true : false);
+            let initFuncRet = null;
+            try {
+                initFuncRet = moduleControllerInitFunc();
+            } catch(exception) {
+                if (moduleInitMark && fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                    fs.clazz.obj.errorHandle(null, exception);
+                } else {
+                    throw exception;
+                }
+            } finally {
+                if (moduleInitMark && fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
+                    fs.clazz.obj.finalHandle(null, initFuncRet);
+                }
+            }
+            
         };
     };
 
@@ -351,19 +368,22 @@ function ___fairysupport(){
                             fs.componentDomInitFuncMap.delete(record.addedNodes.item(i));
                             fs.componentDomInitCntMap.set(initFunc, fs.componentDomInitCntMap.get(initFunc) + 1);
                             if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
+                                let componentInitMark = fs.componentDomComponentInitMarkMap.get(initFunc);
+                                
                                 fs.componentDomInitCntMap.delete(initFunc);
                                 fs.componentDomInitTotalMap.delete(initFunc);
+                                fs.componentDomComponentInitMarkMap.delete(initFunc);
                                 let initFuncRet = null;
                                 try {
                                     initFuncRet = initFunc();
                                 } catch(exception) {
-                                    if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                                    if (componentInitMark && fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
                                         fs.clazz.obj.errorHandle(null, exception);
                                     } else {
                                         throw exception;
                                     }
                                 } finally {
-                                    if (fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
+                                    if (componentInitMark && fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
                                         fs.clazz.obj.finalHandle(null, initFuncRet);
                                     }
                                 }
@@ -375,20 +395,23 @@ function ___fairysupport(){
                             fs.bindDomInitFuncMap.delete(record.addedNodes.item(i));
                             fs.bindDomInitCntMap.set(bindCb, fs.bindDomInitCntMap.get(bindCb) + 1);
                             if (fs.bindDomInitCntMap.get(bindCb) === fs.bindDomInitTotalMap.get(bindCb)) {
+                                let componentInitMark = fs.bindDomComponentInitMarkMap.get(bindCb);
+                                
                                 fs.bindDomInitCntMap.delete(bindCb);
                                 fs.bindDomInitTotalMap.delete(bindCb);
+                                fs.bindDomComponentInitMarkMap.delete(bindCb);
                                 
                                 let initFuncRet = null;
                                 try {
                                     initFuncRet = bindCb();
                                 } catch(exception) {
-                                    if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                                    if (componentInitMark && fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
                                         fs.clazz.obj.errorHandle(null, exception);
                                     } else {
                                         throw exception;
                                     }
                                 } finally {
-                                    if (fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
+                                    if (componentInitMark && fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
                                         fs.clazz.obj.finalHandle(null, initFuncRet);
                                     }
                                 }
@@ -403,11 +426,12 @@ function ___fairysupport(){
         fs.bindBody();
     };
 
-    this.addInitFuncForAfterObserver = function (viewDom, initFunc){
+    this.addInitFuncForAfterObserver = function (viewDom, initFunc, componentInitMark){
 
         let childList = viewDom.childNodes;
         let child = null;
         if (childList !== null && childList !== undefined) {
+            this.bindDomComponentInitMarkMap.set(initFunc, componentInitMark);
             this.bindDomInitCntMap.set(initFunc, 0);
             this.bindDomInitTotalMap.set(initFunc, childList.length);
             for (let i = 0; i < childList.length; i++) {
@@ -939,6 +963,12 @@ function ___fairysupport(){
                     if (childList !== null && childList !== undefined) {
                         fs.componentDomInitCntMap.set(initFunc, 0);
                         fs.componentDomInitTotalMap.set(initFunc, childList.length);
+                        if ('init' in fs.componentControllerMethodList[componentValueMap['componentPath']]) {
+                            fs.componentDomComponentInitMarkMap.set(initFunc, true);
+                        } else {
+                            fs.componentDomComponentInitMarkMap.set(initFunc, false);
+                        }
+                        
                         for (let i = 0; i < childList.length; i++) {
                             child = childList.item(i);
                             fs.addComponentTargetDomNest(child, componentValueMap);
@@ -1960,7 +1990,7 @@ function ___fairysupport(){
                     let cb = (function(fs, dom, position, resolve){
                         return function(viewDom){
 
-                            fs.addInitFuncForAfterObserver(viewDom, resolve);
+                            fs.addInitFuncForAfterObserver(viewDom, resolve, false);
 
                             if ('before' === position && dom.parentNode) {
                                 dom.parentNode.insertBefore(viewDom, dom);
@@ -2605,7 +2635,7 @@ function ___fairysupport(){
                 return function(viewDom){
 
                     let initFunc = fs.getUniqueComponentMethod(fs, controllerObj, methodList, 'init', argObj, func);
-                    fs.addInitFuncForAfterObserver(viewDom, initFunc);
+                    fs.addInitFuncForAfterObserver(viewDom, initFunc, ('init' in methodList ? true : false));
 
                     let childList = viewDom.childNodes;
                     let child = null;
