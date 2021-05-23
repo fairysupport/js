@@ -893,7 +893,7 @@ function ___fairysupport(){
             if (!fs.instanceMap[classFullName]) {
 
                 let componentPathSplit = componentPath.split('/');
-                let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 1]);
+                let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 2]);
                 fs.componentControllerList[componentPath] = new Module[componentClass]();
                 fs.instanceMap[classFullName] = fs.componentControllerList[componentPath];
                 fs.componentControllerMethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
@@ -2561,7 +2561,7 @@ function ___fairysupport(){
             }
 
             let componentPathSplit = componentValueMap['componentPath'].split('/');
-            let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 1]);
+            let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 2]);
             let uniqueComponentControllerObj = new Module[componentClass]();
             let uniqueComponentControllerMethodList = fs.getMethodList(uniqueComponentControllerObj);
             let uniqueDataNameEventMap = {};
