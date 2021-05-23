@@ -353,8 +353,9 @@ function ___fairysupport(){
                             if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
                                 fs.componentDomInitCntMap.delete(initFunc);
                                 fs.componentDomInitTotalMap.delete(initFunc);
+                                let initFuncRet = null;
                                 try {
-                                    initFunc();
+                                    initFuncRet = initFunc();
                                 } catch(exception) {
                                     if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
                                         fs.clazz.obj.errorHandle(null, exception);
@@ -363,7 +364,7 @@ function ___fairysupport(){
                                     }
                                 } finally {
                                     if (fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
-                                        fs.clazz.obj.finalHandle(null, null);
+                                        fs.clazz.obj.finalHandle(null, initFuncRet);
                                     }
                                 }
                             }
@@ -376,8 +377,10 @@ function ___fairysupport(){
                             if (fs.bindDomInitCntMap.get(bindCb) === fs.bindDomInitTotalMap.get(bindCb)) {
                                 fs.bindDomInitCntMap.delete(bindCb);
                                 fs.bindDomInitTotalMap.delete(bindCb);
+                                
+                                let initFuncRet = null;
                                 try {
-                                    bindCb();
+                                    initFuncRet = bindCb();
                                 } catch(exception) {
                                     if (fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
                                         fs.clazz.obj.errorHandle(null, exception);
@@ -386,7 +389,7 @@ function ___fairysupport(){
                                     }
                                 } finally {
                                     if (fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
-                                        fs.clazz.obj.finalHandle(null, null);
+                                        fs.clazz.obj.finalHandle(null, initFuncRet);
                                     }
                                 }
                             }
@@ -1294,6 +1297,7 @@ function ___fairysupport(){
                                                 return;
                                             }
                                         } catch(exception) {
+                                            ret = false;
                                             if (moduleClassObj.errorHandle && typeof moduleClassObj.errorHandle === 'function') {
                                                 moduleClassObj.errorHandle(e, exception);
                                             } else {
@@ -1303,6 +1307,9 @@ function ___fairysupport(){
                                             if (moduleClassObj.finalHandle && typeof moduleClassObj.finalHandle === 'function') {
                                                 moduleClassObj.finalHandle(e, ret);
                                             }
+                                        }
+                                        if (ret === false) {
+                                            return;
                                         }
                                     }
                                 };
@@ -1359,6 +1366,7 @@ function ___fairysupport(){
                                 return;
                             }
                         } catch(exception) {
+                            ret = false;
                             if (moduleClassObj.errorHandle && typeof moduleClassObj.errorHandle === 'function') {
                                 moduleClassObj.errorHandle(e, exception);
                             } else {
@@ -1368,6 +1376,9 @@ function ___fairysupport(){
                             if (moduleClassObj.finalHandle && typeof moduleClassObj.finalHandle === 'function') {
                                 moduleClassObj.finalHandle(e, ret);
                             }
+                        }
+                        if (ret === false) {
+                            return;
                         }
                     }
                 };
