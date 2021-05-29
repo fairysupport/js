@@ -3574,19 +3574,24 @@ function ___fairysupport(){
             return this;
         }
         setTimeout(fn) {
-            if (!('timeout' in this.__resFunc)) {
-                this.__resFunc['timeout'] = Object.create(null);
+            if (typeof fn === 'function') {
+                if (!('timeout' in this.__resFunc)) {
+                    this.__resFunc['timeout'] = Object.create(null);
+                }
+                this.__resFunc['timeout']['default'] = fn;
+                let useFunc = (function (resFunc) {
+                                    return function (e, xhr) {
+                                        if ('default' in resFunc) {
+                                            resFunc['default'](e, xhr);
+                                        }
+                                    };
+                               })(this.__resFunc['timeout']);
+                this.ontimeout = useFunc;
+                return this;
+            } else {
+                this.timeout = fn;
+                return this;
             }
-            this.__resFunc['timeout']['default'] = fn;
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                };
-                           })(this.__resFunc['timeout']);
-            this.ontimeout = useFunc;
-            return this;
         }
     };
 
