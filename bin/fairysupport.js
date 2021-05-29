@@ -3352,13 +3352,12 @@ function ___fairysupport(){
                     req.onloadend = (function(resolve, reject){
                             return function (e, xhr) {
                                 if (200 === xhr.status) {
-                                    resolve(e, xhr);
+                                    resolve(xhr);
                                 } else {
-                                    reject(e, xhr);
+                                    reject(xhr);
                                 }
-                            }
-                        }
-                    )(resolve, reject);
+                            };
+                    })(resolve, reject);
                     req.send(body);
                 };
             })(this, body));
