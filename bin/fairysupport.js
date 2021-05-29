@@ -3059,6 +3059,9 @@ function ___fairysupport(){
 
         let paramStr = this.paramFmt(fmt, paramObj, '');
         if (met.toLowerCase() === 'get' && paramStr !== null && paramStr !== '') {
+            if (paramStr.substring(paramStr.length - 1, paramStr.length) === '&') {
+                paramStr = paramStr.substring(0, paramStr.length - 1)
+            }
             if (reqUrl.indexOf('?') >= 0) {
                 reqUrl += '&' + paramStr;
             } else {
