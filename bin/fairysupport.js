@@ -3692,6 +3692,10 @@ function ___fairysupport(){
         if (name in msgObj) {
             str = msgObj[name];
         }
+        
+        if (replaceObj === null || replaceObj === undefined) {
+            return str;
+        }
 
         for (const [key, value] of Object.entries(replaceObj)) {
             let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
@@ -3716,6 +3720,10 @@ function ___fairysupport(){
         let str = '';
         if (name in componentMsgObj[componentPackeage]) {
             str = componentMsgObj[componentPackeage][name];
+        }
+
+        if (replaceObj === null || replaceObj === undefined) {
+            return str;
         }
 
         for (const [key, value] of Object.entries(replaceObj)) {
@@ -3805,8 +3813,15 @@ function ___fairysupport(){
             }
         }
 
+        let initValid = true;
         for (const func of funcList) {
-            func(obj, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
+            let funcResult = func(obj, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
+            if (!funcResult) {
+                initValid = funcResult;
+            }
+        }
+        if (!initValid) {
+            protoPropertyDescriptor.set.call(obj, null);
         }
 
     }
