@@ -3763,11 +3763,11 @@ function ___fairysupport(){
                 return protoPropertyDescriptor.get.call(obj);
             }
         })(protoPropertyDescriptor, obj);
-        let setFunc = (function(protoPropertyDescriptor, obj, funcList, funcArg){
+        let setFunc = (function(protoPropertyDescriptor, obj, funcList, funcArg, prop){
             return function(arg){
                 let valid = true;
                 for (const func of funcList) {
-                    let funcResult = func(obj, arg, protoPropertyDescriptor.get.call(obj), funcArg);
+                    let funcResult = func(obj, prop, arg, protoPropertyDescriptor.get.call(obj), funcArg);
                     if (!funcResult) {
                         valid = funcResult;
                     }
@@ -3776,7 +3776,7 @@ function ___fairysupport(){
                     protoPropertyDescriptor.set.call(obj, arg);
                 }
             }
-        })(protoPropertyDescriptor, obj, funcList, funcArg);
+        })(protoPropertyDescriptor, obj, funcList, funcArg, prop);
 
         Object.defineProperty(obj, prop, {
             enumerable: true,
@@ -3793,11 +3793,11 @@ function ___fairysupport(){
                                         preValueHolder.preVal[prop] = obj[prop];
                                     };
                                  })(preValueHolder, obj, prop));
-            let eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor){
+            let eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop){
                 return function (event) {
                     let valid = true;
                     for (const func of funcList) {
-                        let funcResult = func(obj, obj[prop], preValueHolder.preVal[prop], funcArg);
+                        let funcResult = func(obj, prop, obj[prop], preValueHolder.preVal[prop], funcArg);
                         if (!funcResult) {
                             valid = funcResult;
                         }
@@ -3807,7 +3807,7 @@ function ___fairysupport(){
                     }
                     preValueHolder.preVal[prop] = obj[prop];
                 };
-            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor);
+            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop);
             for (const eventName of eventList) {
                 obj.addEventListener(eventName, eventFunc);
             }
@@ -3815,7 +3815,7 @@ function ___fairysupport(){
 
         let initValid = true;
         for (const func of funcList) {
-            let funcResult = func(obj, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
+            let funcResult = func(obj, prop, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
             if (!funcResult) {
                 initValid = funcResult;
             }
