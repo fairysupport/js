@@ -53,19 +53,19 @@ function ___fairysupport(){
     const componentEnvValueObj = Object.create(null);
 
     if (!('fairysupportInitFail' in window)) {
-        window.fairysupportInitFail = function (retryCount) {
+        window.fairysupportInitFail = function (retryCount, error) {
             alert('network error');
             return false;
         }
     }
     if (!('fairysupportTemplateFail' in window)) {
-        window.fairysupportTemplateFail = function (retryCount) {
+        window.fairysupportTemplateFail = function (retryCount, error) {
             alert('network error');
             return false;
         }
     }
     if (!('fairysupportComponentFail' in window)) {
-        window.fairysupportComponentFail = function (retryCount) {
+        window.fairysupportComponentFail = function (retryCount, error) {
             alert('network error');
             return false;
         }
@@ -142,7 +142,7 @@ function ___fairysupport(){
                         } else if (404 === xhr.status) {
                             fs.loadModuleBrowserMsg(jsRoot, version, modulePath, 0);
                         } else {
-                            let failResult = fairysupportInitFail(retryCount);
+                            let failResult = fairysupportInitFail(retryCount, xhr);
                             if (failResult) {
                                 fs.loadModuleReqMsg(jsRoot, version, modulePath, ++retryCount);
                             }
@@ -174,7 +174,7 @@ function ___fairysupport(){
                         } else if (404 === xhr.status) {
                             fs.loadModuleDefaultMsg(jsRoot, version, modulePath, 0);
                         } else {
-                            let failResult = fairysupportInitFail(retryCount);
+                            let failResult = fairysupportInitFail(retryCount, xhr);
                             if (failResult) {
                                 fs.loadModuleBrowserMsg(jsRoot, version, modulePath, ++retryCount);
                             }
@@ -203,7 +203,7 @@ function ___fairysupport(){
                     } else if (404 === xhr.status) {
                         fs.loadModuleController(version, moduleRoot, modulePath, 0);
                     } else {
-                        let failResult = fairysupportInitFail(retryCount);
+                        let failResult = fairysupportInitFail(retryCount, xhr);
                         if (failResult) {
                             fs.loadModuleDefaultMsg(jsRoot, version, modulePath, ++retryCount);
                         }
@@ -224,7 +224,7 @@ function ___fairysupport(){
         .then(this.getControllerLoader(this, modulePath))
         .catch((function(version, moduleRoot, modulePath, retryCount){
                 return function (err) {
-                    let failResult = fairysupportInitFail(retryCount);
+                    let failResult = fairysupportInitFail(retryCount, err);
                     if (failResult) {
                         fs.loadModuleController(version, moduleRoot, modulePath, ++retryCount);
                     }
@@ -788,7 +788,7 @@ function ___fairysupport(){
                         } else if (404 === xhr.status) {
                             fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0);
                         } else {
-                            let failResult = fairysupportComponentFail(retryCount);
+                            let failResult = fairysupportComponentFail(retryCount, xhr);
                             if (failResult) {
                                 fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount);
                             }
@@ -823,7 +823,7 @@ function ___fairysupport(){
                         } else if (404 === xhr.status) {
                             fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0);
                         } else {
-                            let failResult = fairysupportComponentFail(retryCount);
+                            let failResult = fairysupportComponentFail(retryCount, xhr);
                             if (failResult) {
                                 fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount);
                             }
@@ -855,7 +855,7 @@ function ___fairysupport(){
                     } else if (404 === xhr.status) {
                         nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj);
                     } else {
-                        let failResult = fairysupportComponentFail(retryCount);
+                        let failResult = fairysupportComponentFail(retryCount, xhr);
                         if (failResult) {
                             fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount);
                         }
@@ -888,7 +888,7 @@ function ___fairysupport(){
         .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj))
         .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount){
                 return function (err) {
-                    let failResult = fairysupportComponentFail(retryCount);
+                    let failResult = fairysupportComponentFail(retryCount, err);
                     if (failResult) {
                         fs.singleComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount);
                     } else {
@@ -1952,7 +1952,7 @@ function ___fairysupport(){
                                 let viewStr = xhr.response;
                                 resolve(viewStr);
                             } else {
-                                let failResult = fairysupportTemplateFail(retryCount);
+                                let failResult = fairysupportTemplateFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.getTemplate(templatePackeage, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2060,7 +2060,7 @@ function ___fairysupport(){
                                 let viewStr = xhr.response;
                                 fs.loadStringTemplate(dom, viewStr, argObj, position, timing).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportTemplateFail(retryCount);
+                                let failResult = fairysupportTemplateFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.loadTemplate(dom, templatePackeage, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
@@ -2110,7 +2110,7 @@ function ___fairysupport(){
                                 let json = xhr.response;
                                 fs.loadTemplate(dom, templatePackeage, json, position, 0, timing).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportTemplateFail(retryCount);
+                                let failResult = fairysupportTemplateFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
@@ -2160,7 +2160,7 @@ function ___fairysupport(){
                                 let json = xhr.response;
                                 fs.loadTemplate(dom, templatePackeage, json, position, 0, timing).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportTemplateFail(retryCount);
+                                let failResult = fairysupportTemplateFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resJsonTemplateByForm(dom, templatePackeage, reqUrl, formObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
@@ -2215,7 +2215,7 @@ function ___fairysupport(){
                                 let viewStr = xhr.response;
                                 fs.loadStringTemplate(dom, viewStr, argObj, position, timing).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportTemplateFail(retryCount);
+                                let failResult = fairysupportTemplateFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
@@ -2268,7 +2268,7 @@ function ___fairysupport(){
                                 let viewStr = xhr.response;
                                 fs.loadStringTemplate(dom, viewStr, argObj, position, timing).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportTemplateFail(retryCount);
+                                let failResult = fairysupportTemplateFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resHtmlTemplateByForm(dom, viewUrl, formObj, argObj, withCredentials, position, ++retryCount, timing).then(resolve).catch(reject);
                                 } else {
@@ -2366,7 +2366,7 @@ function ___fairysupport(){
                                 let json = xhr.response;
                                 fs.loadUniqueComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2416,7 +2416,7 @@ function ___fairysupport(){
                                 let json = xhr.response;
                                 fs.loadUniqueComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resJsonUniqueComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2475,7 +2475,7 @@ function ___fairysupport(){
 
                                 fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2532,7 +2532,7 @@ function ___fairysupport(){
 
                                 fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resHtmlUniqueComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2574,7 +2574,7 @@ function ___fairysupport(){
         .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj))
         .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount){
                 return function (err) {
-                    let failResult = fairysupportComponentFail(retryCount);
+                    let failResult = fairysupportComponentFail(retryCount, err);
                     if (failResult) {
                         fs.uniqueComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount);
                     } else {
@@ -2832,7 +2832,7 @@ function ___fairysupport(){
                                 let json = xhr.response;
                                 fs.loadSingleComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2882,7 +2882,7 @@ function ___fairysupport(){
                                 let json = xhr.response;
                                 fs.loadSingleComponent(dom, componentPackeage, json, position).then(resolve).catch(reject);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resJsonSingleComponentByForm(dom, componentPackeage, reqUrl, formObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2941,7 +2941,7 @@ function ___fairysupport(){
 
                                 fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
@@ -2999,7 +2999,7 @@ function ___fairysupport(){
 
                                 fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, viewStr);
                             } else {
-                                let failResult = fairysupportComponentFail(retryCount);
+                                let failResult = fairysupportComponentFail(retryCount, xhr);
                                 if (failResult) {
                                     fs.resHtmlSingleComponentByForm(dom, componentPackeage, viewUrl, formObj, argObj, withCredentials, position, ++retryCount).then(resolve).catch(reject);
                                 } else {
