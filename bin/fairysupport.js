@@ -3900,23 +3900,31 @@ function ___fairysupport(){
 
     this.storeClass = class FairysupportStore {
         constructor() {
-            this.data = Object.create(null);
+            this.data = new Map();
             this.listener = new Map();
         }
         set(k, v) {
-            this.data[k] = v;
-            for (let l of this.listener.values()) {
-              l(k, v);
+            this.data.set(k, v);
+            if (this.listener.has(k)) {
+                for (let l of this.listener.get(k).values()) {
+                  l(k, v);
+                }
             }
         }
         get(k) {
             return this.data[k];
         }
-        addListener(l){
-            this.listener.set(l, l);
+        addListener(k, l){
+            if (!this.listener.has(k)) {
+                this.listener.set(k, new Map());
+            }
+            this.listener.get(k).set(l, l);
         }
-        removeListener(l){
-            this.listener.delete(l);
+        removeListener(k, l){
+            if (!this.listener.has(k)) {
+                this.listener.set(k, new Map());
+            }
+            this.listener.get(k).delete(l)
         }
     };
 
