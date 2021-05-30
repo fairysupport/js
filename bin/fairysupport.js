@@ -3928,7 +3928,7 @@ function ___fairysupport(){
             if (!this.listener.has(k)) {
                 this.listener.set(k, new Map());
             }
-            this.listener.get(k).delete(l)
+            this.listener.get(k).delete(l);
         }
     };
 
