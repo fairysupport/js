@@ -3700,7 +3700,8 @@ function ___fairysupport(){
         for (const [key, value] of Object.entries(replaceObj)) {
             let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
             str = str.replace(re, value);
-            str = str.replace("\\${" + key + "}", "${" + key + "}");
+            let reEscape = new RegExp("\\\\\\$\\{" + key + "\\}", "g");
+            str = str.replace(reEscape, "${" + key + "}");
         }
         return str;
 
@@ -3729,7 +3730,8 @@ function ___fairysupport(){
         for (const [key, value] of Object.entries(replaceObj)) {
             let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
             str = str.replace(re, value);
-            str = str.replace("\\${" + key + "}", "${" + key + "}");
+            let reEscape = new RegExp("\\\\\\$\\{" + key + "\\}", "g");
+            str = str.replace(reEscape, "${" + key + "}");
         }
         return str;
 
