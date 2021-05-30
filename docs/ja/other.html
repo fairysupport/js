@@ -1,0 +1,152 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js その他
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">その他</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>moduleやコンポーネント、テンプレート、msg.jsonを取得するときに、キャッシュ対策としてクエリパラメーターを付加できます</span><br>
+                 <span>fairysupport.min.jsを読み込んでいるscriptタグにdata-version属性を付けてください。data-version="1"の場合?1が付加されます</span><br>
+             </p>
+             <pre class="code-view">
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot; data-version=&quot;1&quot;&gt;&lt;/script&gt;
+</pre>
+
+             
+             <p>
+                 <span>このフレームワークは最初にmoduleを読み込みます。その際エラーになった場合の関数を定義できます</span><br>
+                 <span>function fairysupportInitFail(retryCount, error){}を定義してください</span><br>
+                 <span>fairysupportInitFailがtrueを返すと、もう一度module、msg.jsonを読み込みに行きます</span><br>
+                 <span>fairysupportInitFailの第一引数は再読み込みを行った回数です</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script&gt;
+function fairysupportInitFail(retryCount, error){
+    console.error(error);
+    if (retryCount &gt;= 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+&lt;/script&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <br>
+             
+             
+             <p>
+                 <span>別ファイルになっているテンプレートを読み込み失敗時のリトライも定義できます</span><br>
+                 <span>function fairysupportTemplateFail(retryCount, error){}を定義してください</span><br>
+                 <span>fairysupportTemplateFailがtrueを返すと、もう一度テンプレートを読み込みに行きます</span><br>
+                 <span>fairysupportTemplateFailの第一引数は再読み込みを行った回数です</span><br>
+             </p>
+             
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script&gt;
+function fairysupportTemplateFail(retryCount, error){
+    console.error(error);
+    if (retryCount &gt;= 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+&lt;/script&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <br>
+             
+             
+             <p>
+                 <span>コンポーネントを読み込み失敗時のリトライも定義できます</span><br>
+                 <span>function fairysupportComponentFail(retryCount, error){}を定義してください</span><br>
+                 <span>fairysupportComponentFailがtrueを返すと、もう一度コンポーネントを読み込みに行きます</span><br>
+                 <span>fairysupportComponentFailの第一引数は再読み込みを行った回数です</span><br>
+             </p>
+             
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script&gt;
+function fairysupportComponentFail(retryCount, error){
+    console.error(error);
+    if (retryCount &gt;= 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+&lt;/script&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+             <br>
+             
+             <p>
+                 <span><a href="target_version.html">次ページ</a>対象ブラウザ</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

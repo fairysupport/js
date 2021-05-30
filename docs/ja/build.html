@@ -1,0 +1,71 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js ビルド
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">ビルド</div>
+     <article class="article">
+         <section>
+             <h1>distWork</h1>
+             <p>
+                 <span>package.jsonにbuild_prd、build_stg、build_dev、build_localが定義されています。これがsrcからdistWorkを生成するscriptです</span><br>
+                 <span>srcからdistWorkを生成するときに</span><br>
+                 <span>package.jsonでfairysupport_jsに与えられている環境と、src/js/env配下のenvValue.json、envValue.{環境}.jsonをsrc/js/modules配下のjsに組み込んでいます</span><br>
+                 <span>src/js/msg/配下のmsg.json、msg.{言語}.jsonを親ディレクトリから子ディレクトリへマージしています</span><br>
+                 <span>src/js/components配下のenvValue.json、envValue.{環境}.jsonとview.htmlをsrc/js/components配下のcontroller.jsに組み込んでいます</span><br>
+                 <span>src/js/components配下のmsg.json、msg.{言語}.jsonを親ディレクトリから子ディレクトリへマージしています</span><br>
+                 <span>src/css配下のapp.cssを親ディレクトリから子ディレクトリへマージしています</span><br>
+                 <span>src/page配下のファイルで$frameを使用している場合、src/frame配下のhtmlとsrc/page配下のファイルをマージします</span><br>
+                 <span>src/page配下のファイル、src/frame配下のhtml、src/embed配下のhtmlで$embedを使用している場合、src/embed配下のhtmlをマージします</span><br>
+                 <span>src/js、src/page、src/css配下のファイルで$envValueを使用している場合、src/env配下のenvValue.json、envValue.{環境}.jsonで置換します</span><br>
+                 <span>app.cssをsrc/pageとマージします</span><br>
+                 <span>src/js、src/page、src/css配下のファイルで$imgを使用している場合、src/img配下の画像で置換します</span><br>
+                 <span>distWork配下にfairysupport.min.jsを生成します</span><br>
+             </p>
+             
+             <br>
+             
+             <h1>dist</h1>
+             
+             <p>
+                 <span>package.jsonがあるディレクトリにコマンドラインで移動</span>
+             </p>
+             <pre class="exec-view">npm run minify</pre>
+             <p>
+             
+             <p>
+                 <span>package.jsonを見ていただければわかりますが、minifyはgruntを実行してファイルを圧縮してdistWorkからdistへコピーしているだけです</span><br>
+                 <span>設定はGruntfile.jsに書いてあります。圧縮ツールは何を使ってもかまいません</span><br>
+                 <span>distディレクトリが最終生成物になります</span><br>
+             </p>
+             
+
+             <br>
+             
+             <p>
+                 <span><a href="other.html">次ページ</a>その他</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
