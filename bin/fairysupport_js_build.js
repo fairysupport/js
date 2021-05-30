@@ -696,16 +696,29 @@ try {
             
         };
     }
+    function getCommonEnvJson(distWorkCommonEnv){
+        let envValueDestObj = Object.create(null);
+        const objDefaultPath = path.join(distWorkCommonEnv, "envValue.json");
+        const objEnvValuePath = path.join(distWorkCommonEnv, "envValue." + envTxt + ".json");
+        
+        if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
+            Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+        }
+        if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
+            Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+        }
+        return envValueDestObj;
+    }
     
-    console.log('start replace envValue in page and css');
+    console.log('start replace envValue in page and css and js');
     
     const distWorkPageEnv = createDir(distWork, "env");
-    let pageEnvValueDestObj = Object.create(null);
-    bundleCssEnvJson(envTxt, pageEnvValueDestObj, distWorkCss, distWorkPageEnv);
-    bundlePageEnvJson(envTxt, pageEnvValueDestObj, distWorkPage, distWorkPageEnv);
+    bundleCssEnvJson(envTxt, getCommonEnvJson(distWorkPageEnv), distWorkCss, createDir(distWorkPageEnv, "css"));
+    bundlePageEnvJson(envTxt, getCommonEnvJson(distWorkPageEnv), distWorkPage, createDir(distWorkPageEnv, "page"));
+    bundlePageEnvJson(envTxt, getCommonEnvJson(distWorkPageEnv), distWorkJs, createDir(distWorkPageEnv, "js"));
     rmAll(distWorkPageEnv)
     
-    console.log('end replace envValue in page and css');
+    console.log('end replace envValue in page and css and js');
     
     
     function rmImgEncodeInfo(distWorkImg) {
