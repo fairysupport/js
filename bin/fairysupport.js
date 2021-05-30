@@ -225,7 +225,7 @@ function ___fairysupport(){
 
         import(moduleControllerUrl)
         .then(this.getControllerLoader(this, modulePath))
-        .catch((function(version, moduleRoot, modulePath, retryCount){
+        .catch((function(version, moduleRoot, modulePath, retryCount, fs){
                 return function (err) {
                     let failResult = fairysupportInitFail(retryCount, err);
                     if (failResult) {
@@ -233,7 +233,7 @@ function ___fairysupport(){
                     }
                 }
             }
-        )(version, moduleRoot, modulePath, retryCount))
+        )(version, moduleRoot, modulePath, retryCount, this))
         ;
 
     };
