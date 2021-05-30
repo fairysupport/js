@@ -54,18 +54,21 @@ function ___fairysupport(){
 
     if (!('fairysupportInitFail' in window)) {
         window.fairysupportInitFail = function (retryCount, error) {
+            console.error(error);
             alert('network error');
             return false;
         }
     }
     if (!('fairysupportTemplateFail' in window)) {
         window.fairysupportTemplateFail = function (retryCount, error) {
+            console.error(error);
             alert('network error');
             return false;
         }
     }
     if (!('fairysupportComponentFail' in window)) {
         window.fairysupportComponentFail = function (retryCount, error) {
+            console.error(error);
             alert('network error');
             return false;
         }
