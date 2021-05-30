@@ -1,0 +1,329 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js validate
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">validate</div>
+     <article class="article">
+         <section>
+
+             <p>
+                 <span>値の検証処理を実装します</span><br>
+                 <span>src/js/msg/msg.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/msg/msg.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;errorMinMaxLength&quot; : &quot;length min:${min} max:${max}&quot;
+    ,&quot;errorMinMaxValue&quot; : &quot;value min:${min} max:${max}&quot;
+    ,&quot;errorRadioValue&quot; : &quot;cannot change value&quot;
+    ,&quot;errorRadiType&quot; : &quot;cannot wrong type&quot;
+    ,&quot;errorCheckValue&quot; : &quot;cannot change value&quot;
+    ,&quot;errorCheckType&quot; : &quot;cannot wrong type&quot;
+    ,&quot;errorSelectedIndex&quot; : &quot;index min:${min} max:${max}&quot;
+    ,&quot;errorSelectValue&quot; : &quot;option cannot wrong type&quot;
+    ,&quot;errorRequired&quot; : &quot;required&quot;
+}
+</pre>
+             <p>
+                 <span>src/js/util/validator.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/util/validator.js</span>
+             <br>
+             <pre class="code-view">
+export class Validator {
+
+    constructor() {
+    }
+
+    initValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        meta.msgObj.textContent = &quot;&quot;;
+        return true;
+    }
+    
+    propRequireValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target[property]);
+        if (newValue === null || newValue === undefined) {
+            console.error(meta.name + ' : ' + $f.msg('errorRequired'));
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    propLengthValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target[property]);
+        if (newValue !== null && newValue !== undefined && (newValue.length &lt; meta.minLen || meta.maxLen &lt; newValue.length)) {
+            console.error(meta.name + ' : ' + $f.msg('errorMinMaxLength', {'min': meta.minLen, 'max': meta.maxLen}));
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    textValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue.length &lt; meta.minLen || meta.maxLen &lt; newValue.length) {
+            meta.msgObj.textContent = $f.msg('errorMinMaxLength', {'min': meta.minLen, 'max': meta.maxLen});
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+    
+    radioValueValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue !== old) {
+            meta.msgObj.textContent = $f.msg('errorRadioValue');
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+    
+    radioCheckValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue !== true && newValue !== false) {
+            meta.msgObj.textContent = $f.msg('errorRadiType');
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+    
+    checkValueValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue !== old) {
+            meta.msgObj.textContent = $f.msg('errorCheckValue');
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+    
+    checkCheckValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue !== true && newValue !== false) {
+            meta.msgObj.textContent = $f.msg('errorCheckType');
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+    
+    selectValueValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue &lt; meta.min || meta.max &lt; newValue) {
+            meta.msgObj.textContent = $f.msg('errorMinMaxValue', {'min': meta.min, 'max': meta.max});
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+    
+    selectIndexValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue &lt; meta.min || meta.max &lt; newValue) {
+            meta.msgObj.textContent = $f.msg('errorSelectedIndex', {'min': meta.min, 'max': meta.max});
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+    
+    selectOptionValidate (target, property, newValue, old, arg) {
+        let meta = $f.getMeta(target);
+        if (newValue !== true && newValue !== false) {
+            meta.msgObj.textContent = $f.msg('errorSelectValue');
+            return false;
+        } else {
+            meta.msgObj.textContent = &quot;&quot;;
+            return true;
+        }
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/js/modules/index.jsを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+import {Validator} from '../util/validator.js';
+
+export class Index {
+
+    constructor() {
+        this.prop1 = 'abc';
+    }
+
+    init() {
+
+        $f.addMeta(this.text, {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1});
+        $f.addMeta(this.radio1, {&quot;msgObj&quot;: this.bind2});
+        $f.addMeta(this.radio2, {&quot;msgObj&quot;: this.bind2});
+        $f.addMeta(this.checkbox, {&quot;msgObj&quot;: this.bind4});
+        $f.addMeta(this.singleSelect, {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind5});
+        $f.addMeta(this.singleSelect.options[0], {&quot;msgObj&quot;: this.bind5});
+        $f.addMeta(this.singleSelect.options[1], {&quot;msgObj&quot;: this.bind5});
+        $f.addMeta(this.singleSelect.options[2], {&quot;msgObj&quot;: this.bind5});
+        $f.addMeta(this.multipleSelect, {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind7});
+        $f.addMeta(this.multipleSelect.options[0], {&quot;msgObj&quot;: this.bind7});
+        $f.addMeta(this.multipleSelect.options[1], {&quot;msgObj&quot;: this.bind7});
+        $f.addMeta(this.multipleSelect.options[2], {&quot;msgObj&quot;: this.bind7});
+        $f.addMeta(this.textarea, {&quot;minLen&quot;: 5, &quot;maxLen&quot;: 10, &quot;msgObj&quot;: this.bind9});
+        $f.addMeta(this.prop1, {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;name&quot;: &quot;Index-&gt;prop1&quot;});
+
+        let v = new Validator();
+
+        $f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);
+        $f.validate(this.radio1, 'value', ['input'], [v.initValidate.bind(v), v.radioValueValidate.bind(v)]);
+        $f.validate(this.radio1, 'checked', ['input'], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)]);
+        $f.validate(this.radio2, 'value', ['input'], [v.initValidate.bind(v), v.radioValueValidate.bind(v)]);
+        $f.validate(this.radio2, 'checked', ['input'], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)]);
+        $f.validate(this.checkbox, 'value', ['input'], [v.initValidate.bind(v), v.checkValueValidate.bind(v)]);
+        $f.validate(this.checkbox, 'checked', ['input'], [v.initValidate.bind(v), v.checkCheckValidate.bind(v)]);
+        $f.validate(this.singleSelect, 'value', ['input'], [v.initValidate.bind(v), v.selectValueValidate.bind(v)]);
+        $f.validate(this.singleSelect, 'selectedIndex', null, [v.initValidate.bind(v), v.selectIndexValidate.bind(v)]);
+        $f.validate(this.singleSelect.options[0], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
+        $f.validate(this.singleSelect.options[1], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
+        $f.validate(this.singleSelect.options[2], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
+        $f.validate(this.multipleSelect, 'value', ['input'], [v.initValidate.bind(v), v.selectValueValidate.bind(v)]);
+        $f.validate(this.multipleSelect, 'selectedIndex', null, [v.initValidate.bind(v), v.selectIndexValidate.bind(v)]);
+        $f.validate(this.multipleSelect.options[0], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
+        $f.validate(this.multipleSelect.options[1], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
+        $f.validate(this.multipleSelect.options[2], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
+        $f.validate(this.textarea, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);
+        $f.validate(this, 'prop1', null, [v.propRequireValidate.bind(v), v.propLengthValidate.bind(v)]);
+        
+    }
+
+    btn_click(event) {
+
+        this.text.value = '12345';
+        this.radio1.value = 'a';
+        this.radio1.checked = 'a';
+        this.radio2.value = 'a';
+        this.radio2.checked = 'a';
+        this.checkbox.value = 'a';
+        this.checkbox.checked = 'a';
+        this.singleSelect.value = 3;
+        this.singleSelect.selectedIndex = 3;
+        this.singleSelect.options[0].selected = 'a';
+        this.singleSelect.options[1].selected = 'a';
+        this.singleSelect.options[2].selected = 'a';
+        this.multipleSelect.value = 3;
+        this.multipleSelect.selectedIndex = 3;
+        this.multipleSelect.options[0].selected = 'a';
+        this.multipleSelect.options[1].selected = 'a';
+        this.multipleSelect.options[2].selected = 'a';
+        this.textarea.value = '12345678901';
+        this.prop1 = 'abcdef';
+    }
+}
+</pre>
+             <p>
+                 <span>src/page/index.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-obj=&quot;text&quot; value=&quot;123456&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind2&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;radio&quot; data-obj=&quot;radio1&quot; name=&quot;radio&quot; value=&quot;1&quot;&gt;&lt;input type=&quot;radio&quot; data-obj=&quot;radio2&quot; name=&quot;radio&quot; value=&quot;2&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind4&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;checkbox&quot; data-obj=&quot;checkbox&quot; value=&quot;1&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind5&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind6&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;select data-obj=&quot;singleSelect&quot;&gt;
+            &lt;option value=&quot;aa&quot; selected&gt;aa_val&lt;/option&gt;
+            &lt;option value=&quot;bb&quot;&gt;bb_val&lt;/option&gt;
+            &lt;option value=&quot;cc&quot;&gt;cc_val&lt;/option&gt;
+        &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div data-obj=&quot;bind7&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind8&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;select data-obj=&quot;multipleSelect&quot; multiple&gt;
+            &lt;option value=&quot;aaa&quot; selected&gt;aaa_val&lt;/option&gt;
+            &lt;option value=&quot;bbb&quot;&gt;bbb_val&lt;/option&gt;
+            &lt;option value=&quot;ccc&quot;&gt;ccc_val&lt;/option&gt;
+        &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div data-obj=&quot;bind9&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;textarea cols=&quot;10&quot; rows=&quot;10&quot; data-obj=&quot;textarea&quot;&gt;12345&lt;/textarea&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;button&quot; data-name=&quot;btn&quot; value=&quot;set&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>index.jsで使っている$f.addMetaメソッドは第一引数に関する情報を格納するメソッドです。格納した情報は$f.getMetaで取得できます。getMetaの引数はaddMetaの第一引数です。格納した情報は$f.deleteMetaで削除できます。deleteMetaの引数はgetMetaと同じです</span><br>
+                 <span>index.jsで使っている$f.validateメソッドは第一引数オブジェクトの第二引数プロパティに値が格納されようとしたとき、第四引数に渡した関数を実行するメソッドです</span><br>
+                 <span>例えば、$f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);の場合</span><br>
+                 <span>this.textオブジェクトのvalueプロパティに値が格納されようとしたとき ValidatorクラスのinitValidate、textValidateメソッドが実行されます</span><br>
+                 <span>さらに$f.validateメソッドは第一引数オブジェクトに第三引数イベントが発生したとき、第四引数に渡した関数を実行します</span><br>
+                 <span>例えば、$f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);の場合</span><br>
+                 <span>this.textオブジェクトにinputイベントが発生したとき ValidatorクラスのinitValidate、textValidateメソッドが実行されます。イベントが発生しないオブジェクトのプロパティの場合、第三引数はnullにしてください</span><br>
+                 <span>$f.validateの第四引数に渡される関数は引数を5つ取ります</span><br>
+                 <span>第一引数：$f.validateの第一引数に渡した値</span><br>
+                 <span>第二引数：$f.validateの第二引数に渡した値</span><br>
+                 <span>第三引数：新たに格納しようとしている値</span><br>
+                 <span>第四引数：現在格納されている値</span><br>
+                 <span>第五引数：$f.validateの第五引数に渡した値。$f.validateに第五引数を指定しなかった場合、undefinedになります</span><br>
+                 <span>となります</span><br>
+                 <span>$f.validateの戻り値はbooleanです。trueを返すと新たに格納しようとしている値を第一引数オブジェクトの第二引数プロパティにセットします。falseを返すとセットしません</span><br>
+             </p>
+             <br>
+             
+             <br>
+             
+             <p>
+                 <span><a href="store.html">次ページ</a>値の保持</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

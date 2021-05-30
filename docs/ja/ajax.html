@@ -1,0 +1,292 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js Ajax
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">Ajax</div>
+     <article class="article">
+         <section>
+             <h1>リクエストデータを直接渡す。コールバック関数で処理する</h1>
+
+             <p>
+                 <span>envValue.local.json、index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/env/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    "apiRoot" : "http://localhost:8080"
+}</pre>
+
+             
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.ajax($f.envValue('apiRoot') + '/json.php', {'sample_key': 'sample_value'})
+        .setLoadend(200, this.success.bind(this))
+        .setLoadend(null, this.error.bind(this))
+        .send();
+    }
+    
+    success(event, xhr) {
+        this.obj.textContent = JSON.stringify(xhr.response);
+    }
+    
+    error(event, xhr) {
+        this.obj.textContent += xhr.status;
+    }
+    
+}
+</pre>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>json.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
+                 <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
+                 <span>ここでは例をしてCORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+             </p>
+             <span class="code-title">json.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $jsonRequest['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>例としてPHPでjsonを返すサーバープログラムを示しました。これがドキュメントルート直下に設置されているとします</span><br>
+             </p>
+             <br>
+
+             
+             <p>
+                 <span>$f.ajaxについて</span><br>
+                 <span>第一引数がAjax送信先URL、第二引数がリクエストパラメーターです</span><br>
+                 <span>デフォルトではPOST送信されます。HTTPメソッドを変えたい場合は、第三引数にHTTPメソッドを文字列で渡してください。(例：'GET'、'POST'、'PUT'、'DELETE')</span><br>
+                 <span>デフォルトではリクエストパラメーターはJSONで送信されます。クエリパラメーター形式で送信したい場合は第四引数に'query'という文字列を渡してください。json形式で送信したい場合は'json'という文字列を渡してください</span><br>
+                 <span>setLoadendでリクエストが完了したとき(成功した場合も成功しなかった場合も)の処理を実装できます。第一引数がHTTPステータス、第二引数がコールバック関数です。</span><br>
+                 <span>第二引数のコールバック関数にはイベントオブジェクトとXMLHttpRequestが引数として渡されます</span><br>
+                 <span>setLoadendの第一引数にnullを渡した場合、リクエストが完了時のデフォルト処理になります</span><br>
+                 <span>今回の例の場合、setLoadendの第一引数に200を渡したものと、nullを渡したものを実行しています。この場合、HTTPステータスが200の場合、setLoadendの第一引数に200を指定したコールバック関数が実行され、HTTPステータスが200ではない場合(大抵の場合、エラーやタイムアウトの場合)、setLoadendの第一引数にnullを指定したコールバック関数が実行されます</span><br>
+                 <span>sendで送信されます</span><br>
+                 <span>$f.ajaxの戻り値はXMLHttpRequestの同名のプロパティとメソッドを使用できます</span><br>
+                 <span>$f.ajaxの戻り値はXMLHttpRequestに無いメソッドもあります</span><br>
+                 <span>$f.ajaxの戻り値オブジェクトにありXMLHttpRequestに無いメソッドの説明</span><br>
+                 <span>setWithCredentialsメソッドは引数にbooleanを取ります。trueを渡すとcookieを送信します。withCredentialsプロパティにtrueをセットするのと同じです。setWithCredentialsメソッドが用意されているのはメソッドチェーンで使用できるようにするためです</span><br>
+                 <span>setResponseTypeメソッドは引数にXMLHttpRequestResponseTypeに含まれる値を取ります。responseTypeプロパティをセットするのと同じです。setResponseTypeメソッドが用意されているのはメソッドチェーンで使用できるようにするためです</span><br>
+                 <span>setTimeoutメソッドは引数にunsigned&nbsp;longを取ります。timeoutプロパティをセットするのと同じです。setTimeoutメソッドが用意されているのはメソッドチェーンで使用できるようにするためです</span><br>
+                 <span>setProgressメソッドはsetLoadendと使い方は全く同じです。第一引数がHTTPステータス、第二引数がコールバック関数です。progressイベントが発生したとき、第一引数に設定したHTTPステータスに基づき、第二引数に設定したコールバック関数が実行されます</span><br>
+                 <span>setReadystatechangeメソッドは第一引数がXMLHttpRequestの状態を表すreadyState、第二引数がHTTPステータス、第三引数がコールバック関数です。readyStateが変化したとき、第一引数、第二引数に設定した値に基づき、第三引数に設定したコールバック関数が実行されます。setLoadendのように第一引数にnullを渡すと未設定readyState時の動作となります、setLoadendのように第二引数にnullを渡すと未設定HTTPステータス時の動作となります</span><br>
+             </p>
+             <br>
+             <p>
+                 <span>$f.ajaxは自動的にresponseTypeがjsonになります。$f.ajaxTextにするとresponseTypeがtextになります。$f.ajaxTextの使い方は$f.ajaxと全く同じです。引数も同じです</span><br>
+                 <span>$f.ajax、$f.ajaxTextは自動的にリクエストヘッダーにX-Requested-With、Accept、Content-Typeが設定されます。リクエストヘッダーとresponseTypeになにも設定されていない状態を取得したい場合は、$f.emptyAjaxを使用してください。$f.emptyAjaxの使い方は$f.ajaxと全く同じです。引数も同じです</span><br>
+             </p>
+             
+             <h1>リクエストデータを直接渡す。Promiseで処理する</h1>
+
+             <p>
+                 <span>index.jsを下記に変更しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.ajax($f.envValue('apiRoot') + '/json.php', {'sample_key': 'sample_value'})
+        .sendPromise()
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this))
+        ;
+    }
+    
+    success(xhr) {
+        this.obj.textContent = JSON.stringify(xhr.response);
+    }
+    
+    error(xhr) {
+        this.obj.textContent += xhr.status;
+    }
+    
+}
+</pre>
+             <p>
+                 <span>sendではなくsendPromiseを使うとPromiseを返します</span><br>
+                 <span>HTTPステータスが200の場合、resolveします。HTTPステータスが200でない場合、rejectします</span><br>
+                 <span>sendのコールバック関数と異なり、イベントオブジェクトは渡されません</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>リクエストデータをformオブジェクトで渡す</h1>
+
+             <p>
+                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.ajaxByForm($f.envValue('apiRoot') + '/json.php', this.sampleForm)
+        .setLoadend(200, this.success.bind(this))
+        .setLoadend(null, this.error.bind(this))
+        .send();
+    }
+    
+    success(event, xhr) {
+        this.obj.textContent = JSON.stringify(xhr.response);
+    }
+    
+    error(event, xhr) {
+        this.obj.textContent += xhr.status;
+    }
+    
+}
+</pre>
+             <p>
+                 <span>json.phpを修正しましょう</span><br>
+             </p>
+             <span class="code-title">json.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $_REQUEST['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             
+             <p>
+                 <span>$f.ajaxByFormについて</span><br>
+                 <span>第一引数がAjax送信先URL、第二引数が送信するformオブジェクトです</span><br>
+                 <span>ajaxByFormはHTTPメソッドは必ずPOSTになります。変更できません</span><br>
+                 <span>$f.ajaxのようにリクエストパラメーター形式を設定できません。jsonで送信できません</span><br>
+                 <span>$f.ajaxByFormは自動的にresponseTypeがjsonになります。$f.ajaxTextByFormにするとresponseTypeがtextになります。$f.ajaxTextByFormの使い方は$f.ajaxByFormと全く同じです。引数も同じです</span><br>
+                 <span>$f.ajaxByForm、$f.ajaxTextByFormは自動的にリクエストヘッダーにX-Requested-With、Acceptが設定されます。リクエストヘッダーとresponseTypeになにも設定されていない状態を取得したい場合は、$f.emptyAjaxByFormを使用してください。$f.emptyAjaxByFormの使い方は$f.ajaxByFormと全く同じです。引数も同じです</span><br>
+                 <span>ajaxByForm、ajaxTextByForm、emptyAjaxByFormもsendPromiseを使用するとPromiseが返ります</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="validate.html">次ページ</a>validate</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

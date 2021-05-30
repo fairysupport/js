@@ -1,0 +1,105 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js 値の保持
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">値の保持</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>src/js/modules/index.jsを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    init() {
+        this.listener = this.sampleListener.bind(this);
+        $f.store().addListener('key1', this.listener);
+    }
+
+    setButton_click(event) {
+        $f.store().set('key1', this.text.value);
+    }
+
+    getButton_click(event) {
+        this.obj.textContent = $f.store().get('key1');
+    }
+
+    removeListenerButton_click(event) {
+        $f.store().removeListener('key1', this.listener);
+    }
+
+    sampleListener(k, v) {
+        console.log(&quot;sampleListener &quot; + k + &quot; : &quot; + v);
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/page/index.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-obj=&quot;text&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;setButton&quot;&gt;set&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;getButton&quot;&gt;get&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;removeListenerButton&quot;&gt;removeListener&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>$f.store().setでフレームワークに値を保持させることができます</span><br>
+                 <span>$f.store().getでフレームワークに値を保持させた値を取得することができます</span><br>
+                 <span>$f.store().deleteでフレームワークに値を保持させた値を削除することができます</span><br>
+                 <span>$f.store().addListenerで値セットされる時に実行する処理を設定することができます。addListenerで設定した関数がfalseを返すと、値はセットされません</span><br>
+                 <span>$f.store().removeListenerでaddListenerで設定した関数を削除できます</span><br>
+             </p>
+             <br>
+             
+             <br>
+             
+             <p>
+                 <span><a href="addEventListener.html">次ページ</a>addEventListener</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js コンポーネントのviewをサーバーから受け取る
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">コンポーネントのviewをサーバーから受け取る</div>
+     <article class="article">
+         <section>
+             
+             <h1>コンポーネントのviewをサーバーから受け取る。その1</h1>
+
+             <p>
+                 <span>コンポーネントのviewを外部のサーバーから取得します</span><br>
+                 <span>index.js、index.htmlを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resHtmlSingleComponent(this.obj, 
+                                  'sample', 
+                                  $f.envValue('apiRoot') + '/tpl2.php', 
+                                  {'sample_key': 'sample_value'}, 
+                                  {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>tpl2.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
+             </p>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo htmlspecialchars($jsonRequest['sample_key'], ENT_QUOTES)?&gt;&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>src/js/components/sample/controller.jsを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor(data) {
+    }
+
+    init(data) {
+        console.log(&quot;init&quot;);
+        console.log(data);
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+    }
+
+}
+</pre>
+             <p>
+                 <span>シングルコンポーネントの場合resHtmlSingleComponentメソッド、ユニークコンポーネントの場合resHtmlUniqueComponentを使います</span><br>
+                 <span>第二引数にコンポーネント名を与えます</span><br>
+                 <span>第三引数にviewを返すURLを与えます</span><br>
+                 <span>第四引数にviewを返すURLに送信するリクエストパラメーターを与えます</span><br>
+                 <span>第五引数にview内でvという変数名で使うオブジェクトを渡します</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第六引数にtrueを与えます</span><br>
+                 <span>resHtmlSingleComponent、resHtmlUniqueComponentは第三引数で与えられたURLに第四引数に与えられたデータをPOST送信します。そのレスポンスをview.htmlとして扱います</span><br>
+                 <span>resHtmlSingleComponent、resHtmlUniqueComponentではなく、appendResHtmlSingleComponent、appendResHtmlUniqueComponentにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resHtmlSingleComponent、resHtmlUniqueComponentではなく、beforeResHtmlSingleComponent、beforeResHtmlUniqueComponentにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resHtmlSingleComponent、resHtmlUniqueComponentではなく、afterResHtmlSingleComponent、afterResHtmlUniqueComponentにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             
+             
+             <h1>コンポーネントのviewをサーバーから受け取る。その2</h1>
+
+             <p>
+                 <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
+                 <span>index.js、index.html、tpl2.phpを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resHtmlSingleComponentByForm(this.obj, 
+                                  'sample', 
+                                  $f.envValue('apiRoot') + '/tpl2.php', 
+                                  this.sampleForm, 
+                                  {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo $_REQUEST['sample_key']?&gt;&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>シングルコンポーネントの場合resHtmlSingleComponentByFormメソッド、ユニークコンポーネントの場合resHtmlUniqueComponentByFormを使います</span><br>
+                 <span>第二引数にコンポーネント名を与えます</span><br>
+                 <span>第三引数にviewを返すURLを与えます</span><br>
+                 <span>第四引数にviewを返すURLに送信するformオブジェクトを与えます</span><br>
+                 <span>第五引数にview内でvという変数名で使うオブジェクトを渡します</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第六引数にtrueを与えます</span><br>
+                 <span>resHtmlSingleComponentByForm、resHtmlUniqueComponentByFormは第三引数で与えられたURLに第四引数に与えられたformをPOST送信します。そのレスポンスをview.htmlとして扱います</span><br>
+                 <span>resHtmlSingleComponentByForm、resHtmlUniqueComponentByFormではなく、appendResHtmlSingleComponentByForm、appendResHtmlUniqueComponentByFormにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resHtmlSingleComponentByForm、resHtmlUniqueComponentByFormではなく、beforeResHtmlSingleComponentByForm、beforeResHtmlUniqueComponentByFormにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resHtmlSingleComponentByForm、resHtmlUniqueComponentByFormではなく、afterResHtmlSingleComponentByForm、afterResHtmlUniqueComponentByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="ajax.html">次ページ</a>Ajax</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

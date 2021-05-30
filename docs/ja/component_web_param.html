@@ -1,0 +1,288 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js コンポーネントに渡す値をサーバーから受け取る
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">コンポーネントに渡す値をサーバーから受け取る</div>
+     <article class="article">
+         <section>
+             
+             <h1>コンポーネントに渡す値をサーバーから受け取る。その1</h1>
+
+             <p>
+                 <span>これまでview.html内でvという変数名で使うことができる値をjsonで与えていましたが、これをサーバーから受信したjsonにすることができます</span><br>
+                 <span>src/js/env/envValue.local.jsonを作成しましょう</span><br>
+             </p>
+             
+             
+             <span class="code-title">src/js/env/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    "apiRoot" : "http://localhost:8080"
+}</pre>
+
+             <p>
+                 <span>src/js/modules/index.js、src/page/index.htmlを修正しましょう</span><br>
+             </p>
+             
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resJsonSingleComponent(this.obj, 'sample', $f.envValue('apiRoot') + '/tpl.php', {'sample_key': 'sample_value'})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>tpl.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
+                 <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
+                 <span>ここでは例をしてCORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+             </p>
+             <span class="code-title">tpl.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $jsonRequest['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>例としてPHPでjsonを返すサーバープログラムを示しました。これがドキュメントルート直下に設置されているとします</span><br>
+             </p>
+             <br>
+
+             <p>
+                 <span>src/js/components/sample/controller.js、src/js/components/sample/view.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor(data) {
+    }
+
+    init(data) {
+        console.log(&quot;init&quot;);
+        console.log(data);
+    }
+
+}
+</pre>
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+
+&lt;div data-if='v.key2.val1 === 1'&gt;
+    v.key2.val1 === 1
+&lt;/div&gt;
+&lt;div data-elseif='v.key2.val1 === 2'&gt;
+    v.key2.val1 === 2
+&lt;/div&gt;
+&lt;div data-else=''&gt;
+    else
+&lt;/div&gt;
+
+&lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+    &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+    &lt;span&gt;:&lt;/span&gt;
+    &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div data-text='v.request_value'&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>シングルコンポーネントの場合resJsonSingleComponentメソッド、ユニークコンポーネントの場合resJsonUniqueComponentを使います</span><br>
+                 <span>第二引数にコンポーネント名を与えます</span><br>
+                 <span>第三引数にjsonを返すURLを与えます</span><br>
+                 <span>第四引数にjsonを返すURLに送信するリクエストパラメーターを与えます</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第五引数にtrueを与えます</span><br>
+                 <span>resJsonSingleComponent、resJsonUniqueComponentは第三引数で与えられたURLに第四引数に与えられたデータをPOST送信します。そのレスポンスのJSONをコンポーネントに渡します</span><br>
+                 <span>resJsonSingleComponent、resJsonUniqueComponentではなく、appendResJsonSingleComponent、appendResJsonUniqueComponentにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resJsonSingleComponent、resJsonUniqueComponentではなく、beforeResJsonSingleComponent、beforeResJsonUniqueComponentにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resJsonSingleComponent、resJsonUniqueComponentではなく、afterResJsonSingleComponent、afterResJsonUniqueComponentにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>コンポーネントに渡す変数をサーバーから受け取る。その2</h1>
+
+             <p>
+                 <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
+                 <span>index.js、index.html、tpl.phpを下記に変更しましょう</span><br>
+             </p>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resJsonSingleComponentByForm(this.obj, 'sample', $f.envValue('apiRoot') + '/tpl.php', this.sampleForm)
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">tpl.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $_REQUEST['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>index.htmlにformタグを追加し、data-obj=&quot;sampleForm&quot;を付けました</span><br>
+                 <span>index.jsではシングルコンポーネントの場合resJsonSingleComponentByForm、ユニークコンポーネントの場合resJsonUniqueComponentByFormを使います</span><br>
+                 <span>第四引数にjsonを返すURLに送信するformオブジェクトを与えます</span><br>
+                 <span>withCredentialsをtrueにしたい場合(cookieを送信したい場合)は第五引数にtrueを与えます</span><br>
+                 <span>resJsonSingleComponentByForm、resJsonUniqueComponentByFormは第三引数で与えられたURLに第四引数に与えられたformをPOST送信します。そのレスポンスのJSONをコンポーネントに渡します</span><br>
+                 <span>resJsonSingleComponentByForm、resJsonUniqueComponentByFormではなく、appendResJsonSingleComponentByForm、appendResJsonUniqueComponentByFormにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>resJsonSingleComponentByForm、resJsonUniqueComponentByFormではなく、beforeResJsonSingleComponentByForm、beforeResJsonUniqueComponentByFormにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>resJsonSingleComponentByForm、resJsonUniqueComponentByFormではなく、afterResJsonSingleComponentByForm、afterResJsonUniqueComponentByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="component_web_view.html">次ページ</a>コンポーネントのviewをサーバーから受け取る</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
