@@ -3912,7 +3912,7 @@ function ___fairysupport(){
             }
         }
         get(k) {
-            return this.data[k];
+            return this.data.get(k);
         }
         addListener(k, l){
             if (!this.listener.has(k)) {
