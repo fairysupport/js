@@ -419,7 +419,8 @@ try {
     function bundleToolReplace(content, replaceStr, funcName, argVal) {
         let re = new RegExp("(?<!\\\\)\\$" + funcName + "\\(" + argVal + "\\)", "g");
         content = content.replace(re, replaceStr);
-        content = content.replace("\\$" + funcName + "(" + argVal + ")", "$" + funcName + "(" + argVal + ")");
+        let reEscape = new RegExp("\\\\\\$" + funcName + "\\(" + argVal + "\\)", "g");
+        content = content.replace(reEscape, "$" + funcName + "(" + argVal + ")");
         return content;
     }
     function getBundleToolReplaceFunc(useFrameObj) {
@@ -438,13 +439,14 @@ try {
         let re = new RegExp("(?<!\\\\)\\$frame\\([^\\)]+\\)", "g");
         pageContent = pageContent.replace(re, replaceFunc);
         if ('frameName' in useFrameObj) {
-            pageContent = pageContent.replace("\\$frame(" + useFrameObj['frameName'] + ")", "$frame(" + useFrameObj['frameName'] + ")");
+            let reEscape = new RegExp("\\\\\\$frame\\(" + useFrameObj['frameName'] + "\\)", "g");
+            pageContent = pageContent.replace(reEscape, "$frame(" + useFrameObj['frameName'] + ")");
             let framePathSplit = useFrameObj['frameName'].split('.');
             framePathSplit[framePathSplit.length - 1] = framePathSplit[framePathSplit.length - 1] + '.html';
             const framePath = path.join(frameDirPath, ...framePathSplit);
             if (fs.existsSync(framePath) && fs.statSync(framePath).isFile()) {
                 let frameContent = fs.readFileSync(framePath);
-                let replacedContent = bundleToolReplace(frameContent.toString(), pageContent, 'page', '');
+                let replacedContent = bundleToolReplace(frameContent.toString(), pageContent.toString().trim(), 'page', '');
                 return replacedContent;
             } else {
                 console.error('Error');
@@ -485,7 +487,10 @@ try {
         return function (match) {
             let matchSplitHead = match.split('(');
             let matchSplitTail = matchSplitHead[1].split(')');
-            useEmbedObj['embedName'] = matchSplitTail[0];
+            if (!('embedName' in useEmbedObj)) {
+                useEmbedObj['embedName'] = Object.create(null);
+            }
+            useEmbedObj['embedName'][matchSplitTail[0]] = matchSplitTail[0];
             let embedPathSplit = matchSplitTail[0].split('.');
             embedPathSplit[embedPathSplit.length - 1] = embedPathSplit[embedPathSplit.length - 1] + '.html';
             const embedPath = path.join(useEmbedObj['embedDirPath'], ...embedPathSplit);
@@ -495,8 +500,8 @@ try {
             } else {
                 console.error('Error');
                 console.error('Not Found ' + embedPath);
-                console.error('$embed(' + useEmbedObj['embedName'] +  ') in ' + useEmbedObj['pageFilePath']);
-                let errorMessage = 'Error : Not Found ' + embedPath + ' $embed(' + useEmbedObj['embedName'] + ') in ' + useEmbedObj['pageFilePath'];
+                console.error('$embed(' + matchSplitTail[0] +  ') in ' + useEmbedObj['pageFilePath']);
+                let errorMessage = 'Error : Not Found ' + embedPath + ' $embed(' + matchSplitTail[0] + ') in ' + useEmbedObj['pageFilePath'];
                 throw new Error(errorMessage);
             }
         };
@@ -510,9 +515,13 @@ try {
         
         let re = new RegExp("(?<!\\\\)\\$embed\\([^\\)]+\\)", "g");
         let replacedContent = pageContent.replace(re, replaceFunc);
+        
         if ('embedName' in useEmbedObj) {
             replacedContent = bundleToolReplaceForEmbed(replacedContent.toString(), embedDirPath, pageFilePath);
-            replacedContent = replacedContent.replace("\\$embed(" + useEmbedObj['embedName'] + ")", "$embed(" + useEmbedObj['embedName'] + ")");
+            for (const embedNameVal of Object.values(useEmbedObj['embedName'])) {
+                let reEscape = new RegExp("\\\\\\$embed\\(" + embedNameVal + "\\)", "g");
+                replacedContent = replacedContent.replace(reEscape, "$embed(" + embedNameVal + ")");
+            }
         }
         return replacedContent;
     }
@@ -579,14 +588,17 @@ try {
         return function (match) {
             let matchSplitHead = match.split('(');
             let matchSplitTail = matchSplitHead[1].split(')');
-            useEnvValueObj['envValueName'] = matchSplitTail[0];
-            if (useEnvValueObj['envValueName'] in envValueDestObj) {
-                return envValueDestObj[useEnvValueObj['envValueName']];
+            if (!('envValueName' in useEnvValueObj)) {
+                useEnvValueObj['envValueName'] = Object.create(null);
+            }
+            useEnvValueObj['envValueName'][matchSplitTail[0]] = matchSplitTail[0];
+            if (matchSplitTail[0] in envValueDestObj) {
+                return envValueDestObj[matchSplitTail[0]];
             } else {
                 console.error('Error');
-                console.error('Not Found ' + useEnvValueObj['envValueName']);
-                console.error('$envValue(' + useEnvValueObj['envValueName'] +  ') in ' + useEnvValueObj['filePath']);
-                let errorMessage = 'Error : Not Found ' + useEnvValueObj['envValueName'] + ' $envValue(' + useEnvValueObj['envValueName'] + ') in ' + useEnvValueObj['filePath'];
+                console.error('Not Found ' + matchSplitTail[0]);
+                console.error('$envValue(' + matchSplitTail[0] +  ') in ' + useEnvValueObj['filePath']);
+                let errorMessage = 'Error : Not Found ' + matchSplitTail[0] + ' $envValue(' + matchSplitTail[0] + ') in ' + useEnvValueObj['filePath'];
                 throw new Error(errorMessage);
             }
         };
@@ -600,7 +612,10 @@ try {
         let re = new RegExp("(?<!\\\\)\\$envValue\\([^\\)]+\\)", "g");
         let replacedContent = content.replace(re, replaceFunc);
         if ('envValueName' in useEnvValueObj) {
-            replacedContent = replacedContent.replace("\\$envValue(" + useEnvValueObj['envValueName'] + ")", "$envValue(" + useEnvValueObj['envValueName'] + ")");
+            for (const envValueNameVal of Object.values(useEnvValueObj['envValueName'])) {
+                let reEscape = new RegExp("\\\\\\$envValue\\(" + envValueNameVal + "\\)", "g");
+                replacedContent = replacedContent.replace(reEscape, "$envValue(" + envValueNameVal + ")");
+            }
         }
         return replacedContent;
     }
@@ -749,19 +764,22 @@ try {
         return function (match) {
             let matchSplitHead = match.split('(');
             let matchSplitTail = matchSplitHead[1].split(')');
-            useValueObj['imgName'] = matchSplitTail[0];
+            if (!('imgName' in useValueObj)) {
+                useValueObj['imgName'] = Object.create(null);
+            }
+            useValueObj['imgName'][matchSplitTail[0]] = matchSplitTail[0];
             
-            const pageFilePath = path.join(useValueObj['distWorkImg'], useValueObj['imgName']);
+            const pageFilePath = path.join(useValueObj['distWorkImg'], matchSplitTail[0]);
             
             if (!fs.existsSync(pageFilePath)) {
                 console.error('Error');
                 console.error('Not Found ' + pageFilePath);
-                console.error('$img(' + useValueObj['imgName'] +  ') in ' + useValueObj['contentFilePath']);
-                let errorMessage = 'Error : Not Found ' + pageFilePath + ' $img(' + useValueObj['imgName'] + ') in ' + useValueObj['contentFilePath'];
+                console.error('$img(' + matchSplitTail[0] +  ') in ' + useValueObj['contentFilePath']);
+                let errorMessage = 'Error : Not Found ' + pageFilePath + ' $img(' + matchSplitTail[0] + ') in ' + useValueObj['contentFilePath'];
                 throw new Error(errorMessage);
             }
             
-            const imgNameSplit = useValueObj['imgName'].split('.');
+            const imgNameSplit = matchSplitTail[0].split('.');
             let mineType = null;
             const ext = imgNameSplit[imgNameSplit.length - 1];
             if ('jpg' === ext || 'jpeg' === ext || 'jfif' === ext || 'pjpeg' === ext || 'pjp' === ext) {
@@ -782,7 +800,7 @@ try {
                 
             } else {
                 
-                return useValueObj['imgEncodeInfo']["domain"] + useValueObj['imgName'];
+                return useValueObj['imgEncodeInfo']["domain"] + matchSplitTail[0];
                 
             }
             
@@ -799,7 +817,10 @@ try {
         let re = new RegExp("(?<!\\\\)\\$img\\([^\\)]+\\)", "g");
         let replacedContent = content.replace(re, replaceFunc);
         if ('imgName' in useValueObj) {
-            replacedContent = replacedContent.replace("\\$img(" + useValueObj['imgName'] + ")", "$img(" + useValueObj['imgName'] + ")");
+            for (const imgNameVal of Object.values(useValueObj['imgName'])) {
+                let reEscape = new RegExp("\\\\\\$img\\(" + imgNameVal + "\\)", "g");
+                replacedContent = replacedContent.replace(reEscape, "$img(" + imgNameVal + ")");
+            }
         }
         return replacedContent;
     }
