@@ -3904,12 +3904,16 @@ function ___fairysupport(){
             this.listener = new Map();
         }
         set(k, v) {
-            this.data.set(k, v);
+            let setFlg = true;
             if (this.listener.has(k)) {
                 for (let l of this.listener.get(k).values()) {
-                  l(k, v);
+                    setFlg = l(k, v);
+                    if (setFlg === false) {
+                        return;
+                    }
                 }
             }
+            this.data.set(k, v);
         }
         get(k) {
             return this.data.get(k);
