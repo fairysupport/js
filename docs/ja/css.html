@@ -1,0 +1,193 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js CSS
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">CSS</div>
+     <article class="article">
+         <section>
+             <h1>システム全体</h1>
+
+             <p>
+                 <span>src/frame/sample.html、src/page/index.html、src/js/modules/index.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/frame/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+$page()
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div class=&quot;sample1&quot;&gt;
+    &lt;div class=&quot;sample2&quot;&gt;page&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/css/app.cssを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/css/app.css</span>
+             <br>
+             <pre class="code-view">
+.sample1 {
+  color: #ffffff;
+  background-color: #ff0000;
+  padding: 30px;
+}
+.sample2 {
+  color: #ffffff;
+  background-color: #0000ff;
+}
+</pre>
+             
+             <p>
+                 <span>npm&nbsp;run&nbsp;watch_localが実行されたらdistWork/page/index.htmlを見てみましょう</span><br>
+                 <span>src/css/app.cssがマージされています</span><br>
+                 <span>また、distWork/css配下にファイルができています</span><br>
+                 <span>distWork/cssにapp.cssを作成すると、pageに組み込まれます</span><br>
+                 <span>したがって、linkタグで外部cssファイルを読み込む必要はありません</span><br>
+                 <span>app.cssという名前でファイルを作成するのはこのフレームワークの規則です</span><br>
+             </p>
+             <br>
+             
+             <h1>ページ固有</h1>
+
+             <p>
+                 <span>src/page/index.html、src/js/modules/index.js、src/page/index2.html、src/js/modules/index2.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div class=&quot;sample1&quot;&gt;
+    &lt;div class=&quot;sample2&quot;&gt;page&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sample3&quot;&gt;
+    &lt;div class=&quot;sample4&quot;&gt;index&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+}
+</pre>
+
+             <span class="code-title">src/page/index2.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div class=&quot;sample1&quot;&gt;
+    &lt;div class=&quot;sample2&quot;&gt;page&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sample3&quot;&gt;
+    &lt;div class=&quot;sample4&quot;&gt;index2&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+             <span class="code-title">src/js/modules/index2.js</span>
+             <br>
+             <pre class="code-view">
+export class Index2 {
+
+    constructor() {
+    }
+
+}
+</pre>
+
+             <p>
+                 <span>src/css/index/app.css、src/css/index2/app.cssを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/css/index/app.css</span>
+             <br>
+             <pre class="code-view">
+.sample3 {
+  color: #ffffff;
+  background-color: #000000;
+  padding: 30px;
+}
+.sample4 {
+  color: #ffffff;
+  background-color: #006400;
+}
+</pre>
+             <span class="code-title">src/css/index2/app.css</span>
+             <br>
+             <pre class="code-view">
+.sample3 {
+  color: #ffffff;
+  background-color: #ff8c00;
+  padding: 30px;
+}
+.sample4 {
+  color: #ffffff;
+  background-color: #8a2be2;
+}
+</pre>
+
+
+             
+             <p>
+                 <span>npm&nbsp;run&nbsp;watch_localが実行されたらdistWork/page/index.html、distWork/page/index2.htmlを見てみましょう</span><br>
+                 <span>src/css/index/app.css、src/css/index2/app.cssがマージされています</span><br>
+                 <span>また、distWork/css配下にファイルができています</span><br>
+                 <span>src/css/index配下にapp.cssを作成した場合は、src/page/index配下のファイルとsrc/page/index.htmlにcssが適用されます</span><br>
+                 <span>src/css/sub/index配下にapp.cssを作成した場合は、src/page/sub/index配下のファイルとsrc/page/sub/index.htmlにcssが適用されます</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="pageEnv.html">次ページ</a>環境ごとに異なる値</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

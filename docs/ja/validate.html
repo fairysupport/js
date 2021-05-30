@@ -54,7 +54,7 @@ export class Validator {
     }
     
     propRequireValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target[property]);
+        let meta = $f.getMeta(target)[property];
         if (newValue === null || newValue === undefined) {
             console.error(meta.name + ' : ' + $f.msg('errorRequired'));
             return false;
@@ -64,7 +64,7 @@ export class Validator {
     }
     
     propLengthValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target[property]);
+        let meta = $f.getMeta(target)[property];
         if (newValue !== null && newValue !== undefined && (newValue.length &lt; meta.minLen || meta.maxLen &lt; newValue.length)) {
             console.error(meta.name + ' : ' + $f.msg('errorMinMaxLength', {'min': meta.minLen, 'max': meta.maxLen}));
             return false;
@@ -192,7 +192,7 @@ export class Index {
         $f.addMeta(this.multipleSelect.options[1], {&quot;msgObj&quot;: this.bind7});
         $f.addMeta(this.multipleSelect.options[2], {&quot;msgObj&quot;: this.bind7});
         $f.addMeta(this.textarea, {&quot;minLen&quot;: 5, &quot;maxLen&quot;: 10, &quot;msgObj&quot;: this.bind9});
-        $f.addMeta(this.prop1, {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;name&quot;: &quot;Index-&gt;prop1&quot;});
+        $f.addMeta(this, {&quot;prop1&quot;: {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;name&quot;: &quot;Index-&gt;prop1&quot;}});
 
         let v = new Validator();
 
@@ -259,7 +259,7 @@ sample
 &lt;/head&gt;
 &lt;body&gt;
     &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;input type=&quot;text&quot; data-obj=&quot;text&quot; value=&quot;123456&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-obj=&quot;text&quot; value=&quot;1234&quot;&gt;&lt;/div&gt;
     &lt;div data-obj=&quot;bind2&quot;&gt;&lt;/div&gt;
     &lt;div&gt;&lt;input type=&quot;radio&quot; data-obj=&quot;radio1&quot; name=&quot;radio&quot; value=&quot;1&quot;&gt;&lt;input type=&quot;radio&quot; data-obj=&quot;radio2&quot; name=&quot;radio&quot; value=&quot;2&quot;&gt;&lt;/div&gt;
     &lt;div data-obj=&quot;bind4&quot;&gt;&lt;/div&gt;

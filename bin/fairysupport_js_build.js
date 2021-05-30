@@ -548,40 +548,6 @@ try {
     
     console.log('end embed insert into page');
     
-    function insertCssPageHead(distWorkCss, distWorkPage) {
-        
-        if (fs.statSync(distWorkPage).isFile()) {
-            const curAppCssFilePath = path.join(distWorkCss, "app.css");
-            if (fs.existsSync(curAppCssFilePath) && fs.statSync(curAppCssFilePath).isFile()) {
-                let curPageContent = fs.readFileSync(distWorkPage).toString();
-                let curCssContent = fs.readFileSync(curAppCssFilePath);
-                curPageContent = curPageContent.replace('</head>', '<style type="text/css">' + "\n" + curCssContent + "\n" + '</style>' + "\n" + '</head>');
-                fs.writeFileSync(distWorkPage, curPageContent);
-            }
-            return;
-        }
-        
-        const fileList = fs.readdirSync(distWorkPage);
-        for (const fileName of fileList) {
-            const pageFilePath = path.join(distWorkPage, fileName);
-            const pageFileStat = fs.statSync(pageFilePath);
-            if (pageFileStat.isFile()) {
-                const fileNameOnly = fileName.split('.')[0];
-                const cssDirPath = createDir(distWorkCss, fileNameOnly);
-                insertCssPageHead(cssDirPath, pageFilePath);
-            } else if (pageFileStat.isDirectory()) {
-                const cssFilePath = createDir(distWorkCss, fileName);
-                insertCssPageHead(cssFilePath, pageFilePath);
-            }
-        };
-    }
-    
-    console.log('start css insert into page');
-    
-    insertCssPageHead(distWorkCss, distWorkPage);
-    
-    console.log('end css insert into page');
-    
     
     
     function getBundleToolReplaceFuncForEnvValue(useEnvValueObj, envValueDestObj) {
@@ -719,6 +685,43 @@ try {
     rmAll(distWorkPageEnv)
     
     console.log('end replace envValue in page and css and js');
+    
+    
+    
+    function insertCssPageHead(distWorkCss, distWorkPage) {
+        
+        if (fs.statSync(distWorkPage).isFile()) {
+            const curAppCssFilePath = path.join(distWorkCss, "app.css");
+            if (fs.existsSync(curAppCssFilePath) && fs.statSync(curAppCssFilePath).isFile()) {
+                let curPageContent = fs.readFileSync(distWorkPage).toString();
+                let curCssContent = fs.readFileSync(curAppCssFilePath);
+                curPageContent = curPageContent.replace('</head>', '<style type="text/css">' + "\n" + curCssContent + "\n" + '</style>' + "\n" + '</head>');
+                fs.writeFileSync(distWorkPage, curPageContent);
+            }
+            return;
+        }
+        
+        const fileList = fs.readdirSync(distWorkPage);
+        for (const fileName of fileList) {
+            const pageFilePath = path.join(distWorkPage, fileName);
+            const pageFileStat = fs.statSync(pageFilePath);
+            if (pageFileStat.isFile()) {
+                const fileNameOnly = fileName.split('.')[0];
+                const cssDirPath = createDir(distWorkCss, fileNameOnly);
+                insertCssPageHead(cssDirPath, pageFilePath);
+            } else if (pageFileStat.isDirectory()) {
+                const cssFilePath = createDir(distWorkCss, fileName);
+                insertCssPageHead(cssFilePath, pageFilePath);
+            }
+        };
+    }
+    
+    console.log('start css insert into page');
+    
+    insertCssPageHead(distWorkCss, distWorkPage);
+    
+    console.log('end css insert into page');
+    
     
     
     function rmImgEncodeInfo(distWorkImg) {

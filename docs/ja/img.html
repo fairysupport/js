@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js 画像
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">画像</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>src/page/index.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(aaa.bbb.sample)
+&lt;div style=&quot;margin-left: 10px; background-color: #0000ff; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;page&lt;/span&gt;
+    &lt;div&gt;\$frame(aaa.bbb.sample)&lt;/div&gt;
+    $embed(aaa.bbb.sample)
+    &lt;div&gt;\$embed(aaa.bbb.sample)&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+             <p>
+                 <span>src/frame/aaa/bbb/sample.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/frame/aaa/bbb/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style=&quot;margin-left: 0px; background-color: #000000; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;frame&lt;/span&gt;
+    $embed(aaa.bbb.sample)
+    &lt;div style=&quot;margin-right: 10px;&quot;&gt;\$embed(aaa.bbb.sample)&lt;/div&gt;
+    &lt;div style=&quot;margin-right: 10px;&quot;&gt;\$page()&lt;/div&gt;
+    $page()
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>src/embed/aaa/bbb/sample.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/embed/aaa/bbb/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div style=&quot;margin-left: 20px; background-color: #008000; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;embed&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;aaa&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;bbb&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;sample&lt;/span&gt;
+    $embed(aaa.bbb.sample2)
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;\$embed(aaa.bbb.sample2)&lt;/span&gt;
+&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>src/embed/aaa/bbb/sample2.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/embed/aaa/bbb/sample2.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div style=&quot;margin-left: 30px; background-color: #ff0000; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;embed&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;aaa&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;bbb&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;sample2&lt;/span&gt;
+&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>npm&nbsp;run&nbsp;watch_localが実行されたらdistWork/page/index.htmlを見てみましょう</span><br>
+                 <span>src/frame/aaa/bbb/sample.html、src/page/index.html、src/embed/aaa/bbb/sample.html、src/embed/aaa/bbb/sample2.htmlがマージされています</span><br>
+                 <span>src/page配下、src/frame配下、src/embed配下のファイル内に$embed()が書いてあると、$embed()内に書いてあるファイルをsrc/embed配下から探し出し置換します</span><br>
+                 <span>src/embed配下のファイルの拡張子はhtmlになります</span><br>
+                 <span>src/page配下、src/frame配下、src/embed配下のファイル内に$embed()という文字列を書きたい場合は\を付けてエスケープしてください</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="css.html">次ページ</a>CSS</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js 環境ごとに異なる値
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">環境ごとに異なる値</div>
+     <article class="article">
+         <section>
+             <h1>システム全体</h1>
+
+             <p>
+                 <span>src/env/envValue.json、src/env/envValue.local.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/env/envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;jsRoot&quot; : &quot;http://localhost:8000/js&quot;
+    ,&quot;pageRoot&quot; : &quot;http://localhost:8000/page&quot;
+    ,&quot;sample&quot; : &quot;../util/sample.js&quot;
+    ,&quot;color&quot; : &quot;#00FA9A&quot;
+}
+</pre>
+             <span class="code-title">src/env/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;jsRoot&quot; : &quot;http://localhost:8000/js&quot;
+    ,&quot;pageRoot&quot; : &quot;http://localhost:8000/page&quot;
+    ,&quot;sample&quot; : &quot;../util/sample.js&quot;
+    ,&quot;color&quot; : &quot;#00FA9A&quot;
+}
+</pre>
+
+             <p>
+                 <span>src/css/app.cssを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/css/app.css</span>
+             <br>
+             <pre class="code-view">
+DIV {
+  background-color: $envValue(color);
+}
+</pre>
+
+             <p>
+                 <span>src/frame/sample.html、src/page/index.html、src/page/index2.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/frame/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;$envValue(jsRoot)/fairysupport.min.js&quot; data-page-root=&quot;$envValue(pageRoot)&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+$page()
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+</pre>
+             <span class="code-title">src/page/index2.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>src/js/modules/index.js、src/js/modules/index2.js、src/js/util/sample.js、src/js/util/sample2.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/modules/index2.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index2 {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/util/sample.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    execute() {
+        console.log('sample#execute');
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/util/sample2.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    execute() {
+        console.log('sample2#execute');
+    }
+    
+}
+</pre>
+             
+             <p>
+                 <span>npm&nbsp;run&nbsp;watch_localが実行されたらdistWork/page、distWork/js、distWork/cssを見てみましょう</span><br>
+                 <span>$envValue()の部分が置換されています</span><br>
+                 <span>src/page、src/js、src/css配下のファイルは$envValue()を書いておくと、src/env配下のenvValue.jsonから該当の要素を探し、置換され、distWorkに出力されます</span><br>
+                 <span>$envValue()を置換されないようにするには\マークを付けてください</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>特定のファイル</h1>
+
+             <p>
+                 <span>src/env/css/index/envValue.local.json、src/env/css/index2/envValue.local.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/env/css/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;color&quot; : &quot;#ff4500&quot;
+}
+</pre>
+             <span class="code-title">src/env/css/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;color&quot; : &quot;#4169e1&quot;
+}
+</pre>
+
+             <p>
+                 <span>src/env/js/modules/index/envValue.local.json、src/env/js/modules/index2/envValue.local.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/env/js/modules/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;sample&quot; : &quot;../util/sample.js&quot;
+}
+</pre>
+             <span class="code-title">src/env/js/modules/index2/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;sample&quot; : &quot;../util/sample2.js&quot;
+}
+</pre>
+
+             <p>
+                 <span>src/env/page/index/envValue.local.json、src/env/page/index2/envValue.local.jsonを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/env/page/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sample&quot; : &quot;sample value&quot;
+}
+</pre>
+             <span class="code-title">src/env/page/index2/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sample&quot; : &quot;sample value 2&quot;
+}
+</pre>
+
+             <p>
+                 <span>src/css/index/app.css、src/css/index2/app.cssを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/css/index/app.css</span>
+             <br>
+             <pre class="code-view">
+DIV {
+  background-color: $envValue(color);
+}
+</pre>
+             <span class="code-title">src/css/index2/app.css</span>
+             <br>
+             <pre class="code-view">
+DIV {
+  background-color: $envValue(color);
+}
+</pre>
+
+             <p>
+                 <span>src/js/modules/index.js、src/js/modules/index2.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/modules/index2.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index2 {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             
+             <p>
+                 <span>src/page/index.html、src/page/index2.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;$envValue(sample)&lt;/button&gt;&lt;/div&gt;
+</pre>
+             <span class="code-title">src/page/index2.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;$envValue(sample)&lt;/button&gt;&lt;/div&gt;
+</pre>
+             
+             <p>
+                 <span>npm&nbsp;run&nbsp;watch_localが実行されたらdistWork/page、distWork/js、distWork/cssを見てみましょう</span><br>
+                 <span>$envValue()の部分が置換されています</span><br>
+                 <span>src/env配下に置いたenvValue.jsonは、格納されているディレクトリ位置に一致するcss、js、pageのファイルの$envValueを置換します</span><br>
+             </p>
+             
+             <br>
+             <p>
+                 <span><a href="img.html">次ページ</a>画像</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

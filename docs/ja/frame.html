@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js フレーム
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">フレーム</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>src/page/index.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(aaa.bbb.sample)
+&lt;div&gt;\$frame(aaa.bbb.sample)&lt;/div&gt;
+&lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>src/frame/aaa/bbb/sample.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/frame/aaa/bbb/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;\$page()&lt;/div&gt;
+$page()
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>npm&nbsp;run&nbsp;watch_localが実行されたらdistWork/page/index.htmlを見てみましょう</span><br>
+                 <span>src/frame/aaa/bbb/sample.htmlとsrc/page/index.htmlがマージされています</span><br>
+                 <span>src/page配下のファイル内に$frame()が書いてあると、$frame()内に書いてあるファイルをsrc/frame配下から探し出し、$page()をsrc/page配下のファイルの内容に置換し、distWork/page配下に出力します</span><br>
+                 <span>src/page配下のファイルの拡張子は何でもいいですが、src/frame配下のファイルの拡張子はhtmlになります</span><br>
+                 <span>src/page配下のファイル内に$page()という文字列を書きたい場合は\を付けてエスケープしてください</span><br>
+                 <span>src/frame配下のhtmlファイル内に$frame()という文字列を書きたい場合は\を付けてエスケープしてください</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="embed.html">次ページ</a>埋め込み</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
