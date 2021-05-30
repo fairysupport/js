@@ -3918,6 +3918,9 @@ function ___fairysupport(){
         get(k) {
             return this.data.get(k);
         }
+        delete(k) {
+            return this.data.delete(k);
+        }
         addListener(k, l){
             if (!this.listener.has(k)) {
                 this.listener.set(k, new Map());
