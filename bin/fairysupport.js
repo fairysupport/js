@@ -3697,15 +3697,26 @@ function ___fairysupport(){
         }
         
         if (replaceObj === null || replaceObj === undefined) {
+            let replaceFunc = function (match) {
+                return match.substr(1);
+            }
+            let re = new RegExp("\\\\\\$\\{[^\\}]+\\}", "g");
+            str = str.replace(re, replaceFunc);
+            
             return str;
         }
-
+        
         for (const [key, value] of Object.entries(replaceObj)) {
             let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
             str = str.replace(re, value);
-            let reEscape = new RegExp("\\\\\\$\\{" + key + "\\}", "g");
-            str = str.replace(reEscape, "${" + key + "}");
         }
+        
+        let replaceFunc = function (match) {
+            return match.substr(1);
+        }
+        let re = new RegExp("\\\\\\$\\{[^\\}]+\\}", "g");
+        str = str.replace(re, replaceFunc);
+        
         return str;
 
     };
@@ -3727,15 +3738,25 @@ function ___fairysupport(){
         }
 
         if (replaceObj === null || replaceObj === undefined) {
+            let replaceFunc = function (match) {
+                return match.substr(1);
+            }
+            let re = new RegExp("\\\\\\$\\{[^\\}]+\\}", "g");
+            str = str.replace(re, replaceFunc);
             return str;
         }
 
         for (const [key, value] of Object.entries(replaceObj)) {
             let re = new RegExp("(?<!\\\\)\\$\\{" + key + "\\}", "g");
             str = str.replace(re, value);
-            let reEscape = new RegExp("\\\\\\$\\{" + key + "\\}", "g");
-            str = str.replace(reEscape, "${" + key + "}");
         }
+        
+        let replaceFunc = function (match) {
+            return match.substr(1);
+        }
+        let re = new RegExp("\\\\\\$\\{[^\\}]+\\}", "g");
+        str = str.replace(re, replaceFunc);
+        
         return str;
 
     };
