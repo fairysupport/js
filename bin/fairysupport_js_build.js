@@ -416,11 +416,17 @@ try {
     
     
     
+    function escapeReplace(content, funcName) {
+        let innerReplaceFunc = function (match) {
+            return match.substr(1);
+        }
+        let reEscape = new RegExp("\\\\\\$" + funcName + "\\([^\\)]*\\)", "g");
+        content = content.replace(reEscape, innerReplaceFunc);
+        return content;
+    }
     function bundleToolReplace(content, replaceStr, funcName, argVal) {
         let re = new RegExp("(?<!\\\\)\\$" + funcName + "\\(" + argVal + "\\)", "g");
         content = content.replace(re, replaceStr);
-        let reEscape = new RegExp("\\\\\\$" + funcName + "\\(" + argVal + "\\)", "g");
-        content = content.replace(reEscape, "$" + funcName + "(" + argVal + ")");
         return content;
     }
     function getBundleToolReplaceFunc(useFrameObj) {
@@ -439,14 +445,14 @@ try {
         let re = new RegExp("(?<!\\\\)\\$frame\\([^\\)]+\\)", "g");
         pageContent = pageContent.replace(re, replaceFunc);
         if ('frameName' in useFrameObj) {
-            let reEscape = new RegExp("\\\\\\$frame\\(" + useFrameObj['frameName'] + "\\)", "g");
-            pageContent = pageContent.replace(reEscape, "$frame(" + useFrameObj['frameName'] + ")");
             let framePathSplit = useFrameObj['frameName'].split('.');
             framePathSplit[framePathSplit.length - 1] = framePathSplit[framePathSplit.length - 1] + '.html';
             const framePath = path.join(frameDirPath, ...framePathSplit);
             if (fs.existsSync(framePath) && fs.statSync(framePath).isFile()) {
                 let frameContent = fs.readFileSync(framePath);
                 let replacedContent = bundleToolReplace(frameContent.toString(), pageContent.toString().trim(), 'page', '');
+                replacedContent = escapeReplace(replacedContent, 'frame');
+                replacedContent = escapeReplace(replacedContent, 'page');
                 return replacedContent;
             } else {
                 console.error('Error');
@@ -456,6 +462,8 @@ try {
                 throw new Error(errorMessage);
             }
         }
+        pageContent = escapeReplace(pageContent, 'frame');
+        pageContent = escapeReplace(pageContent, 'page');
         return pageContent;
     }
     
@@ -518,10 +526,6 @@ try {
         
         if ('embedName' in useEmbedObj) {
             replacedContent = bundleToolReplaceForEmbed(replacedContent.toString(), embedDirPath, pageFilePath);
-            for (const embedNameVal of Object.values(useEmbedObj['embedName'])) {
-                let reEscape = new RegExp("\\\\\\$embed\\(" + embedNameVal + "\\)", "g");
-                replacedContent = replacedContent.replace(reEscape, "$embed(" + embedNameVal + ")");
-            }
         }
         return replacedContent;
     }
@@ -533,6 +537,7 @@ try {
             if (pageFileStat.isFile()) {
                 let pageContent = fs.readFileSync(pageFilePath);
                 let embedPageContent = bundleToolReplaceForEmbed(pageContent.toString(), distWorkEmbed, pageFilePath);
+                embedPageContent = escapeReplace(embedPageContent, 'embed');
                 fs.writeFileSync(pageFilePath, embedPageContent);
             } else if (pageFileStat.isDirectory()) {
                 bundlePageEmbed(pageFilePath, distWorkEmbed);
@@ -577,12 +582,7 @@ try {
         
         let re = new RegExp("(?<!\\\\)\\$envValue\\([^\\)]+\\)", "g");
         let replacedContent = content.replace(re, replaceFunc);
-        if ('envValueName' in useEnvValueObj) {
-            for (const envValueNameVal of Object.values(useEnvValueObj['envValueName'])) {
-                let reEscape = new RegExp("\\\\\\$envValue\\(" + envValueNameVal + "\\)", "g");
-                replacedContent = replacedContent.replace(reEscape, "$envValue(" + envValueNameVal + ")");
-            }
-        }
+        replacedContent = escapeReplace(replacedContent, 'envValue');
         return replacedContent;
     }
     function bundlePageEnvJson(envTxt, envValueDestObj, distWorkPage, distWorkPageEnv) {
@@ -594,10 +594,10 @@ try {
                 const objEnvValuePath = path.join(distWorkPageEnv, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+                    Object.assign(envValueDestObj,  eval("(" + fs.readFileSync(objDefaultPath) + ")"));
                 }
                 if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+                    Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath) + ")"));
                 }
             }
             first = false;
@@ -616,10 +616,10 @@ try {
                 const objEndEnvValuePath = path.join(distWorkPageEnv, fileNameOnly, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objEndDefaultPath) && fs.statSync(objEndDefaultPath).isFile()) {
-                    Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndDefaultPath)));
+                    Object.assign(envValueParentObj, eval("(" + fs.readFileSync(objEndDefaultPath) + ")"));
                 }
                 if (fs.existsSync(objEndEnvValuePath) && fs.statSync(objEndEnvValuePath).isFile()) {
-                    Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndEnvValuePath)));
+                    Object.assign(envValueParentObj, eval("(" + fs.readFileSync(objEndEnvValuePath) + ")"));
                 }
                 
                 let content = fs.readFileSync(pageFilePath).toString();
@@ -639,10 +639,10 @@ try {
                 const objEnvValuePath = path.join(distWorkPageEnv, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+                    Object.assign(envValueDestObj,  eval("(" + fs.readFileSync(objDefaultPath) + ")"));
                 }
                 if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+                    Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath) + ")"));
                 }
             }
             first = false;
@@ -668,10 +668,10 @@ try {
         const objEnvValuePath = path.join(distWorkCommonEnv, "envValue." + envTxt + ".json");
         
         if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-            Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+            Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objDefaultPath) + ")"));
         }
         if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-            Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+            Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath) + ")"));
         }
         return envValueDestObj;
     }
@@ -832,12 +832,7 @@ try {
         
         let re = new RegExp("(?<!\\\\)\\$img\\([^\\)]+\\)", "g");
         let replacedContent = content.replace(re, replaceFunc);
-        if ('imgName' in useValueObj) {
-            for (const imgNameVal of Object.values(useValueObj['imgName'])) {
-                let reEscape = new RegExp("\\\\\\$img\\(" + imgNameVal + "\\)", "g");
-                replacedContent = replacedContent.replace(reEscape, "$img(" + imgNameVal + ")");
-            }
-        }
+        replacedContent = escapeReplace(replacedContent, 'img');
         return replacedContent;
     }
     function replaceImgEncodeDir(imgEncodeInfo, distWorkPage, distWorkImg) {
