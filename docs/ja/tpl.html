@@ -75,17 +75,23 @@ export class Index {
             &lt;div&gt;--data-html--&lt;/div&gt;
             &lt;div data-html='v.key1'&gt;&lt;/div&gt;
             
-            &lt;div&gt;--data-js--&lt;/div&gt;
-            &lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+            &lt;div&gt;--script--&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.var = 1 + 2;
+            &lt;/script&gt;
             &lt;div data-text='l.var'&gt;&lt;/div&gt;
             
             &lt;div&gt;--data-attr--&lt;/div&gt;
-            &lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+            &lt;/script&gt;
             &lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
             &lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
             
             &lt;div&gt;--data-prop--&lt;/div&gt;
-            &lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+            &lt;/script&gt;
             &lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
             &lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
             
@@ -117,9 +123,13 @@ export class Index {
             &lt;/div&gt;
             
             &lt;div&gt;--data-while--&lt;/div&gt;
-            &lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.whileCount = -1;
+            &lt;/script&gt;
             &lt;div data-while='l.whileCount &lt; 8'&gt;
-                &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+                &lt;script data-load-only='true'&gt;
+                    l.whileCount++;
+                &lt;/script&gt;
                 &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
                 &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
                 &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
@@ -145,7 +155,7 @@ export class Index {
                  <span>したがって、&lt;div data-text='v.key1'&gt;&lt;/div&gt;は、loadStringTemplateメソッドの第三引数のkey1要素をこのタグのボディ部にHTMLエスケープして出力することになります</span><br>
                  <span>data-tag='hidden'はこのタグのボディ部だけを出力して、タグは出力しません</span><br>
                  <span>data-htmlは与えられた値をhtmlエスケープせずに出力します</span><br>
-                 <span>data-jsは与えられた値をJavaScriptとして解釈します</span><br>
+                 <span>scriptタグにdata-load-only='true'をつけるとscriptタグの中をJavaScriptとして解釈して、そこで実行します。このscriptタグは削除されます</span><br>
                  <span>テンプレート内ではlというローカル変数を使用できます。lはオブジェクトです。これはこのフレームワークの規則です</span><br>
                  <span>data-attrは与えられた値をsetAttributeを使って属性の値を設定します</span><br>
                  <span>data-propは与えられた値を=演算子を使ってDOMに設定します。ネストされたオブジェクトを指定可能です</span><br>
@@ -230,17 +240,23 @@ export class Index {
 &lt;div&gt;--data-html--&lt;/div&gt;
 &lt;div data-html='v.key1'&gt;&lt;/div&gt;
 
-&lt;div&gt;--data-js--&lt;/div&gt;
-&lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+&lt;div&gt;--script--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.var = 1 + 2;
+&lt;/script&gt;
 &lt;div data-text='l.var'&gt;&lt;/div&gt;
 
 &lt;div&gt;--data-attr--&lt;/div&gt;
-&lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+&lt;/script&gt;
 &lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
 &lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
 
 &lt;div&gt;--data-prop--&lt;/div&gt;
-&lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+&lt;/script&gt;
 &lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
 &lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
 
@@ -272,9 +288,13 @@ export class Index {
 &lt;/div&gt;
 
 &lt;div&gt;--data-while--&lt;/div&gt;
-&lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.whileCount = -1;
+&lt;/script&gt;
 &lt;div data-while='l.whileCount &lt; 8'&gt;
-    &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;script data-load-only='true'&gt;
+        l.whileCount++;
+    &lt;/script&gt;
     &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
     &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
     &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
@@ -576,17 +596,23 @@ $jsonRequest = json_decode($rawRequest, true);
 &lt;div&gt;--data-html--&lt;/div&gt;
 &lt;div data-html='v.key1'&gt;&lt;/div&gt;
 
-&lt;div&gt;--data-js--&lt;/div&gt;
-&lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+&lt;div&gt;--script--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.var = 1 + 2;
+&lt;/script&gt;
 &lt;div data-text='l.var'&gt;&lt;/div&gt;
 
 &lt;div&gt;--data-attr--&lt;/div&gt;
-&lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+&lt;/script&gt;
 &lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
 &lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
 
 &lt;div&gt;--data-prop--&lt;/div&gt;
-&lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+&lt;/script&gt;
 &lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
 &lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
 
@@ -618,9 +644,13 @@ $jsonRequest = json_decode($rawRequest, true);
 &lt;/div&gt;
 
 &lt;div&gt;--data-while--&lt;/div&gt;
-&lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.whileCount = -1;
+&lt;/script&gt;
 &lt;div data-while='l.whileCount &lt; 8'&gt;
-    &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;script data-load-only='true'&gt;
+        l.whileCount++;
+    &lt;/script&gt;
     &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
     &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
     &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
@@ -716,7 +746,8 @@ header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 ?&gt;
 &lt;div&gt;--requestData--&lt;/div&gt;
-&lt;div&gt;&lt;?php echo $_REQUEST['sample_key']?&gt;&lt;/div&gt;
+&lt;div&gt;&lt;?php echo htmlspecialchars($_REQUEST['sample_key'], ENT_QUOTES)?&gt;&lt;/div&gt;
+
 
 &lt;div&gt;--data-text--&lt;/div&gt;
 &lt;div data-text='v.key1'&gt;&lt;/div&gt;
@@ -725,17 +756,23 @@ header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 &lt;div&gt;--data-html--&lt;/div&gt;
 &lt;div data-html='v.key1'&gt;&lt;/div&gt;
 
-&lt;div&gt;--data-js--&lt;/div&gt;
-&lt;div data-js='l.var = 1 + 2;'&gt;&lt;/div&gt;
+&lt;div&gt;--script--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.var = 1 + 2;
+&lt;/script&gt;
 &lt;div data-text='l.var'&gt;&lt;/div&gt;
 
 &lt;div&gt;--data-attr--&lt;/div&gt;
-&lt;div data-js='l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+&lt;/script&gt;
 &lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
 &lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
 
 &lt;div&gt;--data-prop--&lt;/div&gt;
-&lt;div data-js='l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+&lt;/script&gt;
 &lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
 &lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
 
@@ -767,9 +804,13 @@ header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 &lt;/div&gt;
 
 &lt;div&gt;--data-while--&lt;/div&gt;
-&lt;div data-js='l.whileCount = -1'&gt;&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.whileCount = -1;
+&lt;/script&gt;
 &lt;div data-while='l.whileCount &lt; 8'&gt;
-    &lt;div data-js='l.whileCount++' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;script data-load-only='true'&gt;
+        l.whileCount++;
+    &lt;/script&gt;
     &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
     &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
     &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
