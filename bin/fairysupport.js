@@ -49,8 +49,8 @@ function ___fairysupport(){
     const msgObj = Object.create(null);
     const envValueObj = Object.create(null);
 
-    const componentMsgObj = Object.create(null);
-    const componentEnvValueObj = Object.create(null);
+    const componentMsgObj = new WeakMap();
+    const componentEnvValueObj = new WeakMap();
 
     if (!('fairysupportInitFail' in window)) {
         window.fairysupportInitFail = function (retryCount, error) {
@@ -772,100 +772,103 @@ function ___fairysupport(){
         }
     };
 
-    this.loadComponentReqMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount){
+    this.loadComponentReqMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl){
 
         if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
 
             let queryLangStr = '.' + reqLang;
-            let req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
+            let req = null;
+            if (componentDirUrl !== null && componentDirUrl !== undefined) {
+                req = this.ajax(componentDirUrl + '/' + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
+            } else {
+                req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
+            }
             req.timeout = fsTimeout;
-            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj){
+            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl){
                     return function (e, xhr) {
                         if (200 === xhr.status) {
                             let json = xhr.response;
-                            if (!(componentValueMap['componentPackeage'] in componentMsgObj)) {
-                                componentMsgObj[componentValueMap['componentPackeage']] = Object.create(null);
-                            }
-                            Object.assign(componentMsgObj[componentValueMap['componentPackeage']], json);
-                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj);
+                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json);
                         } else if (404 === xhr.status) {
-                            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0);
+                            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
                         } else {
                             let failResult = fairysupportComponentFail(retryCount, xhr);
                             if (failResult) {
-                                fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount);
+                                fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl);
                             }
                         }
                     }
                 }
-            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj);
+            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl);
             req.send();
 
         } else {
-            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0);
+            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
         }
 
     };
 
-    this.loadComponentBrowserMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount){
+    this.loadComponentBrowserMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl){
 
         if (confLang !== null && confLang !== undefined && confLang !== '') {
 
             let queryLangStr = '.' + confLang;
-            let req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
+            let req = null;
+            if (componentDirUrl !== null && componentDirUrl !== undefined) {
+                req = this.ajax(componentDirUrl + '/' + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
+            } else {
+                req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
+            }
             req.timeout = fsTimeout;
-            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj){
+            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl){
                     return function (e, xhr) {
                         if (200 === xhr.status) {
                             let json = xhr.response;
-                            if (!(componentValueMap['componentPackeage'] in componentMsgObj)) {
-                                componentMsgObj[componentValueMap['componentPackeage']] = Object.create(null);
-                            }
-                            Object.assign(componentMsgObj[componentValueMap['componentPackeage']], json);
-                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj);
+                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json);
                         } else if (404 === xhr.status) {
-                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0);
+                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
                         } else {
                             let failResult = fairysupportComponentFail(retryCount, xhr);
                             if (failResult) {
-                                fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount);
+                                fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl);
                             }
                         }
                     }
                 }
-            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj);
+            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl);
             req.send();
 
         } else {
-            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0);
+            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
         }
 
     };
 
-    this.loadComponentDefaultMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount){
+    this.loadComponentDefaultMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl){
 
-        let req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg.json' + '?' + fs.version, null, 'GET', 'query');
+        let req = null;
+        if (componentDirUrl !== null && componentDirUrl !== undefined) {
+            req = this.ajax(componentDirUrl + '/' + componentValueMap['componentPath'] + 'msg.json' + '?' + fs.version, null, 'GET', 'query');
+        } else {
+            req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg.json' + '?' + fs.version, null, 'GET', 'query');
+        }
         req.timeout = fsTimeout;
-        req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj){
+        req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl){
                 return function (e, xhr) {
                     if (200 === xhr.status) {
                         let json = xhr.response;
-                        if (!(componentValueMap['componentPackeage'] in componentMsgObj)) {
-                            componentMsgObj[componentValueMap['componentPackeage']] = Object.create(null);
-                        }
-                        Object.assign(componentMsgObj[componentValueMap['componentPackeage']], json);
-                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj);
+                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json);
                     } else if (404 === xhr.status) {
-                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj);
+                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, {});
                     } else {
                         let failResult = fairysupportComponentFail(retryCount, xhr);
                         if (failResult) {
-                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount);
+                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl);
                         }
                     }
                 }
             }
-        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj);
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl);
         req.send();
 
     };
@@ -876,7 +879,7 @@ function ___fairysupport(){
 
     };
 
-    this.singleComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount){
+    this.singleComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -888,12 +891,12 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj))
-        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount){
+        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, msgObj))
+        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount, err);
                     if (failResult) {
-                        fs.singleComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount);
+                        fs.singleComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount, componentDirUrl, msgObj);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
                             errCb(err);
@@ -901,18 +904,13 @@ function ___fairysupport(){
                     }
                 }
             }
-        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount))
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj))
         ;
 
     };
 
-    this.loadSingleComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj){
+    this.loadSingleComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, msgObj){
         return function (Module){
-
-            if (!(componentValueMap['componentPackeage'] in componentEnvValueObj)) {
-                componentEnvValueObj[componentValueMap['componentPackeage']] = Object.create(null);
-            }
-            Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], Module.__fairysupport__envValueObj);
 
             if (viewStr === undefined || viewStr === null) {
                 viewStr = Module.__fairysupport__viewStr;
@@ -925,6 +923,10 @@ function ___fairysupport(){
                 let componentPathSplit = componentPath.split('/');
                 let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 2]);
                 fs.componentControllerList[componentPath] = new Module[componentClass]();
+                
+                componentMsgObj.set(fs.componentControllerList[componentPath], msgObj);
+                componentEnvValueObj.set(fs.componentControllerList[componentPath], Module.__fairysupport__envValueObj);
+                
                 fs.instanceMap[classFullName] = fs.componentControllerList[componentPath];
                 fs.componentControllerMethodList[componentPath] = fs.getMethodList(fs.componentControllerList[componentPath]);
 
@@ -947,13 +949,13 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb);
+            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, fs.componentControllerList[componentPath]);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb){
+    this.getInsertComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, controllerObj){
         return function (){
 
             let cb = (function (fs, dom, componentValueMap, argObj, func, position) {
@@ -996,6 +998,11 @@ function ___fairysupport(){
 
                 };
             })(fs, dom, componentValueMap, argObj, func, position);
+
+            if (argObj === null || argObj === undefined) {
+                argObj = Object.create(null);
+            }
+            argObj['_controller'] = controllerObj;
 
             fs.getTplDom(viewStr, argObj, errCb, cb);
 
@@ -2361,6 +2368,32 @@ function ___fairysupport(){
             return fs.execUniqueComponentMethod(controllerObj, methodList, methodName, argList);
         };
     };
+    
+    this.appendLoadWebComponent = function (dom, componentDirUrl, componentPackeage, argObj){
+        return this.loadWebComponent(dom, componentDirUrl, componentPackeage, argObj, 'append');
+    };
+
+    this.beforeLoadWebComponent = function (dom, componentDirUrl, componentPackeage, argObj){
+        return this.loadWebComponent(dom, componentDirUrl, componentPackeage, argObj, 'before');
+    };
+
+    this.afterLoadWebComponent = function (dom, componentDirUrl, componentPackeage, argObj){
+        return this.loadWebComponent(dom, componentDirUrl, componentPackeage, argObj, 'after');
+    };
+
+    this.loadWebComponent = function (dom, componentDirUrl, componentPackeage, argObj, position){
+
+        let componentValueMap = this.getComponentValue(componentPackeage);
+        let componentControllerPath = componentDirUrl + '/' + componentValueMap['componentPath'] + 'controller.js';
+
+        return new Promise((function(fs, dom, argObj, position, componentValueMap, componentControllerPath, componentDirUrl){
+            return function (resolve, reject) {
+                 fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, null, componentDirUrl);
+
+            };
+        })(this, dom, argObj, position, componentValueMap, componentControllerPath, componentDirUrl));
+
+    };
 
     this.appendLoadUniqueComponent = function (dom, componentPackeage, argObj){
         return this.loadUniqueComponent(dom, componentPackeage, argObj, 'append');
@@ -2604,13 +2637,13 @@ function ___fairysupport(){
 
     };
 
-    this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr){
+    this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentDirUrl){
 
-        this.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, this.uniqueComponentInsertFuncExec.bind(fs), 0);
+        this.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, this.uniqueComponentInsertFuncExec.bind(fs), 0, componentDirUrl);
 
     };
 
-    this.uniqueComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount){
+    this.uniqueComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -2622,12 +2655,12 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj))
-        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount){
+        .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, componentDirUrl, msgObj))
+        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount, err);
                     if (failResult) {
-                        fs.uniqueComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount);
+                        fs.uniqueComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount, componentDirUrl, msgObj);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
                             errCb(err);
@@ -2635,18 +2668,13 @@ function ___fairysupport(){
                     }
                 }
             }
-        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount))
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj))
         ;
 
     };
 
-    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj){
+    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, componentDirUrl, msgObj){
         return function (Module){
-
-            if (!(componentValueMap['componentPackeage'] in componentEnvValueObj)) {
-                componentEnvValueObj[componentValueMap['componentPackeage']] = Object.create(null);
-            }
-            Object.assign(componentEnvValueObj[componentValueMap['componentPackeage']], Module.__fairysupport__envValueObj);
 
             if (viewStr === undefined || viewStr === null) {
                 viewStr = Module.__fairysupport__viewStr;
@@ -2655,6 +2683,10 @@ function ___fairysupport(){
             let componentPathSplit = componentValueMap['componentPath'].split('/');
             let componentClass = fs.getCamel(componentPathSplit[componentPathSplit.length - 2]);
             let uniqueComponentControllerObj = new Module[componentClass]();
+            
+            componentMsgObj.set(uniqueComponentControllerObj, msgObj);
+            componentEnvValueObj.set(uniqueComponentControllerObj, Module.__fairysupport__envValueObj);
+            
             let uniqueComponentControllerMethodList = fs.getMethodList(uniqueComponentControllerObj);
             let uniqueDataNameEventMap = {};
 
@@ -2673,16 +2705,16 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap, errCb);
+            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap, errCb, componentDirUrl);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertUniqueComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap, errCb){
+    this.getInsertUniqueComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap, errCb, componentDirUrl){
         return function (){
 
-            let cb = (function(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap){
+            let cb = (function(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap, componentDirUrl){
                 return function(viewDom){
 
                     let initFunc = fs.getUniqueComponentMethod(fs, controllerObj, methodList, 'init', argObj, func);
@@ -2693,7 +2725,7 @@ function ___fairysupport(){
                     if (childList !== null && childList !== undefined) {
                         for (let i = 0; i < childList.length; i++) {
                             child = childList.item(i);
-                            fs.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, dataNameEventMap);
+                            fs.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, dataNameEventMap, componentDirUrl);
                         }
                     }
 
@@ -2713,37 +2745,53 @@ function ___fairysupport(){
                     }
 
                 };
-            })(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap);
+            })(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap, componentDirUrl);
+
+            if (argObj === null || argObj === undefined) {
+                argObj = Object.create(null);
+            }
+            argObj['_controller'] = controllerObj;
 
             fs.getTplDom(viewStr, argObj, errCb, cb);
 
         };
     };
 
-    this.bindUniqueComponentAll = function (obj, componentValueMap, controllerObj, methodList, eventMethodList){
+    this.bindUniqueComponentAll = function (obj, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl){
         if (obj === null || obj === undefined) {
             return;
         }
-        this.bindAllSingle(obj, this.bindUniqueComponentProp(this, obj, componentValueMap, controllerObj, methodList, eventMethodList));
+        this.bindAllSingle(obj, this.bindUniqueComponentProp(this, obj, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl));
         let childList = obj.childNodes;
         let child = null;
         if (childList !== null && childList !== undefined) {
             for (let i = 0; i < childList.length; i++) {
                 child = childList.item(i);
-                this.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, eventMethodList);
+                this.bindUniqueComponentAll(child, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl);
             }
         }
 
     };
 
-    this.bindUniqueComponentProp = function (fs, obj, componentValueMap, controllerObj, methodList, eventMethodList){
+    this.bindUniqueComponentProp = function (fs, obj, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl){
         return function(){
             let dataset = obj.dataset;
             if (dataset !== null && dataset !== undefined) {
 
-                let bindObj = dataset[componentValueMap['componentCamel'] + 'Obj'];
-                let bindList = dataset[componentValueMap['componentCamel'] + 'List'];
-                let name = dataset[componentValueMap['componentCamel'] + 'Name'];
+                let bindObj = null;
+                let bindList = null;
+                let name = null;
+                
+                if (componentDirUrl !== null && componentDirUrl !== undefined) {
+                    bindObj = dataset['objWeb'];
+                    bindList = dataset['listWeb'];
+                    name = dataset['nameWeb'];
+                } else {
+                    bindObj = dataset[componentValueMap['componentCamel'] + 'Obj'];
+                    bindList = dataset[componentValueMap['componentCamel'] + 'List'];
+                    name = dataset[componentValueMap['componentCamel'] + 'Name'];
+                }
+                
 
                 if (bindObj !== null && bindObj !== undefined) {
                     fs.bindUniqueComponentSingleObj(obj, bindObj, controllerObj, methodList);
@@ -3769,20 +3817,20 @@ function ___fairysupport(){
 
     };
 
-    this.componentEnvValue = function (componentPackeage, name){
-        if (!(componentPackeage in componentEnvValueObj)) {
+    this.componentEnvValue = function (controllerObj, name){
+        if (!componentEnvValueObj.has(controllerObj)) {
             return null;
         }
-        return componentEnvValueObj[componentPackeage][name];
+        return componentEnvValueObj.get(controllerObj)[name];
     };
 
-    this.componentMsg = function (componentPackeage, name, replaceObj){
-        if (!(componentPackeage in componentMsgObj)) {
+    this.componentMsg = function (controllerObj, name, replaceObj){
+        if (!componentMsgObj.has(controllerObj)) {
             return null;
         }
         let str = '';
-        if (name in componentMsgObj[componentPackeage]) {
-            str = componentMsgObj[componentPackeage][name];
+        if (name in componentMsgObj.get(controllerObj)) {
+            str = componentMsgObj.get(controllerObj)[name];
         }
 
         if (replaceObj === null || replaceObj === undefined) {
