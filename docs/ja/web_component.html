@@ -1,0 +1,154 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript フレームワーク fairy support js Webコンポーネント
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="subtitle">Webコンポーネント</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>コンポーネントを別サーバーに配置することができます</span><br>
+             </p>
+             
+             <h1>使い方</h1>
+
+             <p>
+                 <span>index.html、index.jsを作成しましょう</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadWebComponent(this.obj, 'http://localhost:8080/web_component', 'sample', {'key1': 'val1'})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <p>
+                 <span>src/js/components/sample/controller.js、src/js/components/sample/view.htmlを作成しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample1_click(event) {
+        alert(this.obj.value);
+    }
+
+    sample2_click(event) {
+        let str = '';
+        for (const item of this.list.values()) {
+            str += item.value;
+        }
+        alert(str);
+    }
+
+}
+</pre>
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+
+&lt;div&gt;&lt;input type='text' data-obj-web='obj' /&gt;&lt;/div&gt;
+&lt;button data-name-web=&quot;sample1&quot;&gt;click&lt;/button&gt;
+
+&lt;div&gt;&lt;input type='text' data-list-web='list' /&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type='text' data-list-web='list' /&gt;&lt;/div&gt;
+&lt;button data-name-web=&quot;sample2&quot;&gt;click&lt;/button&gt;
+</pre>
+
+             <p>
+                 <span><a href="build.html">ビルド</a>で解説したように、コンポーネントの最終生成物はdistWork、またはdistディレクトリ内のjs/components配下のファイルです</span><br>
+                 <span>distWork、またはdistディレクトリ内のjs/components配下のファイルをCORS設定した別サーバーの公開ディレクトリに置きます</span><br>
+                 <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
+                 <span>例えばApacheであれば設定ファイルのDirectory、Location、Files、VirtualHostタグ内に</span><br>
+                 <span>Header always set Access-Control-Allow-Origin http://localhost:8000</span><br>
+                 <span>Header always set Access-Control-Allow-Credentials true</span><br>
+                 <span>Header always set Access-Control-Allow-Headers "Accept, Content-Type, X-Requested-With"</span><br>
+                 <span>を追加してみましょう</span><br>
+                 <span>ここでは例としてCORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+                 <span>今回はCORS設定したサーバーの公開ディレクトリ直下にweb_componentというディレクトリを作成し、その中にビルドによって生成されたjs/components配下のsampleディレクトリ置きます</span><br>
+                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
+                 <span>CORS設定したサーバーに置いたコンポーネントが出力されます</span><br>
+                 <span>loadWebComponentの第一引数にはWebコンポーネント出力先を与えます</span><br>
+                 <span>loadWebComponentの第二引数にはWebコンポーネント格納先URLを与えます</span><br>
+                 <span>loadWebComponentの第三引数にはコンポーネント名(ディレクトリ名)を与えます</span><br>
+                 <span>loadWebComponentの第四引数にはWebコンポーネントのview内で使用する変数を与えます</span><br>
+                 <span>loadWebComponentではなく、appendLoadWebComponentにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
+                 <span>loadWebComponentではなく、beforeLoadWebComponentにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
+                 <span>loadWebComponentではなく、afterLoadWebComponentにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
+                 <span>js/components配下にサブディレクトリを作成することもできます。その場合、loadWebComponentの第三引数にはピリオド区切りで文字列を渡します</span><br>
+                 <span>コンポーネントのview.html内のdata-name-web属性値を持つタグとコンポーネントのcontroller.jsクラスのメソッドは自動的に結びつけられます</span><br>
+                 <span>コンポーネントのcontroller.jsに[data-name-web属性値_イベント名]という名前のメソッドを用意しておけば、このフレームワークが自動的にコンポーネントのview.html内のdata-name-web属性値を持つタグと結びつけます</span><br>
+                 <span>コンポーネントのview.html内のdata-obj-web属性値を持つタグとコンポーネントのcontroller.jsクラスのプロパティは自動的に結びつけられます</span><br>
+                 <span>コンポーネントのview.html内のdata-list-web属性値を持つタグとコンポーネントのcontroller.jsクラスのプロパティは自動的に結びつけられます</span><br><br>
+                 <span>Webコンポーネントは<a href="unique_component.html">ユニークコンポーネント</a>扱いとなります。<a href="single_component_event.html">シングルコンポーネント</a>にはできません</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="other.html">次ページ</a>その他</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">目次</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

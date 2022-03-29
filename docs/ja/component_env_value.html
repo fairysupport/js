@@ -77,7 +77,7 @@ export class Sample {
     }
 
     sample_click(event) {
-        alert($f.componentEnvValue('sample', 'key1') + ' ' + $f.componentEnvValue('sample', 'key2') + ' ' + $f.componentEnvValue('sample', 'key3'));
+        alert($f.componentEnvValue(this, 'key1') + ' ' + $f.componentEnvValue(this, 'key2') + ' ' + $f.componentEnvValue(this, 'key3'));
     }
 
 }
@@ -113,7 +113,7 @@ export class Sample {
                  <span>value1&nbsp;value2_local&nbsp;value3_localとalertが出力されます</span><br>
                  <span>controller.js内で実行している$f.componentEnvValueは</span><br>
                  <span>src/js/components配下のenvValue.jsonの値を返すメソッドです</span><br>
-                 <span>componentEnvValueは第一引数にコンポーネント名、第二引数にenvValue.jsonのキーを受け取ります</span><br>
+                 <span>componentEnvValueは第一引数にコンポーネントインスタンス、第二引数にenvValue.jsonのキーを受け取ります</span><br>
                  <span>envValue.jsonはjsonなのでキー、値はダブルクォートで囲います。シングルクォートではありません</span><br>
                  <span>コンポーネントで使うenvValue.jsonはsrc/js/components配下に作成します。これはフレームワークの規則です</span><br>
                  <span>また、envValue.jsonだけでなく、envValue.{環境}.jsonを用意できます</span><br>
@@ -145,7 +145,7 @@ export class Sample {
              <p>
                  <span>実行してsampleボタンをクリック後、component sampleボタンをクリックしてみましょう</span><br>
                  <span>value1&nbsp;sample_value2&nbsp;sample_value3_localとalertが出力されます</span><br>
-                 <span>src/js/components/sample配下に作成したenvValue.jsonは、componentEnvValueメソッドの第一引数がsampleである場合にのみ使用できます</span><br>
+                 <span>src/js/components/sample配下に作成したenvValue.jsonは、componentEnvValueメソッドの第一引数がsrc/js/components/sample/controller.jsのインスタンスである場合にのみ使用できます</span><br>
              </p>
              <br>
              

@@ -45,13 +45,15 @@ try {
         
     }
     
-    const curDir = process.cwd();
+    let curDir = process.cwd();
+    if (process.argv.length >= 4) {
+        curDir = process.argv[3].toString().trim();
+    }
     
     let envTxt = "";
     if (process.argv.length >= 3) {
         envTxt = process.argv[2].toString().trim();
     }
-    
     
     const src = path.join(curDir, "src");
     rmAll(path.join(curDir, "distWork"));

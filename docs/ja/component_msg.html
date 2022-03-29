@@ -31,8 +31,8 @@ export class Sample {
 
     sample_click(event) {
         alert(
-            $f.componentMsg('sample', 'key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'}) + &quot;\n&quot; +
-            $f.componentMsg('sample', 'key2', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'})
+            $f.componentMsg(this, 'key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'}) + &quot;\n&quot; +
+            $f.componentMsg(this, 'key2', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'})
         );
     }
 
@@ -88,7 +88,7 @@ export class Sample {
                  <span>src/js/components配下に作成したjsonファイル内の値が出力されます</span><br>
                  <span>controller.js内で実行している$f.componentMsgは</span><br>
                  <span>src/js/components配下に作成したmsg.json内の値を返すメソッドです</span><br>
-                 <span>componentMsgは第一引数にコンポーネント名、第二引数にmsg.jsonのキーを受け取ります</span><br>
+                 <span>componentMsgは第一引数にコンポーネントインスタンス、第二引数にmsg.jsonのキーを受け取ります</span><br>
                  <span>componentMsgメソッドの第三引数はjson内の${}で囲われた箇所を置換する値です。置換したくない場合は\を付けてください</span><br>
                  <span>msg.jsonはjsonなのでキー、値はダブルクォートで囲います。シングルクォートではありません</span><br>
                  <span>コンポーネントで使うmsg.jsonはsrc/js/components配下に作成します。これはフレームワークの規則です</span><br>
@@ -149,7 +149,7 @@ export class Sample {
              <p>
                  <span>実行してsampleボタンをクリック後、component sampleボタンをクリックしてみましょう</span><br>
                  <span>src/js/components/sample配下に作成したjsonファイル内の値が出力されます</span><br>
-                 <span>src/js/components/sample配下に作成したmsg.jsonは、第一引数がsampleである場合にのみ使用できます</span><br>
+                 <span>src/js/components/sample配下に作成したmsg.jsonは、第一引数がsrc/js/components/sample/controller.jsのインスタンスである場合にのみ使用できます</span><br>
              </p>
              <br>
              

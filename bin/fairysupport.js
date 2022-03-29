@@ -1190,30 +1190,37 @@ function ___fairysupport(){
     };
 
     this.elementList = class FairysupportObjList {
+        #objMap;
+        #bindListStr;
+        #beforeMet;
+        #afterMet;
+        #addBeforeMet;
+        #addAfterMet;
+        #fairysupportClear;
         constructor(bindList, beforeFn, afterFn, addBeforeFn, addAfterFn, fairysupportClear) {
-            this.objMap = new Map();
-            this.bindListStr = bindList;
-            this.beforeMet = beforeFn;
-            this.afterMet = afterFn;
-            this.addBeforeMet = addBeforeFn;
-            this.addAfterMet = addAfterFn;
-            this.fairysupportClear = fairysupportClear;
+            this.#objMap = new Map();
+            this.#bindListStr = bindList;
+            this.#beforeMet = beforeFn;
+            this.#afterMet = afterFn;
+            this.#addBeforeMet = addBeforeFn;
+            this.#addAfterMet = addAfterFn;
+            this.#fairysupportClear = fairysupportClear;
         }
         size() {
-            return this.objMap.size;
+            return this.#objMap.size;
         }
         has(element) {
-            return this.objMap.has(element);
+            return this.#objMap.has(element);
         }
         add(element) {
-            this.addBeforeMet({'name': this.bindListStr, 'value': element});
-            this.objMap.set(element, element);
-            this.addAfterMet({'name': this.bindListStr, 'value': element});
+            this.#addBeforeMet({'name': this.#bindListStr, 'value': element});
+            this.#objMap.set(element, element);
+            this.#addAfterMet({'name': this.#bindListStr, 'value': element});
             return this;
         }
         replace(oldElement, newElement) {
-            this.beforeMet({'name': this.bindListStr, 'value': oldElement});
-            this.objMap.delete(oldElement);
+            this.#beforeMet({'name': this.#bindListStr, 'value': oldElement});
+            this.#objMap.delete(oldElement);
             if (oldElement) {
                 if (oldElement.parentNode && !(newElement instanceof fairysupportClear)) {
                     if (newElement === null || newElement=== undefined) {
@@ -1223,31 +1230,38 @@ function ___fairysupport(){
                     }
                 }
             }
-            this.afterMet({'name': this.bindListStr, 'value': oldElement});
+            this.#afterMet({'name': this.#bindListStr, 'value': oldElement});
             return this;
         }
         remove(element) {
-            this.beforeMet({'name': this.bindListStr, 'value': element});
-            this.objMap.delete(element);
+            this.#beforeMet({'name': this.#bindListStr, 'value': element});
+            this.#objMap.delete(element);
             if (element && element.parentNode && !(element instanceof fairysupportClear)) {
                 element.parentNode.removeChild(element);
             }
-            this.afterMet({'name': this.bindListStr, 'value': element});
+            this.#afterMet({'name': this.#bindListStr, 'value': element});
             return this;
         }
         values() {
-            return this.objMap.values();
+            return this.#objMap.values();
         }
         forEach(fn, arg = null){
             if (arg === null) {
-                for (let value of this.objMap.values()) {
+                for (let value of this.#objMap.values()) {
                     fn(value);
                 }
             } else {
-                for (let value of this.objMap.values()) {
+                for (let value of this.#objMap.values()) {
                     fn(value, arg);
                 }
             }
+        }
+        toArray(){
+            let ret = [];
+            for (let value of this.#objMap.values()) {
+                ret.push(value);
+            }
+            return ret;
         }
     };
 
@@ -3241,174 +3255,182 @@ function ___fairysupport(){
     };
 
     this.fairysupportAjaxObj = class FairysupportAjaxObj {
+        
+        #dom;
+        #componentPackeage;
+        #viewUrl;
+        #paramObj;
+        #argObj;
+        #cb;
+        #position;
+        #metName;
+        #componentRoot;
+
+        #xhr;
+        
+        #__resFunc;
+        
         constructor(dom, componentPackeage, viewUrl, paramObj, argObj, cb, position, metName, componentRoot) {
 
-            this.dom = dom;
-            this.componentPackeage = componentPackeage;
-            this.viewUrl = viewUrl;
-            this.paramObj = paramObj;
-            this.argObj = argObj;
-            this.cb = cb;
-            this.position = position;
-            this.metName = metName;
-            this.componentRoot = componentRoot;
+            this.#dom = dom;
+            this.#componentPackeage = componentPackeage;
+            this.#viewUrl = viewUrl;
+            this.#paramObj = paramObj;
+            this.#argObj = argObj;
+            this.#cb = cb;
+            this.#position = position;
+            this.#metName = metName;
+            this.#componentRoot = componentRoot;
+            this.#__resFunc = Object.create(null);
 
-            this.xhr = new XMLHttpRequest();
-            let getFunc = (function(s){return function(){return s.xhr.onreadystatechange;};})(this);
-            let setFunc = (function(s){return function(newFunc){s.xhr.onreadystatechange = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            this.#xhr = new XMLHttpRequest();
+            let getFunc = (function(xhr){return function(){return xhr.onreadystatechange;};})(this.#xhr);
+            let setFunc = (function(xhr){return function(newFunc){xhr.onreadystatechange = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'onreadystatechange', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.readyState;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.readyState = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.readyState;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.readyState = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'readyState', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.response;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.response = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.response;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.response = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'response', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.responseText;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.responseText = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.responseText;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseText = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'responseText', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.responseType;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.responseType = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.responseType;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseType = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'responseType', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.responseURL;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.responseURL = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.responseURL;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseURL = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'responseURL', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.responseXML;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.responseXML = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.responseXML;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseXML = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'responseXML', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.status;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.status = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.status;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.status = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'status', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.statusText;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.statusText = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.statusText;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.statusText = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'statusText', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.timeout;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.timeout = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.timeout;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.timeout = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'timeout', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.upload;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.upload = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.upload;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.upload = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'upload', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.withCredentials;};})(this);
-            setFunc = (function(s){return function(newValue){s.xhr.withCredentials = newValue;};})(this);
+            getFunc = (function(xhr){return function(){return xhr.withCredentials;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.withCredentials = newValue;};})(this.#xhr);
             Object.defineProperty(this, 'withCredentials', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.onabort;};})(this);
-            setFunc = (function(s){return function(newFunc){s.xhr.onabort = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            getFunc = (function(xhr){return function(){return xhr.onabort;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onabort = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'onabort', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.onerror;};})(this);
-            setFunc = (function(s){return function(newFunc){s.xhr.onerror = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            getFunc = (function(xhr){return function(){return xhr.onerror;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onerror = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'onerror', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.onload;};})(this);
-            setFunc = (function(s){return function(newFunc){s.xhr.onload = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            getFunc = (function(xhr){return function(){return xhr.onload;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onload = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'onload', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.onloadend;};})(this);
-            setFunc = (function(s){return function(newFunc){s.xhr.onloadend = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            getFunc = (function(xhr){return function(){return xhr.onloadend;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onloadend = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'onloadend', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.onloadstart;};})(this);
-            setFunc = (function(s){return function(newFunc){s.xhr.onloadstart = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            getFunc = (function(xhr){return function(){return xhr.onloadstart;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onloadstart = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'onloadstart', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.onprogress;};})(this);
-            setFunc = (function(s){return function(newFunc){s.xhr.onprogress = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            getFunc = (function(xhr){return function(){return xhr.onprogress;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onprogress = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'onprogress', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
                 set : setFunc
             });
-            getFunc = (function(s){return function(){return s.xhr.ontimeout;};})(this);
-            setFunc = (function(s){return function(newFunc){s.xhr.ontimeout = (function(s, newFunc){return function(e){newFunc(e, s.xhr);};})(s, newFunc);};})(this);
+            getFunc = (function(xhr){return function(){return xhr.ontimeout;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.ontimeout = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
             Object.defineProperty(this, 'ontimeout', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(funcMap){return function(){return funcMap;};})(Object.create(null));
-            setFunc = function(){};
-            Object.defineProperty(this, '__resFunc', {
                 enumerable: true,
                 configurable: false,
                 get: getFunc,
@@ -3420,28 +3442,28 @@ function ___fairysupport(){
             return this;
         }
         abort() {
-            this.xhr.abort();
+            this.#xhr.abort();
             return this;
         }
         getAllResponseHeaders() {
-            return this.xhr.getAllResponseHeaders();
+            return this.#xhr.getAllResponseHeaders();
         }
         getResponseHeader(headerName) {
-            return this.xhr.getResponseHeader(headerName);
+            return this.#xhr.getResponseHeader(headerName);
         }
         open(method, url, async = true, user = null, password = null) {
-            this.xhr.open(method, url, async, user, password);
+            this.#xhr.open(method, url, async, user, password);
             return this;
         }
         overrideMimeType(mimeType) {
-            this.xhr.overrideMimeType(mimeType);
+            this.#xhr.overrideMimeType(mimeType);
             return this;
         }
         send(body) {
-            if (this.paramObj !== null && this.paramObj !== undefined) {
-                this.xhr.send(this.paramObj);
+            if (this.#paramObj !== null && this.#paramObj !== undefined) {
+                this.#xhr.send(this.#paramObj);
             } else {
-                this.xhr.send(body);
+                this.#xhr.send(body);
             }
             return this;
         }
@@ -3462,7 +3484,7 @@ function ___fairysupport(){
             })(this, body));
         }
         setRequestHeader(header, value) {
-            return this.xhr.setRequestHeader(header, value);
+            return this.#xhr.setRequestHeader(header, value);
         }
         setOnreadystatechange(fn) {
             this.onreadystatechange = fn;
@@ -3501,29 +3523,29 @@ function ___fairysupport(){
             return this;
         }
         setReadystatechange(state, status, fn) {
-            if (!('readystatechange' in this.__resFunc)) {
-                this.__resFunc['readystatechange'] = Object.create(null);
+            if (!('readystatechange' in this.#__resFunc)) {
+                this.#__resFunc['readystatechange'] = Object.create(null);
             }
             if (state === null && status === null) {
-                this.__resFunc['readystatechange']['default'] = fn;
+                this.#__resFunc['readystatechange']['default'] = fn;
             } else if (state !== null && status === null) {
-                if (!('statusDefault' in this.__resFunc['readystatechange'])) {
-                    this.__resFunc['readystatechange']['statusDefault'] = Object.create(null);
+                if (!('statusDefault' in this.#__resFunc['readystatechange'])) {
+                    this.#__resFunc['readystatechange']['statusDefault'] = Object.create(null);
                 }
-                this.__resFunc['readystatechange']['statusDefault'][String(state)] = fn;
+                this.#__resFunc['readystatechange']['statusDefault'][String(state)] = fn;
             } else if (state === null && status !== null) {
-                if (!('stateDefault' in this.__resFunc['readystatechange'])) {
-                    this.__resFunc['readystatechange']['stateDefault'] = Object.create(null);
+                if (!('stateDefault' in this.#__resFunc['readystatechange'])) {
+                    this.#__resFunc['readystatechange']['stateDefault'] = Object.create(null);
                 }
-                this.__resFunc['readystatechange']['stateDefault'][String(status)] = fn;
+                this.#__resFunc['readystatechange']['stateDefault'][String(status)] = fn;
             } else {
-                if (!('fn' in this.__resFunc['readystatechange'])) {
-                    this.__resFunc['readystatechange']['fn'] = Object.create(null);
+                if (!('fn' in this.#__resFunc['readystatechange'])) {
+                    this.#__resFunc['readystatechange']['fn'] = Object.create(null);
                 }
-                if (!(state in this.__resFunc['readystatechange']['fn'])) {
-                    this.__resFunc['readystatechange']['fn'][String(state)] = Object.create(null);
+                if (!(state in this.#__resFunc['readystatechange']['fn'])) {
+                    this.#__resFunc['readystatechange']['fn'][String(state)] = Object.create(null);
                 }
-                this.__resFunc['readystatechange']['fn'][String(state)][String(status)] = fn;
+                this.#__resFunc['readystatechange']['fn'][String(state)][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
@@ -3547,51 +3569,51 @@ function ___fairysupport(){
                                         }
                                     }
                                 };
-                           })(this.__resFunc['readystatechange']);
+                           })(this.#__resFunc['readystatechange']);
             this.onreadystatechange = useFunc;
             return this;
         }
         setAbort(fn) {
-            if (!('abort' in this.__resFunc)) {
-                this.__resFunc['abort'] = Object.create(null);
+            if (!('abort' in this.#__resFunc)) {
+                this.#__resFunc['abort'] = Object.create(null);
             }
-            this.__resFunc['abort']['default'] = fn;
+            this.#__resFunc['abort']['default'] = fn;
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
                                     if ('default' in resFunc) {
                                         resFunc['default'](e, xhr);
                                     }
                                 };
-                           })(this.__resFunc['abort']);
+                           })(this.#__resFunc['abort']);
             this.onabort = useFunc;
             return this;
         }
         setError(fn) {
-            if (!('error' in this.__resFunc)) {
-                this.__resFunc['error'] = Object.create(null);
+            if (!('error' in this.#__resFunc)) {
+                this.#__resFunc['error'] = Object.create(null);
             }
-            this.__resFunc['error']['default'] = fn;
+            this.#__resFunc['error']['default'] = fn;
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
                                     if ('default' in resFunc) {
                                         resFunc['default'](e, xhr);
                                     }
                                 };
-                           })(this.__resFunc['error']);
+                           })(this.#__resFunc['error']);
             this.onerror = useFunc;
             return this;
         }
         setLoad(status, fn) {
-            if (!('load' in this.__resFunc)) {
-                this.__resFunc['load'] = Object.create(null);
+            if (!('load' in this.#__resFunc)) {
+                this.#__resFunc['load'] = Object.create(null);
             }
             if (status === null) {
-                this.__resFunc['load']['default'] = fn;
+                this.#__resFunc['load']['default'] = fn;
             } else {
-                if (!('fn' in this.__resFunc['load'])) {
-                    this.__resFunc['load']['fn'] = Object.create(null);
+                if (!('fn' in this.#__resFunc['load'])) {
+                    this.#__resFunc['load']['fn'] = Object.create(null);
                 }
-                this.__resFunc['load']['fn'][String(status)] = fn;
+                this.#__resFunc['load']['fn'][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
@@ -3602,21 +3624,21 @@ function ___fairysupport(){
                                         resFunc['default'](e, xhr);
                                     }
                                 };
-                           })(this.__resFunc['load']);
+                           })(this.#__resFunc['load']);
             this.onload = useFunc;
             return this;
         }
         setLoadend(status, fn) {
-            if (!('loadend' in this.__resFunc)) {
-                this.__resFunc['loadend'] = Object.create(null);
+            if (!('loadend' in this.#__resFunc)) {
+                this.#__resFunc['loadend'] = Object.create(null);
             }
             if (status === null) {
-                this.__resFunc['loadend']['default'] = fn;
+                this.#__resFunc['loadend']['default'] = fn;
             } else {
-                if (!('fn' in this.__resFunc['loadend'])) {
-                    this.__resFunc['loadend']['fn'] = Object.create(null);
+                if (!('fn' in this.#__resFunc['loadend'])) {
+                    this.#__resFunc['loadend']['fn'] = Object.create(null);
                 }
-                this.__resFunc['loadend']['fn'][String(status)] = fn;
+                this.#__resFunc['loadend']['fn'][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
@@ -3627,36 +3649,36 @@ function ___fairysupport(){
                                         resFunc['default'](e, xhr);
                                     }
                                 };
-                           })(this.__resFunc['loadend']);
+                           })(this.#__resFunc['loadend']);
             this.onloadend = useFunc;
             return this;
         }
         setLoadstart(fn) {
-            if (!('loadstart' in this.__resFunc)) {
-                this.__resFunc['loadstart'] = Object.create(null);
+            if (!('loadstart' in this.#__resFunc)) {
+                this.#__resFunc['loadstart'] = Object.create(null);
             }
-            this.__resFunc['loadstart']['default'] = fn;
+            this.#__resFunc['loadstart']['default'] = fn;
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
                                     if ('default' in resFunc) {
                                         resFunc['default'](e, xhr);
                                     }
                                 };
-                           })(this.__resFunc['loadstart']);
+                           })(this.#__resFunc['loadstart']);
             this.onloadstart = useFunc;
             return this;
         }
         setProgress(status, fn) {
-            if (!('progress' in this.__resFunc)) {
-                this.__resFunc['progress'] = Object.create(null);
+            if (!('progress' in this.#__resFunc)) {
+                this.#__resFunc['progress'] = Object.create(null);
             }
             if (status === null) {
-                this.__resFunc['progress']['default'] = fn;
+                this.#__resFunc['progress']['default'] = fn;
             } else {
-                if (!('fn' in this.__resFunc['progress'])) {
-                    this.__resFunc['progress']['fn'] = Object.create(null);
+                if (!('fn' in this.#__resFunc['progress'])) {
+                    this.#__resFunc['progress']['fn'] = Object.create(null);
                 }
-                this.__resFunc['progress']['fn'][String(status)] = fn;
+                this.#__resFunc['progress']['fn'][String(status)] = fn;
             }
             let useFunc = (function (resFunc) {
                                 return function (e, xhr) {
@@ -3667,23 +3689,23 @@ function ___fairysupport(){
                                         resFunc['default'](e, xhr);
                                     }
                                 };
-                           })(this.__resFunc['progress']);
+                           })(this.#__resFunc['progress']);
             this.onprogress = useFunc;
             return this;
         }
         setTimeout(fn) {
             if (typeof fn === 'function') {
-                if (!('timeout' in this.__resFunc)) {
-                    this.__resFunc['timeout'] = Object.create(null);
+                if (!('timeout' in this.#__resFunc)) {
+                    this.#__resFunc['timeout'] = Object.create(null);
                 }
-                this.__resFunc['timeout']['default'] = fn;
+                this.#__resFunc['timeout']['default'] = fn;
                 let useFunc = (function (resFunc) {
                                     return function (e, xhr) {
                                         if ('default' in resFunc) {
                                             resFunc['default'](e, xhr);
                                         }
                                     };
-                               })(this.__resFunc['timeout']);
+                               })(this.#__resFunc['timeout']);
                 this.ontimeout = useFunc;
                 return this;
             } else {
@@ -3735,27 +3757,34 @@ function ___fairysupport(){
     };
 
     this.timeLineClass =  class FairysupportTimeLineClass {
+        
+        #fs;
+        #timelinePropList;
+        #preClazz;
+        #props;
+        #ms;
+        
         constructor(fs, timelinePropList, preClazz, props, ms) {
-            this.fs = fs;
-            this.timelinePropList = timelinePropList;
-            this.preClazz = preClazz;
-            this.props = props;
-            this.ms = ms;
+            this.#fs = fs;
+            this.#timelinePropList = timelinePropList;
+            this.#preClazz = preClazz;
+            this.#props = props;
+            this.#ms = ms;
         }
         execTimer() {
-            if (this.preClazz !== null && this.preClazz !== undefined && this.preClazz.timerId !== null && this.preClazz.timerId !== undefined) {
-                this.preClazz.clerTimer();
+            if (this.#preClazz !== null && this.#preClazz !== undefined && this.#preClazz.timerId !== null && this.#preClazz.timerId !== undefined) {
+                this.#preClazz.clerTimer();
             }
             if (this.timerId !== null && this.timerId !== undefined) {
-                let propsValues = this.props.values();
+                let propsValues = this.#props.values();
                 for (let propsVal of propsValues) {
-                    this.fs.setTimeLineProp(propsVal.obj, propsVal.value);
+                    this.#fs.setTimeLineProp(propsVal.obj, propsVal.value);
                 }
             }
-            let timelineProp = this.timelinePropList.shift();
+            let timelineProp = this.#timelinePropList.shift();
             if (timelineProp !== null && timelineProp !== undefined) {
-                let timeLineClazz = new this.fs.timeLineClass(this.fs, this.timelinePropList, this, timelineProp.prop, timelineProp.ms);
-                timeLineClazz.timerId = window.setTimeout(timeLineClazz.execTimer.bind(timeLineClazz), timelineProp.ms - this.ms);
+                let timeLineClazz = new this.#fs.timeLineClass(this.#fs, this.#timelinePropList, this, timelineProp.prop, timelineProp.ms);
+                timeLineClazz.timerId = window.setTimeout(timeLineClazz.execTimer.bind(timeLineClazz), timelineProp.ms - this.#ms);
             } else {
                 this.clerTimer();
             }
@@ -4021,39 +4050,41 @@ function ___fairysupport(){
     }
 
     this.storeClass = class FairysupportStore {
+        #data;
+        #listener;
         constructor() {
-            this.data = new Map();
-            this.listener = new Map();
+            this.#data = new Map();
+            this.#listener = new Map();
         }
         set(k, v) {
             let setFlg = true;
-            if (this.listener.has(k)) {
-                for (let l of this.listener.get(k).values()) {
+            if (this.#listener.has(k)) {
+                for (let l of this.#listener.get(k).values()) {
                     setFlg = l(k, v);
                     if (setFlg === false) {
                         return;
                     }
                 }
             }
-            this.data.set(k, v);
+            this.#data.set(k, v);
         }
         get(k) {
-            return this.data.get(k);
+            return this.#data.get(k);
         }
         delete(k) {
-            return this.data.delete(k);
+            return this.#data.delete(k);
         }
         addListener(k, l){
-            if (!this.listener.has(k)) {
-                this.listener.set(k, new Map());
+            if (!this.#listener.has(k)) {
+                this.#listener.set(k, new Map());
             }
-            this.listener.get(k).set(l, l);
+            this.#listener.get(k).set(l, l);
         }
         removeListener(k, l){
-            if (!this.listener.has(k)) {
-                this.listener.set(k, new Map());
+            if (!this.#listener.has(k)) {
+                this.#listener.set(k, new Map());
             }
-            this.listener.get(k).delete(l);
+            this.#listener.get(k).delete(l);
         }
     };
 

@@ -1,6 +1,6 @@
 {
   "name": "fairysupport_js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "bin": {
     "fairysupport_js": "bin/fairysupport_js_build.js"
