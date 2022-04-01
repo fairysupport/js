@@ -52,49 +52,49 @@ export class Index {
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     sample2_input(event) {
         this.obj2.textContent = event.target.value;
     }
-    
+
     success() {
         alert(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
     template() {
         return `
             &lt;div&gt;--data-text--&lt;/div&gt;
             &lt;div data-text='v.key1'&gt;&lt;/div&gt;
             &lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
-            
+
             &lt;div&gt;--data-html--&lt;/div&gt;
             &lt;div data-html='v.key1'&gt;&lt;/div&gt;
-            
+
             &lt;div&gt;--script--&lt;/div&gt;
             &lt;script data-load-only='true'&gt;
                 l.var = 1 + 2;
             &lt;/script&gt;
             &lt;div data-text='l.var'&gt;&lt;/div&gt;
-            
+
             &lt;div&gt;--data-attr--&lt;/div&gt;
             &lt;script data-load-only='true'&gt;
                 l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
             &lt;/script&gt;
             &lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
             &lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
-            
+
             &lt;div&gt;--data-prop--&lt;/div&gt;
             &lt;script data-load-only='true'&gt;
                 l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
             &lt;/script&gt;
             &lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
             &lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
-            
+
             &lt;div&gt;--data-if--&lt;/div&gt;
             &lt;div data-if='v.key2.val1 === 1'&gt;
                 v.key2.val1 === 1
@@ -105,14 +105,14 @@ export class Index {
             &lt;div data-else=''&gt;
                 else
             &lt;/div&gt;
-            
+
             &lt;div&gt;--data-for--&lt;/div&gt;
             &lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
                 &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
                 &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
                 &lt;div data-text='l.i'&gt;&lt;/div&gt;
             &lt;/div&gt;
-            
+
             &lt;div&gt;--data-foreach--&lt;/div&gt;
             &lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
                 &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
@@ -121,7 +121,7 @@ export class Index {
                 &lt;span&gt;:&lt;/span&gt;
                 &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
             &lt;/div&gt;
-            
+
             &lt;div&gt;--data-while--&lt;/div&gt;
             &lt;script data-load-only='true'&gt;
                 l.whileCount = -1;
@@ -134,7 +134,7 @@ export class Index {
                 &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
                 &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
             &lt;/div&gt;
-            
+
             &lt;input data-name='sample2' type='text'&gt;
             &lt;div data-obj='obj2'&gt;&lt;/div&gt;
         `;
@@ -142,7 +142,7 @@ export class Index {
 
 }
 </pre>
-             
+
              <p>
                  <span>実行してsampleボタンをクリックしてみましょう</span><br>
                  <span>index.jsのtemplateメソッドの戻り値に、$f.loadStringTemplateの第三引数の値が埋め込まれて出力されます</span><br>
@@ -173,7 +173,7 @@ export class Index {
                  <span>loadStringTemplateではなく、afterLoadStringTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
+
              <h1>テンプレートを別ファイルにする</h1>
 
              <p>
@@ -210,20 +210,20 @@ export class Index {
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     sample2_input(event) {
         this.obj2.textContent = event.target.value;
     }
-    
+
     success() {
         alert(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <p>
@@ -315,22 +315,22 @@ export class Index {
                  <span>loadTemplateではなく、afterLoadTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
+
              <h1>テンプレートのネスト</h1>
-             
+
              <p>
                  <span>data-template属性を設定するとテンプレートからテンプレートを呼び出せます</span><br>
                  <span>data-template属性値はloadTemplateの第二引数と同じです</span><br>
              </p>
-             
+
              <h1>テンプレートに渡す変数をサーバーから受け取る。その1</h1>
 
              <p>
                  <span>これまでテンプレート内でvという変数名で使うことができる値をjsonで与えていましたが、これをサーバーから受信したjsonにすることができます</span><br>
                  <span>src/js/env/envValue.local.jsonを作成し、index.jsを下記に変更しましょう</span><br>
              </p>
-             
-             
+
+
              <span class="code-title">src/js/env/envValue.local.json</span>
              <br>
              <pre class="code-view">{
@@ -350,26 +350,26 @@ export class Index {
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     sample2_input(event) {
         this.obj2.textContent = event.target.value;
     }
-    
+
     success() {
         alert(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <p>
                  <span>tpl.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
                  <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
-                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定し、CORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定しす。PHPサーバーはhttp://localhost:8080とします</span><br>
              </p>
              <span class="code-title">tpl.php</span>
              <br>
@@ -377,7 +377,7 @@ export class Index {
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 $rawRequest = file_get_contents(&quot;php://input&quot;);
@@ -413,16 +413,16 @@ echo json_encode($responseJson);
                  <span>resJsonTemplateではなく、afterResJsonTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
-             
-             
+
+
+
              <h1>テンプレートに渡す変数をサーバーから受け取る。その2</h1>
 
              <p>
                  <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
                  <span>index.js、index.html、tpl.phpを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">index.js</span>
              <br>
              <pre class="code-view">
@@ -436,20 +436,20 @@ export class Index {
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     sample2_input(event) {
         this.obj2.textContent = event.target.value;
     }
-    
+
     success() {
         alert(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">index.html</span>
@@ -481,7 +481,7 @@ sample
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 $responseJson = array(
@@ -512,15 +512,15 @@ echo json_encode($responseJson);
                  <span>resJsonTemplateByFormではなく、afterResJsonTemplateByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
-             
+
+
              <h1>テンプレートをサーバーから受け取る。その1</h1>
 
              <p>
                  <span>テンプレートを外部のサーバーから取得します</span><br>
                  <span>index.js、index.htmlを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">index.js</span>
              <br>
              <pre class="code-view">
@@ -530,27 +530,27 @@ export class Index {
     }
 
     sample_click(event) {
-        $f.resHtmlTemplate(this.obj, 
-                           $f.envValue('apiRoot') + '/tpl2.php', 
-                           {'sample_key': 'sample_value'}, 
+        $f.resHtmlTemplate(this.obj,
+                           $f.envValue('apiRoot') + '/tpl2.php',
+                           {'sample_key': 'sample_value'},
                            {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     sample2_input(event) {
         this.obj2.textContent = event.target.value;
     }
-    
+
     success() {
         alert(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">index.html</span>
@@ -572,7 +572,7 @@ sample
 &lt;/html&gt;
 </pre>
              <p>
-                 <span>tpl2.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
+                 <span>tpl2.phpを作成し、配置してみましょう</span><br>
              </p>
              <span class="code-title">tpl2.php</span>
              <br>
@@ -580,7 +580,7 @@ sample
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 $rawRequest = file_get_contents(&quot;php://input&quot;);
@@ -671,14 +671,14 @@ $jsonRequest = json_decode($rawRequest, true);
                  <span>resHtmlTemplateではなく、afterResHtmlTemplateにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
+
              <h1>テンプレートをサーバーから受け取る。その2</h1>
 
              <p>
                  <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
                  <span>index.js、index.html、tpl2.phpを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">index.js</span>
              <br>
              <pre class="code-view">
@@ -688,28 +688,28 @@ export class Index {
     }
 
     sample_click(event) {
-        
-        $f.resHtmlTemplateByForm(this.obj, 
-                                 $f.envValue('apiRoot') + '/tpl2.php', 
-                                 this.sampleForm, 
+
+        $f.resHtmlTemplateByForm(this.obj,
+                                 $f.envValue('apiRoot') + '/tpl2.php',
+                                 this.sampleForm,
                                  {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     sample2_input(event) {
         this.obj2.textContent = event.target.value;
     }
-    
+
     success() {
         alert(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">index.html</span>
@@ -741,7 +741,7 @@ sample
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 ?&gt;
@@ -831,14 +831,14 @@ header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
                  <span>resHtmlTemplateByFormではなく、afterResHtmlTemplateByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
-             
+
+
              <h1>画面に表示されているDOMをテンプレートとして使う</h1>
 
              <p>
                  <span>index.js、index.htmlを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">index.js</span>
              <br>
              <pre class="code-view">
@@ -852,16 +852,16 @@ export class Index {
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     success() {
         this.obj.style.display = &quot;block&quot;;
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">index.html</span>
@@ -897,7 +897,7 @@ sample
                  <span>第二引数にテンプレート内でvという変数名で使うオブジェクトを渡します</span><br>
              </p>
              <br>
-             
+
              <p>
                  <span><a href="single_component_event.html">次ページ</a>シングルコンポーネントのイベント処理</span>
                  <br>

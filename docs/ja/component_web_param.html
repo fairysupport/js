@@ -16,15 +16,15 @@ JavaScript フレームワーク fairy support js コンポーネントに渡す
      <div class="subtitle">コンポーネントに渡す値をサーバーから受け取る</div>
      <article class="article">
          <section>
-             
+
              <h1>コンポーネントに渡す値をサーバーから受け取る。その1</h1>
 
              <p>
                  <span>これまでview.html内でvという変数名で使うことができる値をjsonで与えていましたが、これをサーバーから受信したjsonにすることができます</span><br>
                  <span>src/js/env/envValue.local.jsonを作成しましょう</span><br>
              </p>
-             
-             
+
+
              <span class="code-title">src/js/env/envValue.local.json</span>
              <br>
              <pre class="code-view">
@@ -35,7 +35,7 @@ JavaScript フレームワーク fairy support js コンポーネントに渡す
              <p>
                  <span>src/js/modules/index.js、src/page/index.htmlを修正しましょう</span><br>
              </p>
-             
+
              <span class="code-title">src/js/modules/index.js</span>
              <br>
              <pre class="code-view">
@@ -49,16 +49,16 @@ export class Index {
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     success() {
         console.log(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">src/page/index.html</span>
@@ -82,7 +82,7 @@ sample
              <p>
                  <span>tpl.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
                  <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
-                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定し、CORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定しす。PHPサーバーはhttp://localhost:8080とします</span><br>
              </p>
              <span class="code-title">tpl.php</span>
              <br>
@@ -90,7 +90,7 @@ sample
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 $rawRequest = file_get_contents(&quot;php://input&quot;);
@@ -173,15 +173,15 @@ export class Sample {
                  <span>resJsonSingleComponent、resJsonUniqueComponentではなく、afterResJsonSingleComponent、afterResJsonUniqueComponentにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
-             
+
+
              <h1>コンポーネントに渡す変数をサーバーから受け取る。その2</h1>
 
              <p>
                  <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
                  <span>index.js、index.html、tpl.phpを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">index.js</span>
              <br>
              <pre class="code-view">
@@ -195,16 +195,16 @@ export class Index {
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     success() {
         console.log(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">index.html</span>
@@ -236,7 +236,7 @@ sample
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 $responseJson = array(
@@ -267,8 +267,8 @@ echo json_encode($responseJson);
                  <span>resJsonSingleComponentByForm、resJsonUniqueComponentByFormではなく、afterResJsonSingleComponentByForm、afterResJsonUniqueComponentByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
-             
+
+
              <p>
                  <span><a href="component_web_view.html">次ページ</a>コンポーネントのviewをサーバーから受け取る</span>
                  <br>

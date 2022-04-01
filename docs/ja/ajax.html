@@ -28,7 +28,7 @@ JavaScript フレームワーク fairy support js Ajax
     "apiRoot" : "http://localhost:8080"
 }</pre>
 
-             
+
              <span class="code-title">src/js/modules/index.js</span>
              <br>
              <pre class="code-view">
@@ -43,15 +43,15 @@ export class Index {
         .setLoadend(null, this.error.bind(this))
         .send();
     }
-    
+
     success(event, xhr) {
         this.obj.textContent = JSON.stringify(xhr.response);
     }
-    
+
     error(event, xhr) {
         this.obj.textContent += xhr.status;
     }
-    
+
 }
 </pre>
              <span class="code-title">src/page/index.html</span>
@@ -75,7 +75,7 @@ sample
              <p>
                  <span>json.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
                  <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
-                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定し、CORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定します。PHPサーバーはhttp://localhost:8080とします</span><br>
              </p>
              <span class="code-title">json.php</span>
              <br>
@@ -111,7 +111,7 @@ echo json_encode($responseJson);
              </p>
              <br>
 
-             
+
              <p>
                  <span>$f.ajaxについて</span><br>
                  <span>第一引数がAjax送信先URL、第二引数がリクエストパラメーターです</span><br>
@@ -136,7 +136,7 @@ echo json_encode($responseJson);
                  <span>$f.ajaxは自動的にresponseTypeがjsonになります。$f.ajaxTextにするとresponseTypeがtextになります。$f.ajaxTextの使い方は$f.ajaxと全く同じです。引数も同じです</span><br>
                  <span>$f.ajax、$f.ajaxTextは自動的にリクエストヘッダーにX-Requested-With、Accept、Content-Typeが設定されます。リクエストヘッダーとresponseTypeになにも設定されていない状態を取得したい場合は、$f.emptyAjaxを使用してください。$f.emptyAjaxの使い方は$f.ajaxと全く同じです。引数も同じです</span><br>
              </p>
-             
+
              <h1>リクエストデータを直接渡す。Promiseで処理する</h1>
 
              <p>
@@ -157,15 +157,15 @@ export class Index {
         .catch(this.error.bind(this))
         ;
     }
-    
+
     success(xhr) {
         this.obj.textContent = JSON.stringify(xhr.response);
     }
-    
+
     error(xhr) {
         this.obj.textContent += xhr.status;
     }
-    
+
 }
 </pre>
              <p>
@@ -175,14 +175,14 @@ export class Index {
                  <span>sendPromiseを使うとsetLoadendメソッド、onloadendフィールドは使えません</span><br>
              </p>
              <br>
-             
-             
+
+
              <h1>リクエストデータをformオブジェクトで渡す</h1>
 
              <p>
                  <span>index.html、index.jsを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">src/page/index.html</span>
              <br>
              <pre class="code-view">
@@ -221,15 +221,15 @@ export class Index {
         .setLoadend(null, this.error.bind(this))
         .send();
     }
-    
+
     success(event, xhr) {
         this.obj.textContent = JSON.stringify(xhr.response);
     }
-    
+
     error(event, xhr) {
         this.obj.textContent += xhr.status;
     }
-    
+
 }
 </pre>
              <p>
@@ -261,7 +261,7 @@ $responseJson = array(
 
 echo json_encode($responseJson);
 </pre>
-             
+
              <p>
                  <span>$f.ajaxByFormについて</span><br>
                  <span>第一引数がAjax送信先URL、第二引数が送信するformオブジェクトです</span><br>
@@ -272,8 +272,8 @@ echo json_encode($responseJson);
                  <span>ajaxByForm、ajaxTextByForm、emptyAjaxByFormもsendPromiseを使用するとPromiseが返ります</span><br>
              </p>
              <br>
-             
-             
+
+
              <p>
                  <span><a href="validate.html">次ページ</a>validate</span>
                  <br>

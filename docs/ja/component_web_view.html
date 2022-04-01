@@ -16,14 +16,14 @@ JavaScript フレームワーク fairy support js コンポーネントのview�
      <div class="subtitle">コンポーネントのviewをサーバーから受け取る</div>
      <article class="article">
          <section>
-             
+
              <h1>コンポーネントのviewをサーバーから受け取る。その1</h1>
 
              <p>
                  <span>コンポーネントのviewを外部のサーバーから取得します</span><br>
                  <span>index.js、index.htmlを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">index.js</span>
              <br>
              <pre class="code-view">
@@ -33,24 +33,24 @@ export class Index {
     }
 
     sample_click(event) {
-        $f.resHtmlSingleComponent(this.obj, 
-                                  'sample', 
-                                  $f.envValue('apiRoot') + '/tpl2.php', 
-                                  {'sample_key': 'sample_value'}, 
+        $f.resHtmlSingleComponent(this.obj,
+                                  'sample',
+                                  $f.envValue('apiRoot') + '/tpl2.php',
+                                  {'sample_key': 'sample_value'},
                                   {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     success() {
         console.log(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">index.html</span>
@@ -74,7 +74,7 @@ sample
              <p>
                  <span>tpl2.phpを作成し、CORS設定したwebサーバーに配置してみましょう</span><br>
                  <span>CORS設定したwebサーバーはご自身で用意してください</span><br>
-                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定し、CORS設定したwebサーバーはhttp://localhost:8080とします</span><br>
+                 <span>ここでは例としてPHPでheaderメソッドを使いCORS設定します。PHPサーバーはhttp://localhost:8080とします</span><br>
              </p>
              <span class="code-title">tpl2.php</span>
              <br>
@@ -82,7 +82,7 @@ sample
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 $rawRequest = file_get_contents(&quot;php://input&quot;);
@@ -130,16 +130,16 @@ export class Sample {
                  <span>resHtmlSingleComponent、resHtmlUniqueComponentではなく、afterResHtmlSingleComponent、afterResHtmlUniqueComponentにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
-             
-             
+
+
+
              <h1>コンポーネントのviewをサーバーから受け取る。その2</h1>
 
              <p>
                  <span>先ほどはサーバーにjsonを送信しましたが、formを送信することもできます</span><br>
                  <span>index.js、index.html、tpl2.phpを下記に変更しましょう</span><br>
              </p>
-             
+
              <span class="code-title">index.js</span>
              <br>
              <pre class="code-view">
@@ -149,24 +149,24 @@ export class Index {
     }
 
     sample_click(event) {
-        $f.resHtmlSingleComponentByForm(this.obj, 
-                                  'sample', 
-                                  $f.envValue('apiRoot') + '/tpl2.php', 
-                                  this.sampleForm, 
+        $f.resHtmlSingleComponentByForm(this.obj,
+                                  'sample',
+                                  $f.envValue('apiRoot') + '/tpl2.php',
+                                  this.sampleForm,
                                   {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
         .then(this.success.bind(this))
         .catch(this.error.bind(this));
     }
-    
+
     success() {
         console.log(&quot;success&quot;);
     }
-    
+
     error(exception) {
         alert(&quot;error&quot;);
         console.error(exception);
     }
-    
+
 }
 </pre>
              <span class="code-title">index.html</span>
@@ -198,7 +198,7 @@ sample
 &lt;?php
 header(&quot;Access-Control-Allow-Credentials: true&quot;);
 header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
-header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;); 
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
 header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
 
 ?&gt;
@@ -222,7 +222,7 @@ header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
                  <span>resHtmlSingleComponentByForm、resHtmlUniqueComponentByFormではなく、afterResHtmlSingleComponentByForm、afterResHtmlUniqueComponentByFormにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
              </p>
              <br>
-             
+
              <p>
                  <span><a href="ajax.html">次ページ</a>Ajax</span>
                  <br>
