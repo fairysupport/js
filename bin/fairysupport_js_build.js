@@ -1,14 +1,35 @@
 #!/usr/bin/env node
 
+const fs = require('fs');
+const path = require('path');
+
+let curDir = process.cwd();
+if (process.argv.length >= 4) {
+    curDir = process.argv[3].toString().trim();
+}
+
+let envTxt = "";
+if (process.argv.length >= 3) {
+    envTxt = process.argv[2].toString().trim();
+}
+
 try {
 
     console.log("----------------start----------------");
     console.log((new Date()).toLocaleString());
     
     
-    const fs = require('fs');
-    const path = require('path');
-    
+    const lockFilePath = path.join(curDir, "fairy_support_js.lock");
+
+    let preCheckDate = 0;
+    while (fs.existsSync(lockFilePath) && fs.statSync(lockFilePath).isFile()) {
+        preCheckDate = Date.now();
+        while (Date.now() - preCheckDate <= 10000) {
+            
+        }
+    }
+    fs.writeFileSync(lockFilePath, "");
+
     function createDir(parentDir, dir) {
         const newDir = path.join(parentDir, dir);
         if (!fs.existsSync(newDir)) {
@@ -43,16 +64,6 @@ try {
             
         }
         
-    }
-    
-    let curDir = process.cwd();
-    if (process.argv.length >= 4) {
-        curDir = process.argv[3].toString().trim();
-    }
-    
-    let envTxt = "";
-    if (process.argv.length >= 3) {
-        envTxt = process.argv[2].toString().trim();
     }
     
     const src = path.join(curDir, "src");
@@ -880,9 +891,17 @@ try {
     
     console.log((new Date()).toLocaleString());
     console.log("----------------complete----------------");
+    
+    fs.unlinkSync(lockFilePath);
 
 } catch (wholeError) {
     console.error("----------------error----------------");
     console.error(wholeError);
     console.error("----------------error----------------");
+    
+    const lockFilePath = path.join(curDir, "fairy_support_js.lock");
+    if (fs.existsSync(lockFilePath) && fs.statSync(lockFilePath).isFile()) {
+        fs.unlinkSync(lockFilePath);
+    }
+
 }
