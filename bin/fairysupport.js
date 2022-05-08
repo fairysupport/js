@@ -1337,8 +1337,9 @@ function ___fairysupport(){
                         if (!eventMapOfClass.has(eventName)) {
                             let eventFn = (function(fnList, classObj, moduleClassObj){
                                 return function(e){
+                                    let ret = true;
                                     for (let func of fnList) {
-                                        let ret = null;
+                                        ret = true;
                                         try {
                                             if (classObj.beforeEvent && typeof classObj.beforeEvent === 'function') {
                                                 classObj.beforeEvent(e);
@@ -1348,7 +1349,7 @@ function ___fairysupport(){
                                                 classObj.afterEvent(e, ret);
                                             }
                                             if (ret === false) {
-                                                return;
+                                                return ret;
                                             }
                                         } catch(exception) {
                                             ret = false;
@@ -1363,9 +1364,10 @@ function ___fairysupport(){
                                             }
                                         }
                                         if (ret === false) {
-                                            return;
+                                            return ret;
                                         }
                                     }
+                                    return ret;
                                 };
                             })(fnList, classObj, moduleClassObj);
                             eventMapOfClass.set(eventName, eventFn);
@@ -1406,8 +1408,9 @@ function ___fairysupport(){
             let fnList = keyEventValueNameList[eventName];
             let eventFn = (function(fnList, classObj, moduleClassObj){
                 return function(e){
+                    let ret = true;
                     for (let func of Object.values(fnList)) {
-                        let ret = null;
+                        ret = true;
                         try {
                             if (classObj.beforeEvent && typeof classObj.beforeEvent === 'function') {
                                 classObj.beforeEvent(e);
@@ -1417,7 +1420,7 @@ function ___fairysupport(){
                                 classObj.afterEvent(e, ret);
                             }
                             if (ret === false) {
-                                return;
+                                return ret;
                             }
                         } catch(exception) {
                             ret = false;
@@ -1432,9 +1435,10 @@ function ___fairysupport(){
                             }
                         }
                         if (ret === false) {
-                            return;
+                            return ret;
                         }
                     }
+                    return ret
                 };
             })(fnList, classObj, moduleClassObj);
 
