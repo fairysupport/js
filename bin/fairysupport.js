@@ -296,6 +296,18 @@ function ___fairysupport(){
     this.binder = function (fs){
         let bodyObj = document.getElementsByTagName("BODY");
         let observer = new MutationObserver((records, obj) => {
+            const removeSet = new WeakSet();
+            const addSet = new WeakSet();
+            for (let record of records) {
+                if (record.type === 'childList') {
+                    for (let i = 0; i < record.removedNodes.length; i++) {
+                        removeSet.add(record.removedNodes.item(i));
+                    }
+                    for (let i = 0; i < record.addedNodes.length; i++) {
+                        addSet.add(record.addedNodes.item(i));
+                    }
+                }
+            }
             for (let record of records) {
                 if (record.type === 'attributes') {
 
@@ -363,9 +375,15 @@ function ___fairysupport(){
                     let initFunc = null;
                     let bindCb = null;
                     for (let i = 0; i < record.removedNodes.length; i++) {
+                        if (removeSet.has(record.removedNodes.item(i)) && addSet.has(record.removedNodes.item(i))) {
+                            continue;
+                        }
                         fs.removeAllNest(record.removedNodes.item(i));
                     }
                     for (let i = 0; i < record.addedNodes.length; i++) {
+                        if (removeSet.has(record.addedNodes.item(i)) && addSet.has(record.addedNodes.item(i))) {
+                            continue;
+                        }
                         fs.bindAllNest(record.addedNodes.item(i));
 
                         if (fs.componentDomInitFuncMap.has(record.addedNodes.item(i))) {
