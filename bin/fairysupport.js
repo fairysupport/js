@@ -51,6 +51,8 @@ function ___fairysupport(){
 
     const componentMsgObj = new WeakMap();
     const componentEnvValueObj = new WeakMap();
+    
+    const uniqueComponentDomControllerMap = new WeakMap();
 
     if (!('fairysupportInitFail' in window)) {
         window.fairysupportInitFail = function (retryCount, error) {
@@ -695,6 +697,31 @@ function ___fairysupport(){
             let bindObj = dataset.obj;
             let bindList = dataset.list;
             let name = dataset.name;
+            
+            if (uniqueComponentDomControllerMap.has(obj)) {
+                let uniqueComponentDomControllerMapValue = uniqueComponentDomControllerMap.get(obj);
+                let uniqueComponentControllerObj = uniqueComponentDomControllerMapValue['controller'];
+                let uniqueComponentControllerMethodList = this.getMethodList(uniqueComponentControllerObj);
+                if ('obj' in uniqueComponentDomControllerMapValue && uniqueComponentDomControllerMapValue['obj'] !== undefined) {
+                    uniqueComponentControllerObj[uniqueComponentDomControllerMapValue['obj']] = null;
+                }
+                if ('list' in uniqueComponentDomControllerMapValue && uniqueComponentDomControllerMapValue['list'] !== undefined) {
+                    uniqueComponentControllerObj[uniqueComponentDomControllerMapValue['list']].remove(obj);
+                }
+                if ('nameInfo' in uniqueComponentDomControllerMapValue && uniqueComponentDomControllerMapValue['nameInfo'] !== undefined) {
+                    for (let nameInfo of uniqueComponentDomControllerMapValue['nameInfo']) {
+                        for (let uniqueComponentDataName of nameInfo['dataNameList']) {
+                            this.execMethod(uniqueComponentControllerObj, uniqueComponentControllerMethodList, 'beforeRemoveName', {'name': uniqueComponentDataName, 'event': nameInfo['eventName'], 'value': obj});
+                        }
+                    }
+                    obj.removeEventListener(uniqueComponentDomControllerMapValue['nameInfo']['eventName'], uniqueComponentDomControllerMapValue['nameInfo']['fn']);
+                    for (let nameInfo of uniqueComponentDomControllerMapValue['nameInfo']) {
+                        for (let uniqueComponentDataName of nameInfo['dataNameList']) {
+                            this.execMethod(uniqueComponentControllerObj, uniqueComponentControllerMethodList, 'afterRemoveName', {'name': uniqueComponentDataName, 'event': nameInfo['eventName'], 'value': obj});
+                        }
+                    }
+                }
+            }
 
             if (!this.targetDomMap.has(obj)) {
                 return;
@@ -1386,7 +1413,8 @@ function ___fairysupport(){
     };
 
     this.setEventFunctionForUniqueComponent = function(dataFullName, classObj, methodList, dom, eventMethodList, moduleClassObj){
-        let keyEventValueNameList = {}
+        let result = [];
+        let keyEventValueNameList = Object.create(null);
         let dataFullNameSplit = dataFullName.split(',');
         for (let i = 0; i < dataFullNameSplit.length; i++) {
             let trimDataName = dataFullNameSplit[i].trim();
@@ -1396,7 +1424,7 @@ function ___fairysupport(){
                         continue;
                     }
                     if (!(eventName in keyEventValueNameList)) {
-                        keyEventValueNameList[eventName] = {};
+                        keyEventValueNameList[eventName] = Object.create(null);
                     }
                     this.execMethod(classObj, methodList, 'beforeName', {'name': trimDataName, 'event': eventName, 'value': dom});
                     keyEventValueNameList[eventName][trimDataName] = methodList[trimDataName + '_' + eventName];
@@ -1443,12 +1471,16 @@ function ___fairysupport(){
             })(fnList, classObj, moduleClassObj);
 
             dom.addEventListener(eventName, eventFn);
+            
+            result.push({'dom': dom, 'eventName' : eventName, 'fn': eventFn, 'dataNameList': Object.keys(fnList)});
 
             for (let dataName in fnList) {
                 this.execMethod(classObj, methodList, 'afterName', {'name': dataName, 'event': eventName, 'value': dom});
             }
 
         }
+        
+        return result;
     };
 
     this.removeEventFunction = function(dataFullName, classObj, methodList, dom){
@@ -2779,7 +2811,7 @@ function ___fairysupport(){
         if (obj === null || obj === undefined) {
             return;
         }
-        this.bindAllSingle(obj, this.bindUniqueComponentProp(this, obj, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl));
+        this.bindAllSingle(obj, this.bindUniqueComponentProp(this, obj, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl, uniqueComponentDomControllerMap));
         let childList = obj.childNodes;
         let child = null;
         if (childList !== null && childList !== undefined) {
@@ -2791,7 +2823,7 @@ function ___fairysupport(){
 
     };
 
-    this.bindUniqueComponentProp = function (fs, obj, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl){
+    this.bindUniqueComponentProp = function (fs, obj, componentValueMap, controllerObj, methodList, eventMethodList, componentDirUrl, domControllerMap){
         return function(){
             let dataset = obj.dataset;
             if (dataset !== null && dataset !== undefined) {
@@ -2813,14 +2845,32 @@ function ___fairysupport(){
 
                 if (bindObj !== null && bindObj !== undefined) {
                     fs.bindUniqueComponentSingleObj(obj, bindObj, controllerObj, methodList);
+                    if (!domControllerMap.has(obj)) {
+                        domControllerMap.set(obj, Object.create(null));
+                    }
+                    let domControllerMapValue = domControllerMap.get(obj);
+                    domControllerMapValue['controller'] = controllerObj;
+                    domControllerMapValue['obj'] = bindObj;
                 }
 
                 if (bindList !== null && bindList !== undefined) {
                     fs.bindUniqueComponentSingleList(obj, bindList, controllerObj, methodList);
+                    if (!domControllerMap.has(obj)) {
+                        domControllerMap.set(obj, Object.create(null));
+                    }
+                    let domControllerMapValue = domControllerMap.get(obj);
+                    domControllerMapValue['controller'] = controllerObj;
+                    domControllerMapValue['list'] = bindList;
                 }
 
                 if (name !== null && name !== undefined) {
-                    fs.bindUniqueComponentSingleEvent(obj, name, controllerObj, methodList, eventMethodList);
+                    let eventDataList = fs.bindUniqueComponentSingleEvent(obj, name, controllerObj, methodList, eventMethodList);
+                    if (!domControllerMap.has(obj)) {
+                        domControllerMap.set(obj, Object.create(null));
+                    }
+                    let domControllerMapValue = domControllerMap.get(obj);
+                    domControllerMapValue['controller'] = controllerObj;
+                    domControllerMapValue['nameInfo'] = eventDataList;
                 }
 
             }
@@ -2890,8 +2940,9 @@ function ___fairysupport(){
 
     this.bindUniqueComponentSingleEvent = function (dom, name, controllerObj, methodList, eventMethodList){
         if (dom !== null && dom !== undefined && name !== null && name !== undefined) {
-            this.setEventFunctionForUniqueComponent(name, controllerObj, methodList, dom, eventMethodList, this.clazz.obj);
+            return this.setEventFunctionForUniqueComponent(name, controllerObj, methodList, dom, eventMethodList, this.clazz.obj);
         }
+        return [];
     }
 
     this.appendLoadSingleComponent = function (dom, componentPackeage, argObj){
