@@ -1,0 +1,431 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Binding DOM to module field
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Binding DOM to module field</div>
+     <article class="article">
+         <section>
+             <h1>Single bind</h1>
+
+             <p>
+                 <span>Let's change index.html and index.js to the following.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+    }
+
+}
+</pre>
+             
+             <p>
+                 <span>We created a tag with data-obj attribute in index.html.</span><br>
+                 <span>When you run and enter a value in the text field on the screen, the value you entered is outputted in the tag with data-obj=&quot;obj&quot;.</span><br>
+                 <span>This framework automatically binds the tag with the data-obj attribute value in the web page to the field of the js class corresponding to the web page.</span><br>
+                 <span>this.obj in index.js will be the object of the tag with data-obj=&quot;obj&quot;.</span><br>
+                 <span>Unlike the data-name attribute, the data-obj attribute cannot be specified multiple times by separating them with commas.</span><br>
+             </p>
+             <br>
+             
+             <h1>Multiple bind</h1>
+
+             <p>
+                 <span>Let's change index.html and index.js to the following</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+        /*
+        This is exactly the same
+        this.list.forEach((item) => {
+            item.textContent = event.target.value;
+        });
+        */
+        
+    }
+
+}
+</pre>
+             
+             <p>
+                 <span>I created a tag with the data-list attribute in index.html.</span><br>
+                 <span>When you run and enter a value in the text field on the screen, the value you entered is outputted in the tag with data-list=&quot;list&quot;.</span><br>
+                 <span>This framework automatically binds the tag with the data-list attribute value in the web page to the field of the js class.</span><br>
+                 <span>The difference from data-obj is that data-obj is unique value on the screen, but data-list is not unique values ​​on the screen.</span><br>
+                 <span>To get the object with data-list in js, execute the values ​​method and process it one by one using for.</span><br>
+                 <span>Alternatively, you can use the forEach method and pass a function as an argument for processing.</span><br>
+                 <span>Unlike the data-name attribute, the data-list attribute cannot be specified multiple times separated by commas.</span><br>
+             </p>
+             <br>
+             
+             
+             
+             <h1>Pre-processing and post-processing when bind</h1>
+             <p>
+                 <span>You can define pre-processing and post-processing when the field of this class bind to the tag with data-obj or data-list attributes.</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeBindObj(data) {
+        console.log("beforeBindObj");
+        console.log(data);
+    }
+    afterBindObj(data) {
+        console.log("afterBindObj");
+        console.log(data);
+    }
+
+    beforeBindList(data) {
+        console.log("beforeBindList");
+        console.log(data);
+    }
+    afterBindList(data) {
+        console.log("afterBindList");
+        console.log(data);
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+             
+                 <span>We created beforeBindObj. Arguments are passed an object with name: data-obj attribute value, and value: DOM of the tag with data-obj attribute.</span><br>
+                 <span>beforeBindObj is the pre-processing when it is binding</span><br>
+                 <span>We created afterBindObj. Arguments are passed an object with name: data-obj attribute value, and value: DOM of the tag with data-obj attribute.</span><br>
+                 <span>afterBindObj is the post-processing when it is binding</span><br>
+                 
+                 <span>We created beforeBindList. Arguments are passed an object with name: data-list attribute value, and value: DOM of the tag with data-list attribute.</span><br>
+                 <span>beforeBindList is the pre-processing when it is binding</span><br>
+                 <span>We created afterBindList. Arguments are passed an object with name: data-list attribute value, and value: DOM of the tag with data-list attribute.</span><br>
+                 <span>afterBindList is the post-processing when it is binding</span><br>
+                 
+             </p>
+             <br>
+             
+             
+             <h1>Pre-processing and post-processing when unbind</h1>
+             <p>
+                 <span>You can define pre-processing and post-processing when the tag with data-obj, data-list attribute unbind field of this class.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;remove&quot;&gt;remove&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeRemoveObj(data) {
+        console.log("beforeRemoveObj");
+        console.log(data);
+    }
+    afterRemoveObj(data) {
+        console.log("afterRemoveObj");
+        console.log(data);
+    }
+
+    beforeRemoveList(data) {
+        console.log("beforeRemoveList");
+        console.log(data);
+    }
+    afterRemoveList(data) {
+        console.log("afterRemoveList");
+        console.log(data);
+    }
+
+    sample_input(event) {
+        if (this.obj) {
+            this.obj.textContent = event.target.value;
+        }
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+    remove_click(event) {
+        if (this.obj) {
+            delete this.obj.dataset.obj;
+        }
+        for (const item of this.list.values()) {
+            delete item.dataset.list;
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+                 <span>We created beforeRemoveObj. Arguments are passed an object with name: data-obj attribute value, and value: DOM of the tag with data-obj attribute.</span><br>
+                 <span>beforeRemoveObj is the pre-processing when it is unbinding</span><br>
+                 <span>We created afterRemoveObj. Arguments are passed an object with name: data-obj attribute value, and value: DOM of the tag with data-obj attribute.</span><br>
+                 <span>afterRemoveObj is the post-processing when it is unbinding</span><br>
+                 
+                 <span>We created beforeRemoveList. Arguments are passed an object with name: data-list attribute value, and value: DOM of the tag with data-list attribute.</span><br>
+                 <span>beforeRemoveList is the pre-processing when it is unbinding</span><br>
+                 <span>We created afterRemoveList. Arguments are passed an object with name: data-list attribute value, and value: DOM of the tag with data-list attribute.</span><br>
+                 <span>afterRemoveList is the post-processing when it is unbinding</span><br>
+                 
+             </p>
+             <br>
+             <p>
+             </p>
+             
+             <h1>Delete process</h1>
+             <p>
+                 <span>Tags with data-obj or data-list attributes can be deleted from the screen</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;remove&quot;&gt;remove&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        if (this.obj) {
+            this.obj.textContent = event.target.value;
+        }
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+    remove_click(event) {
+        if (this.obj) {
+            this.obj = null;
+        }
+        for (const item of this.list.values()) {
+            this.list.remove(item);
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+                 <span>In remove_click, Null is stored in the field binded data-obj.</span><br>
+                 <span>Executing the remove method of the field binded data-list.</span><br>
+                 <span>Click the remove button to remove the tags with data-obj, data-list attributes from the screen.</span><br>
+             </p>
+             <br>
+             
+             <h1>Replacement process</h1>
+             <p>
+                 <span>You can replace tags with data-obj or data-list attributes.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div data-list=&quot;list&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;replace&quot;&gt;replace&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        if (this.obj) {
+            this.obj.textContent = event.target.value;
+        }
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+    replace_click(event) {
+        let div = document.createElement('DIV');
+        div.dataset.obj = 'obj';
+        div.textContent = 'replace';
+        this.obj = div;
+        
+        for (const item of this.list.values()) {
+            div = document.createElement('DIV');
+            div.dataset.list = 'list';
+            div.textContent = 'replace';
+            this.list.replace(item, div);
+        }
+        
+    }
+
+}
+</pre>
+             <p>
+                 <span>We write a replace button.</span><br>
+                 <span>The object newly created by createElement is stored in the field binded data-obj.</span><br>
+                 <span>Execute the replace method of the field binded data-list and replace it with the newly created object by createElement.</span><br>
+             </p>
+             <br>
+             
+             <h1>Method of field binded with tag with data-list attribute</h1>
+             <p>
+                 <span>Field binded with tags with data-list attributes have toArray, size and has methods in addition to values, forEach, remove and replace.</span><br>
+                 <span>The toArray method takes no arguments and returns the DOM in this field as an array.</span><br>
+                 <span>The size method takes no arguments and returns the number of DOM in this field.</span><br>
+                 <span>The has method requires one argument, pass the DOM. Returns true if the passed DOM is included in this field.</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="module_init.html">Next page</a> Initial processing of module</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

@@ -2,24 +2,24 @@
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>
-JavaScript フレームワーク fairy support js 定数
+JavaScript Framework fairy support js Constants
 </title>
 <link rel="stylesheet" href="./css/mb/common.css" type="text/css">
 <link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
 </head>
 <body>
 <header class="header">
-    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
 </header>
 <div class="body">
-     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
-     <div class="subtitle">定数</div>
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Constants</div>
      <article class="article">
          <section>
-             <h1>システム全体</h1>
+             <h1>Whole system</h1>
 
              <p>
-                 <span>index.html、index.jsを下記に変更しましょう</span><br>
+                 <span>Let's change index.html and index.js to the following.</span><br>
              </p>
              <span class="code-title">index.html</span>
              <br>
@@ -54,7 +54,7 @@ export class Index {
 }
 </pre>
              <p>
-                 <span>src/js/env/envValue.json、src/js/env/envValue.local.jsonを作成しましょう</span><br>
+                 <span>Let's create src/js/env/envValue.json, src/js/env/envValue.local.json.</span><br>
              </p>
              <span class="code-title">envValue.json</span>
              <br>
@@ -74,29 +74,29 @@ export class Index {
 </pre>
              
              <p>
-                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
-                 <span>value1&nbsp;value2_local&nbsp;value3_localとalertが出力されます</span><br>
-                 <span>index.js内で実行している$f.envValue("key1")は</span><br>
-                 <span>$fがこのフレームワークのオブジェクトです</span><br>
-                 <span>envValueメソッドはsrc/js/env配下のjsonの値を返すメソッドです</span><br>
-                 <span>定数を定義したい場合は、envValue.jsonに定義し、envValueメソッドで取得します</span><br>
-                 <span>envValue.jsonはjsonなのでキー、値はダブルクォートで囲います。シングルクォートではありません</span><br>
-                 <span>envValue.jsonはsrc/js/env配下に作成します。これはフレームワークの規則です</span><br>
-                 <span>また、envValue.jsonだけでなく、envValue.{環境}.jsonを用意できます</span><br>
-                 <span>環境はpackage.jsonのscriptsでfairysupport_jsの引数として定義します</span><br>
-                 <span>package.jsonのscriptsのwatch_localを見てみましょう</span><br>
-                 <span>&quot;watch_local&quot;: &quot;watch \&quot;npm run build_local\&quot; ./src&quot;となっており、build_localを実行しているのがわかります</span><br>
-                 <span>&quot;build_local&quot;: &quot;fairysupport_js local&quot;ここで環境を引数で渡しています。ここではlocalが渡されています</span><br>
-                 <span>したがって、envValue.jsonだけでなく、envValue.local.jsonも使われます</span><br>
-                 <span>envValue.json、envValue.local.json両方に同じキーがある場合、envValue.local.jsonが優先されます</span><br>
-                 <span>環境は$f.getEnv()で取得できます</span><br>
+                 <span>Let's run it and click the sample button.</span><br>
+                 <span>String of &quot;value1&nbsp;value2_local&nbsp;value3_local&quot; is outputted in alert.</span><br>
+                 <span>About $f.envValue("key1") calling in index.js.</span><br>
+                 <span>$f is the object of this framework.</span><br>
+                 <span>envValue is method that returns the value of json under src/js/env.</span><br>
+                 <span>If you want to define a constants, define it in envValue.json and get it by calling the envValue method.</span><br>
+                 <span>Because envValue.json is json, enclose the key and value in double quotes. Not a single quote.</span><br>
+                 <span>envValue.json is created under src/js/env. This is a framework rule.</span><br>
+                 <span>Also, you can prepare envValue.json as well as envValue.{Environment}.json</span><br>
+                 <span>Environment is defined as an argument of fairysupport_js in scripts of package.json</span><br>
+                 <span>Let's take a look at watch_local in scripts in package.json</span><br>
+                 <span>&quot;watch_local&quot;: &quot;watch \&quot;npm run build_local\&quot; ./src&quot; you can see that you are running build_local.</span><br>
+                 <span>&quot;build_local&quot;: &quot;fairysupport_js local&quot; Here we are passing the environment as an argument. Here local is passed.</span><br>
+                 <span>Therefore, not only envValue.json but also envValue.local.json is used</span><br>
+                 <span>If both envValue.json and envValue.local.json have the same key, envValue.local.json takes precedence.</span><br>
+                 <span>The environment can get by calling $f.getEnv()</span><br>
              </p>
              <br>
              
-             <h1>ページ固有</h1>
+             <h1>Page specific</h1>
 
              <p>
-                 <span>src/page/sub/index.html、src/js/modules/sub/index.jsを作成しましょう</span><br>
+                 <span>Let's create src/page/sub/index.html, src/js/modules/sub/index.js.</span><br>
              </p>
              <span class="code-title">src/page/sub/index.html</span>
              <br>
@@ -130,7 +130,7 @@ export class Index {
 }
 </pre>
              <p>
-                 <span>src/js/env/sub/envValue.json、src/js/env/sub/envValue.local.json、src/js/env/sub/index/envValue.json、src/js/env/sub/index/envValue.local.jsonを作成しましょう</span><br>
+                 <span>Let's create src/js/env/sub/envValue.json, src/js/env/sub/envValue.local.json, src/js/env/sub/index/envValue.json, src/js/env/sub/index/envValue.local.json</span><br>
              </p>
              <span class="code-title">src/js/env/sub/envValue.json</span>
              <br>
@@ -163,19 +163,19 @@ export class Index {
              
              
              <p>
-                 <span>実行してsampleボタンをクリックしてみましょう</span><br>
-                 <span>value1&nbsp;sub_value_local&nbsp;sub_index_value_localとalertが出力されます</span><br>
-                 <span>src/js/env/sub配下に作成したenvValue.jsonは、webページに対応するjsファイルがsrc/js/modules/sub配下または、src/js/modules/sub.jsである場合にのみ使用できます</span><br>
-                 <span>src/js/env/sub/index配下に作成したenvValue.jsonは、webページに対応するjsファイルがsrc/js/modules/sub/index配下または、src/js/modules/sub/index.jsである場合にのみ使用できます</span><br>
+                 <span>Let's run it and click the sample button.</span><br>
+                 <span>String of &quot;value1&nbsp;sub_value_local&nbsp;sub_index_value_local&quot; is outputted in alert.</span><br>
+                 <span>envValue.json created under src/js/env/sub can be used only when the js file corresponding to the web page exists under src/js/modules/sub or src/js/modules/sub.js.</span><br>
+                 <span>envValue.json created under src/js/env/sub/index can be used only when the js file corresponding to the web page exists under src/js/modules/sub/index or src/js/modules/sub/index.js</span><br>
              </p>
              <br>
              
              
              <p>
-                 <span><a href="msg.html">次ページ</a>メッセージ</span>
+                 <span><a href="msg.html">Next page</a> message</span>
                  <br>
                  <br>
-                 <span><a href="index.html">目次</a></span>
+                 <span><a href="index.html">table of contents</a></span>
                  <br>
              </p>
 

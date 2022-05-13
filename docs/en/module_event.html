@@ -1,0 +1,517 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Module event handling
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Module event handling</div>
+     <article class="article">
+         <section>
+             <h1>Single processing</h1>
+             <p>
+                 <span>Let's take a look inside the unzipped directory on the <a href="start.html">previous page</a></span><br>
+             </p>
+             <pre class="code-view">
+Unzipped directory
+|-- distWork
+|-- src
+|   |-- js
+|   |  `-- modules
+|   |      `-- index.js
+|   `-- page
+|      `-- index.html
+|-- Gruntfile.js
+`-- package.json</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+}
+</pre>
+
+             <p>
+                 <span>Contents of index.html</span><br>
+                 <span>Load the framework using&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;</span><br>
+                 <span>There is fairysupport.min.js in distWork/js.</span><br>
+                 <span>npm run watch_local executed on the <a href="start.html">previous page</a> is a command to automatically generate distWork from the src directory when there is a change in the src directory.</span><br>
+                 <span>npm run server executed on the <a href="start.html">previous page</a> is a command to start the http server on port 8000 with the distWork directory as the public directory.</span><br>
+                 <span>Both are defined in package.json. Details of these builds will be explained on another page.</span><br>
+                 <span>It is a rule of this framework to write id=&quot;fs-js&quot; in the script tag that load the framework.</span><br>
+                 <span>It is a rule of this framework to write the data-page-root attribute in the script tag that load the framework.</span><br>
+                 <span>data-page-root attribute value writes the root of the web page that uses this framework.</span><br>
+                 <span>We will use an HTML file as a sample this time, but this framework will work even if the extension is not html. Also, this framework works without the extension.</span><br>
+                 <span>Therefore, Web application that have not used this framework can introduce this framework part way through by setting the data-page-root attribute value correctly.</span><br>
+                 <span>&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;</span><br>
+                 <span>data-name attribute is defined in the button tag. This will be explained in the contents of index.js below.</span><br>
+             </p>
+             <br>
+
+             <p>
+                 <span>Contents of index.js</span><br>
+                 <span>It is a rule of this framework to have the same name as the web page and the extension js.</span><br>
+                 <span>It is a rule of this framework to create under js/modules.</span><br>
+                 <span>For example, when you want to use this framework at http://localhost:8000/page/sub/index.html, if data-page-root attribute value is http://localhost:8000/page, you will create src/page/sub/index.html and src/js/modules/sub/index.js.</span><br>
+                 <span>It is a rule of this framework to make it an export class.</span><br>
+                 <span>It is a rule of this framework to make the class name the first uppercase camel case of the js file name.</span><br>
+                 <span>If the file name is abc-def.js, it will be export class AbcDef.</span><br>
+                 <span>If the file name is abc_def.js, it will be export class AbcDef.</span><br>
+                 <span>When&nbsp;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&nbsp;is clicked, sample_click method is executed.</span><br>
+                 <span>This framework is designed to execute the method of js file when an event occurs in the tag with the data-name attribute.</span><br>
+                 <span>Event object is passed as the argument of the method.</span><br>
+                 <span>It is a rule of this framework that the left side of _ is the data-name attribute value.</span><br>
+                 <span>It is a rule of this framework that the right side of _ is the event name</span><br>
+             </p>
+             <br>
+
+             <p>
+                 <span>Framework movement</span><br>
+                 <span>This framework works based on rules, not settings.</span><br>
+                 <span>Import the corresponding js file from the modules directory from the current URL and the data-page-root attribute value.</span><br>
+                 <span>The modules directory must be in the same hierarchy as fairysupport.min.js</span><br>
+                 <span>fairysupport.min.js is automatically generated directly under distWork/js by npm run watch_local</span><br>
+                 <span>src/js/modules directory is copied to distWork/js by npm run watch_local</span><br>
+                 <span>Therefore, the developer must create the modules directory directly under src/js.</span><br>
+                 <span>When this framework imports js corresponding to the web page under the modules directory, it bind the tag with the data-name attribute value in the web page and the method of the js class.</span><br>
+                 <span>If you write a method named [data-name attribute value_event name], this framework will automatically bind it with the tag with the data-name attribute value in the web page.</span><br>
+             </p>
+             <br>
+
+             <h1>Multiple processing</h1>
+             
+             <p>
+                 <span>Let's add more methods to index.js and add them to data-name separated by commas.</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample,second&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>Added the second_click method.</span><br>
+                 <span>Added second to data-name attribute.</span><br>
+                 <span>Let's start npm run watch_local and npm run server and check the operation.</span><br>
+                 <span>Hello fairysupport and second alert should be output</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span>Try rewriting the return value of sample_click to false</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+        return false;
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+
+             <p>
+                 <span>When multiple methods are bind to the data-name attribute separated by commas, If the previously executed method returns false, the later method will not be executed.</span><br>
+             </p>
+             <br>
+             
+             <h1>Pre-processing, post-processing</h1>
+             <p>
+                 <span>sample_click、second_clickと2つメソッドを定義しましたが、共通の前処理と後処理を定義できます</span><br>
+                 <span>You can define pre-processing and post-processing common to sample_click and second_click</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeEvent(event) {
+        console.log("beforeEvent");
+        console.log(event);
+    }
+    
+    afterEvent(event, result) {
+        console.log("afterEvent");
+        console.log(event);
+        console.log(result);
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             <p>
+                 <span>We created a beforeEvent. Event object is passed as an argument.</span><br>
+                 <span>beforeEvent is the common pre-processing of events.</span><br>
+                 <span>It is a rule of this framework to the method name is beforeEvent.</span><br>
+                 <span>I created an afterEvent. The first argument is the event object and the second argument is the return value of sample_click or second_click.</span><br>
+                 <span>afterEvent is a common post-processing of the event.</span><br>
+                 <span>It is a rule of this framework to the method name is afterEvent.</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span>Because index.js is ordinary JavaScript, you can also define common processing in the parent class.</span><br>
+             </p>
+             <span class="code-title">src/js/base/parentController.js</span>
+             <br>
+             <pre class="code-view">
+export class ParentController {
+
+    constructor() {
+    }
+
+    beforeEvent(event) {
+        console.log("beforeEvent");
+        console.log(event);
+    }
+    
+    afterEvent(event, result) {
+        console.log("afterEvent");
+        console.log(event);
+        console.log(result);
+    }
+
+}
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+import {ParentController} from "../base/parentController.js";
+
+export class Index extends ParentController {
+
+    constructor() {
+        super();
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             
+             <h1>Pre-processing and post-processing when binding</h1>
+             <p>
+                 <span>You can define pre-processing and post-processing when a tag with data-name attribute bind a method of this class.</span><br>
+             </p>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeName(data) {
+        console.log("beforeName");
+        console.log(data);
+    }
+    afterName(data) {
+        console.log("afterName");
+        console.log(data);
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+}
+</pre>
+             <p>
+                 <span>We created beforeName. Arguments are passed an object with name: data-name attribute value, event: event name, and value: DOM of the tag with data-name attribute.</span><br>
+                 <span>beforeName is the pre-processing when it is binding</span><br>
+                 <span>It is a rule of this framework to method name is beforeName</span><br>
+                 <span>We created afterName. Arguments are passed an object with name: data-name attribute value, event: event name, and value: DOM of the tag with data-name attribute.</span><br>
+                 <span>afterName is the post-processing when it is binding</span><br>
+                 <span>It is a rule of this framework to method name is afterName</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>Pre-processing and post-processing when unbind</h1>
+             <p>
+                 <span>You can define pre-processing and post-processing when the tag with data-name attribute unbind method of this class.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button id=&quot;sample&quot; data-name=&quot;sample,second&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;remove&quot;&gt;remove&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    beforeRemoveName(data) {
+        console.log("beforeRemoveName");
+        console.log(data);
+    }
+    afterRemoveName(data) {
+        console.log("afterRemoveName");
+        console.log(data);
+    }
+
+    sample_click(event) {
+        alert("Hello fairysupport");
+    }
+
+    second_click(event) {
+        alert("second");
+    }
+
+    remove_click(event) {
+        delete document.getElementById('sample').dataset.name;
+    }
+
+}
+</pre>
+             <p>
+                 <span>We created beforeRemoveName. Arguments are passed an object with name: data-name attribute value, event: event name, and value: DOM of the tag with data-name attribute.</span><br>
+                 <span>beforeRemoveName is the pre-processing when it is unbinding</span><br>
+                 <span>It is a rule of this framework to method name is beforeRemoveName</span><br>
+                 <span>We created afterRemoveName. Arguments are passed an object with name: data-name attribute value, event: event name, and value: DOM of the tag with data-name attribute.</span><br>
+                 <span>afterRemoveName is the post-processing when it is unbinding</span><br>
+                 <span>It is a rule of this framework to method name is afterRemoveName</span><br>
+                 <span>Click the remove button to unbind, and you click the sample but web page is not response.</span><br>
+             </p>
+             <br>
+             <p>
+             </p>
+             
+             <h1>Error handling</h1>
+             <p>
+                 <span>You can define a method to be executed when an exception is throw</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button id=&quot;sample&quot; data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        throw "error";
+    }
+
+    errorHandle(event, exception) {
+        console.log("errorHandle");
+        console.log(event);
+        console.log(exception);
+    }
+    
+}
+</pre>
+             <p>
+                 <span>We created an errorHandle. Arguments are event objects, exception are passed.</span><br>
+                 <span>It is a rule of this framework to method name is errorHandle.</span><br>
+             </p>
+             <br>
+             
+             <h1>End processing</h1>
+             <p>
+                 <span>You can define a method that will be executed even if the process is successful or the exception is throw.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample2&quot;&gt;sample2&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        return "sample";
+    }
+
+    sample2_click(event) {
+        throw "sample2";
+    }
+
+    errorHandle(event, exception) {
+        console.log("errorHandle");
+        console.log(event);
+        console.log(exception);
+    }
+    
+    finalHandle(event, returnValue) {
+        console.log("finalHandle");
+        console.log(event);
+        console.log(returnValue);
+    }
+}
+</pre>
+             <p>
+                 <span>We created a finalHandle. The argument is an event object, the return value of the processed method is passed.</span><br>
+                 <span>It is a rule of this framework to method name is finalHandle.</span><br>
+             </p>
+             <br>
+             
+             <h1>Get module</h1>
+             <p>
+                 <span>You can get an instance of module from anywhere called $f.getModuleController()</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="module_prop.html">Next page</a> Binding class fields and tags on the screen</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

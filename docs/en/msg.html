@@ -1,0 +1,208 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Message
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Message</div>
+     <article class="article">
+         <section>
+             <h1>Whole system</h1>
+
+             <p>
+                 <span>Let's change index.html and index.js to the following.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind2&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        this.bind1.textContent = $f.msg('key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind2.textContent = $f.msg('key2', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+    }
+
+}
+</pre>
+             <p>
+                 <span>Let's create src/js/msg/msg.json, src/js/msg/msg.ja.json, src/js/msg/msg.ja-JP.json, src/js/msg/msg.en.json and src/js/msg/msg.en-US.json</span><br>
+             </p>
+             <span class="code-title">msg.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.ja.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.ja-JP.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.en-US.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             
+             <p>
+                 <span>Let's run it and click the sample button.</span><br>
+                 <span>Value of json file created under src/js/msg is outputted above the sample button.</span><br>
+                 <span>About $f.msg('key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'}); calling in index.js.</span><br>
+                 <span>$f is the object of this framework.</span><br>
+                 <span>msg is method that returns the value of json under src/js/msg.</span><br>
+                 <span>The second argument of the msg method is the value that replaces the part enclosed in ${} in json.If you don't want to replace it, please add \.</span><br>
+                 <span>If you want to define a messages, define it in msg.json and get it by calling the msg method.</span><br>
+                 <span>Because msg.json is json, enclose the key and value in double quotes. Not a single quote.</span><br>
+                 
+                 
+                 <span>msg.json is created under src/js/msg. This is a framework rule.</span><br>
+                 <span>Also, you can prepare msg.json as well as msg.{Language to use}.json</span><br>
+                 <span>The language to be used is applied in the order of priority of the value of the query parameter lang, the value of navigator.language.</span><br>
+                 <span>Therefore, if you access the URL with ?lang=en, the value defined in msg.en.json will be output.</span><br>
+                 <span>If msg.{Language to use}.json does not exist, msg.json will be applied.</span><br>
+                 <span>Therefore, if you delete and access msg.ja.json, msg.ja-JP.json, msg.en.json, msg.en-US.json, the value defined in msg.json will be output.</span><br>
+             </p>
+             <br>
+             
+             <h1>Page specific</h1>
+
+             <p>
+                 <span>Let's create src/page/sub/index.html, src/js/modules/sub/index.js</span><br>
+             </p>
+             <span class="code-title">src/page/sub/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind2&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind3&quot;&gt;&lt;/div&gt;
+    &lt;div data-obj=&quot;bind4&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">src/js/modules/sub/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        this.bind1.textContent = $f.msg('key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind2.textContent = $f.msg('key2', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind3.textContent = $f.msg('key_sub', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+        this.bind4.textContent = $f.msg('key_sub_index', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'});
+    }
+
+}
+</pre>
+             <p>
+                 <span>Let's create src/js/msg/sub/msg.en.json, src/js/msg/sub/index/msg.en.json</span><br>
+             </p>
+             <span class="code-title">src/js/msg/sub/msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key_sub&quot; : &quot;key_sub => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">src/js/msg/sub/index/msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key_sub_index&quot; : &quot;key_sub_index => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             
+             <p>
+                 <span>Let's access sub/index.html with ?lang=en.</span><br>
+                 <span>When you click the sample button, the message above the sample button will be output.</span><br>
+                 <span>msg.json created under src/js/msg/sub can be used only when the js file corresponding to the web page exists under ssrc/js/modules/sub or src/js/modules/sub.js.</span><br>
+                 <span>msg.json created under src/js/msg/sub/index can be used only when the js file corresponding to the web page exists under src/js/modules/sub/index or src/js/modules/sub/index.js</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="tpl.html">Next page</a> template</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

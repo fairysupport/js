@@ -1,0 +1,917 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Template
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Template</div>
+     <article class="article">
+         <section>
+             <h1>String</h1>
+
+             <p>
+                 <span>Let's change index.html and index.js to the following.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadStringTemplate(this.obj, this.template(), {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+
+    success() {
+        alert(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+    template() {
+        return `
+            &lt;div&gt;--data-text--&lt;/div&gt;
+            &lt;div data-text='v.key1'&gt;&lt;/div&gt;
+            &lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+
+            &lt;div&gt;--data-html--&lt;/div&gt;
+            &lt;div data-html='v.key1'&gt;&lt;/div&gt;
+
+            &lt;div&gt;--script--&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.var = 1 + 2;
+            &lt;/script&gt;
+            &lt;div data-text='l.var'&gt;&lt;/div&gt;
+
+            &lt;div&gt;--data-attr--&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+            &lt;/script&gt;
+            &lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+            &lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+
+            &lt;div&gt;--data-prop--&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+            &lt;/script&gt;
+            &lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+            &lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+
+            &lt;div&gt;--data-if--&lt;/div&gt;
+            &lt;div data-if='v.key2.val1 === 1'&gt;
+                v.key2.val1 === 1
+            &lt;/div&gt;
+            &lt;div data-elseif='v.key2.val1 === 2'&gt;
+                v.key2.val1 === 2
+            &lt;/div&gt;
+            &lt;div data-else=''&gt;
+                else
+            &lt;/div&gt;
+
+            &lt;div&gt;--data-for--&lt;/div&gt;
+            &lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+                &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;div data-text='l.i'&gt;&lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div&gt;--data-foreach--&lt;/div&gt;
+            &lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+                &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+                &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+                &lt;span&gt;:&lt;/span&gt;
+                &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div&gt;--data-while--&lt;/div&gt;
+            &lt;script data-load-only='true'&gt;
+                l.whileCount = -1;
+            &lt;/script&gt;
+            &lt;div data-while='l.whileCount &lt; 8'&gt;
+                &lt;script data-load-only='true'&gt;
+                    l.whileCount++;
+                &lt;/script&gt;
+                &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+                &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+                &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;input data-name='sample2' type='text'&gt;
+            &lt;div data-obj='obj2'&gt;&lt;/div&gt;
+        `;
+    }
+
+}
+</pre>
+
+             <p>
+                 <span>Let's run it and click the sample button.</span><br>
+                 <span>The value of the third argument of $f.loadStringTemplate is embedded in the return value of the template method of index.js and output.</span><br>
+                 <span>The loadStringTemplate method is a method that replaces the body part of the first argument by embedding the value passed to the third argument in the string passed to the second argument.</span><br>
+                 <span>The return value is Promise. After the template is embedded in the web page , the newly embedded template can be binded with js, it will be resolved.</span><br>
+                 <span>Let's take a look at the template method of index.js that creates the second argument of the loadStringTemplate method.</span><br>
+                 <span>Returning just a template literal.</span><br>
+                 <span>By attaching the attribute starting with data- to the tag, the third argument passed to loadStringTemplate can be embedded.</span><br>
+                 <span>In the string passed to the second argument of the loadStringTemplate method, the third argument of the loadStringTemplate method can be used with the variable name v. This is the rule of this framework.</span><br>
+                 <span>Therefore, &lt;div data-text='v.key1'&gt;&lt;/div&gt; will output the key1 element of the third argument of the loadStringTemplate method with HTML escape to the body part of this tag.</span><br>
+                 <span>data-tag ='hidden' outputs only the body part of this tag, not the tag.</span><br>
+                 <span>data-html outputs the given value without html escaping.</span><br>
+                 <span>If you add data-load-only ='true' to the script tag, the inside of the script tag will be interpreted as JavaScript and executed there. This script tag will be removed.</span><br>
+                 <span>You can use a local variable called l in the template. l is an object. This is the rule of this framework.</span><br>
+                 <span>data-attr set the attribute value using setAttribute.</span><br>
+                 <span>data-prop set the value in the DOM using the = operator. You can specify nested object.</span><br>
+                 <span>data-if output the body part if the value is true.</span><br>
+                 <span>data-elseif is executed if the previous data-if value is false, and output the body part if the given value is true.</span><br>
+                 <span>data-else output the body part if the previous data-if and data-elseif values ​​are false.</span><br>
+                 <span>Use data-for-start, data-for-end, and data-for-step together. The data-for-start is evaluated first, and while data-for-end is true, the body part is repeatedly output. Data-for-step is evaluated every time the body part is output.</span><br>
+                 <span>data-continue returns to the beginning of the loop. The value to be set specifies how many loops to return to. Specify 2 to return to the beginning of the top-level loop of the double loop.</span><br>
+                 <span>The data-break breaks out of the loop. The value to be set specifies how many loops to return to. Specify 2 to return to the beginning of the top-level loop of the double loop.</span><br>
+                 <span>Use data-foreach, data-foreach-key, and data-foreach-value together. Iterates over the array or object specified in data-foreach. The string specified in data-foreach-key becomes the key of the local variable l, and the key of the array or object specified in data-foreach is stored there. The string specified in data-foreach-value becomes the key of the local variable l, and the element value of the array or object specified in data-foreach is stored there.</span><br>
+                 <span>data-while output the body part repeatedly while the specified expression is true.</span><br>
+                 <span>If there are attributes binded to js such as data-name, data-obj, data-list, they will be automatically binded by the framework.</span><br>
+                 <span>If you use appendLoadStringTemplate instead of loadStringTemplate, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeLoadStringTemplate instead of loadStringTemplate, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If you set afterLoadStringTemplate instead of loadStringTemplate, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+             <h1>Make the template a separate file</h1>
+
+             <p>
+                 <span>Let's change index.html and index.js to the following.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadTemplate(this.obj, 'tpl', {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+
+    success() {
+        alert(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <p>
+                 <span>Let's create src/js/templates/tpl.html</span><br>
+             </p>
+             <span class="code-title">tpl.html</span>
+             <br>
+             <pre class="code-view">
+
+&lt;div&gt;--data-text--&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-html--&lt;/div&gt;
+&lt;div data-html='v.key1'&gt;&lt;/div&gt;
+
+&lt;div&gt;--script--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.var = 1 + 2;
+&lt;/script&gt;
+&lt;div data-text='l.var'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-attr--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+&lt;/script&gt;
+&lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+&lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+
+&lt;div&gt;--data-prop--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+&lt;/script&gt;
+&lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+&lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+
+&lt;div&gt;--data-if--&lt;/div&gt;
+&lt;div data-if='v.key2.val1 === 1'&gt;
+    v.key2.val1 === 1
+&lt;/div&gt;
+&lt;div data-elseif='v.key2.val1 === 2'&gt;
+    v.key2.val1 === 2
+&lt;/div&gt;
+&lt;div data-else=''&gt;
+    else
+&lt;/div&gt;
+
+&lt;div&gt;--data-for--&lt;/div&gt;
+&lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+    &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;div data-text='l.i'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-foreach--&lt;/div&gt;
+&lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+    &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+    &lt;span&gt;:&lt;/span&gt;
+    &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-while--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.whileCount = -1;
+&lt;/script&gt;
+&lt;div data-while='l.whileCount &lt; 8'&gt;
+    &lt;script data-load-only='true'&gt;
+        l.whileCount++;
+    &lt;/script&gt;
+    &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;input data-name='sample2' type='text'&gt;
+&lt;div data-obj='obj2'&gt;&lt;/div&gt;
+
+</pre>
+             <p>
+                 <span>In loadStringTemplate, the template is passed directly as a string, but you can use loadTemplate to put the template in a separate file.</span><br>
+                 <span>Templates are created under src/js/templates with the extension html. This is the rule of this framework.</span><br>
+                 <span>Give the file name under src/js/templates to the second argument of loadTemplate.</span><br>
+                 <span>You can also create subdirectories under src/js/templates. In that case, pass the string as the second argument of loadTemplate separated by periods.</span><br>
+                 <span>For example, if you created src/js/templates/sub/tpl.html, pass 'sub.tpl' as the second argument of loadTemplate.</span><br>
+                 <span>If you use appendLoadTemplate instead of loadTemplate, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeLoadTemplate instead of loadTemplate, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If you set afterLoadTemplate instead of loadTemplate, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+             <h1>Template nesting</h1>
+
+             <p>
+                 <span>You can call a template from a template by setting the data-template attribute.</span><br>
+                 <span>The data-template attribute value is the same as the second argument of loadTemplate.</span><br>
+             </p>
+
+             <h1>Receive the variables to pass to the template from the server. Part 1</h1>
+
+             <p>
+                 <span>Until now, the value that can be used with the variable name v in the template was given by the json created in js, but this can be the json received from the server.</span><br>
+                 <span>Let's create src/js/env/envValue.local.json and change index.js to the following.</span><br>
+             </p>
+
+
+             <span class="code-title">src/js/env/envValue.local.json</span>
+             <br>
+             <pre class="code-view">{
+    "apiRoot" : "http://localhost:8080"
+}</pre>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resJsonTemplate(this.obj, 'tpl', $f.envValue('apiRoot') + '/tpl.php', {'sample_key': 'sample_value'})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+
+    success() {
+        alert(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <p>
+                 <span>Let's create tpl.php and place it on a web server with CORS settings.</span><br>
+                 <span>Please prepare your own web server with CORS settings.</span><br>
+                 <span>Here, as an example, use the header method in PHP to set CORS. PHP server is http://localhost:8080.</span><br>
+             </p>
+             <span class="code-title">tpl.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $jsonRequest['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>As an example, We have shown a server program that returns json using PHP. Suppose this is located directly under the document root.</span><br>
+                 <span>Use resJsonTemplate instead of loadTemplate.</span><br>
+                 <span>Pass the file name under src/js/templates to the second argument.</span><br>
+                 <span>Pass the URL that returns json as the third argument.</span><br>
+                 <span>Pass the request parameter to send to the URL that returns json in the 4th argument.</span><br>
+                 <span>If you want to set withCredentials to true (if you want to send cookies), pass true to the 5th argument.</span><br>
+                 <span>resJsonTemplate will POST the data given in the 4th argument to the URL given in the 3rd argument. Pass the JSON of that response to the template.</span><br>
+                 <span>If you use appendResJsonTemplate instead of resJsonTemplate, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeResJsonTemplate instead of resJsonTemplate, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If you set afterResJsonTemplate instead of resJsonTemplate, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+
+
+             <h1>Receive the variables to pass to the template from the server. Part 2</h1>
+
+             <p>
+                 <span>We sent the json to the server earlier, but we can also send the form.</span><br>
+                 <span>Let's changeindex.js, index.html、tpl.php</span><br>
+             </p>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resJsonTemplateByForm(this.obj, 'tpl', $f.envValue('apiRoot') + '/tpl.php', this.sampleForm)
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+
+    success() {
+        alert(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">tpl.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $_REQUEST['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>Added form tag to index.html and added data-obj=&quot;sampleForm&quot;.</span><br>
+                 <span>index.js uses resJsonTemplateByForm instead of resJsonTemplate.</span><br>
+                 <span>Pass a form object to send to the URL that returns json as the fourth argument.</span><br>
+                 <span>If you want to set withCredentials to true (if you want to send cookies), pass true to the 5th argument.</span><br>
+                 <span>resJsonTemplateByForm POST the form passed in the 4th argument to the URL passed in the 3rd argument. Pass the JSON of that response to the template.</span><br>
+                 <span>If you use appendResJsonTemplateByForm instead of resJsonTemplateByForm, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeResJsonTemplateByForm instead of resJsonTemplateByForm, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If you set afterResJsonTemplateByForm instead of resJsonTemplateByForm, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+
+             <h1>Receive the template from the server. Part 1</h1>
+
+             <p>
+                 <span>Get the template from an external server.</span><br>
+                 <span>Let's changeindex.js, index.html</span><br>
+             </p>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resHtmlTemplate(this.obj,
+                           $f.envValue('apiRoot') + '/tpl2.php',
+                           {'sample_key': 'sample_value'},
+                           {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+
+    success() {
+        alert(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>Let's create tpl2.php and place it</span><br>
+             </p>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo htmlspecialchars($jsonRequest['sample_key'], ENT_QUOTES)?&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-text--&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-html--&lt;/div&gt;
+&lt;div data-html='v.key1'&gt;&lt;/div&gt;
+
+&lt;div&gt;--script--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.var = 1 + 2;
+&lt;/script&gt;
+&lt;div data-text='l.var'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-attr--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+&lt;/script&gt;
+&lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+&lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+
+&lt;div&gt;--data-prop--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+&lt;/script&gt;
+&lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+&lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+
+&lt;div&gt;--data-if--&lt;/div&gt;
+&lt;div data-if='v.key2.val1 === 1'&gt;
+    v.key2.val1 === 1
+&lt;/div&gt;
+&lt;div data-elseif='v.key2.val1 === 2'&gt;
+    v.key2.val1 === 2
+&lt;/div&gt;
+&lt;div data-else=''&gt;
+    else
+&lt;/div&gt;
+
+&lt;div&gt;--data-for--&lt;/div&gt;
+&lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+    &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;div data-text='l.i'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-foreach--&lt;/div&gt;
+&lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+    &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+    &lt;span&gt;:&lt;/span&gt;
+    &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-while--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.whileCount = -1;
+&lt;/script&gt;
+&lt;div data-while='l.whileCount &lt; 8'&gt;
+    &lt;script data-load-only='true'&gt;
+        l.whileCount++;
+    &lt;/script&gt;
+    &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;input data-name='sample2' type='text'&gt;
+&lt;div data-obj='obj2'&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>Use resHtmlTemplate.</span><br>
+                 <span>Pass the URL to return the template as the second argument.</span><br>
+                 <span>In the third argument, pass the request parameter to be sent to the URL that returns the template..</span><br>
+                 <span>Pass the object used by the variable name v in the template as the fourth argument.</span><br>
+                 <span>If you want to set withCredentials to true (if you want to send cookies), give true to the 5th argument.</span><br>
+                 <span>resHtmlTemplate POST the data passed in the third argument to the URL passed in the second argument. Use that response as a template.</span><br>
+                 <span>If you use appendResHtmlTemplate instead of resHtmlTemplate, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeResHtmlTemplate instead of resHtmlTemplate, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If you use afterResHtmlTemplate instead of resHtmlTemplate, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+             <h1>Receive the template from the server. Part 2</h1>
+
+             <p>
+                 <span>We sent the json to the server earlier, but we can also send the form.</span><br>
+                 <span>Let's changeindex.js, index.html、tpl2.php</span><br>
+             </p>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+
+        $f.resHtmlTemplateByForm(this.obj,
+                                 $f.envValue('apiRoot') + '/tpl2.php',
+                                 this.sampleForm,
+                                 {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    sample2_input(event) {
+        this.obj2.textContent = event.target.value;
+    }
+
+    success() {
+        alert(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo htmlspecialchars($_REQUEST['sample_key'], ENT_QUOTES)?&gt;&lt;/div&gt;
+
+
+&lt;div&gt;--data-text--&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-text='v.key1' data-tag='hidden'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-html--&lt;/div&gt;
+&lt;div data-html='v.key1'&gt;&lt;/div&gt;
+
+&lt;div&gt;--script--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.var = 1 + 2;
+&lt;/script&gt;
+&lt;div data-text='l.var'&gt;&lt;/div&gt;
+
+&lt;div&gt;--data-attr--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.attr = {&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;};
+&lt;/script&gt;
+&lt;div data-attr='l.attr'&gt;data-attr&lt;/div&gt;
+&lt;div data-attr='{&quot;style&quot;: &quot;color: white; background-color: black;&quot;, &quot;title&quot; : &quot;sample&quot;}'&gt;data-attr&lt;/div&gt;
+
+&lt;div&gt;--data-prop--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.prop = {&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;};
+&lt;/script&gt;
+&lt;div data-prop='l.prop'&gt;data-prop&lt;/div&gt;
+&lt;div data-prop='{&quot;style&quot;: {&quot;color&quot; : &quot;white&quot;, &quot;backgroundColor&quot;: &quot;black&quot;}, &quot;title&quot; : &quot;sample}&quot;}'&gt;data-prop&lt;/div&gt;
+
+&lt;div&gt;--data-if--&lt;/div&gt;
+&lt;div data-if='v.key2.val1 === 1'&gt;
+    v.key2.val1 === 1
+&lt;/div&gt;
+&lt;div data-elseif='v.key2.val1 === 2'&gt;
+    v.key2.val1 === 2
+&lt;/div&gt;
+&lt;div data-else=''&gt;
+    else
+&lt;/div&gt;
+
+&lt;div&gt;--data-for--&lt;/div&gt;
+&lt;div data-for-start='l.i = 0' data-for-end='l.i &lt; 10' data-for-step='l.i++'&gt;
+    &lt;span data-if='l.i === 3' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.i === 6' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;div data-text='l.i'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-foreach--&lt;/div&gt;
+&lt;div data-foreach='v.key3' data-foreach-key='arrKey' data-foreach-value='arrVal'&gt;
+    &lt;span data-if='l.arrVal === &quot;str2&quot;' data-continue='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-if='l.arrVal === &quot;str4&quot;' data-break='1' data-tag='hidden'&gt;&lt;/span&gt;
+    &lt;span data-text='l.arrKey'&gt;&lt;/span&gt;
+    &lt;span&gt;:&lt;/span&gt;
+    &lt;span data-text='l.arrVal'&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div&gt;--data-while--&lt;/div&gt;
+&lt;script data-load-only='true'&gt;
+    l.whileCount = -1;
+&lt;/script&gt;
+&lt;div data-while='l.whileCount &lt; 8'&gt;
+    &lt;script data-load-only='true'&gt;
+        l.whileCount++;
+    &lt;/script&gt;
+    &lt;div data-if='l.whileCount === 3' data-continue='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-if='l.whileCount === 6' data-break='1' data-tag='hidden'&gt;&lt;/div&gt;
+    &lt;div data-text='l.whileCount'&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;input data-name='sample2' type='text'&gt;
+&lt;div data-obj='obj2'&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>Added form tag to index.html and added data-obj=&quot;sampleForm&quot;.</span><br>
+                 <span>index.js uses resHtmlTemplateByForm instead of resHtmlTemplate.</span><br>
+                 <span>Pass the form object to be sent to the URL that returns the template as the third argument.</span><br>
+                 <span>Pass the object used by the variable name v in the template as the fourth argument.</span><br>
+                 <span>If you want to set withCredentials to true (if you want to send cookies), pass true to the 5th argument.</span><br>
+                 <span>resHtmlTemplateByForm POST the form passed in the third argument to the URL passed in the second argument. Use that response as a template.</span><br>
+                 <span>If you use appendResHtmlTemplateByForm instead of resHtmlTemplateByForm, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeResHtmlTemplateByForm instead of resHtmlTemplateByForm, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If you set afterResHtmlTemplateByForm instead of resHtmlTemplateByForm, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+
+             <h1>Use the DOM displayed on the screen as a template</h1>
+
+             <p>
+                 <span>Let's change index.js, index.html</span><br>
+             </p>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    init() {
+        $f.useDomAsTemplate(this.obj, {'key': {'val1': 2}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    success() {
+        this.obj.style.display = &quot;block&quot;;
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot; style=&quot;display:none&quot;&gt;
+        &lt;div data-if='v.key.val1 === 1'&gt;
+            v.key.val1 === 1
+        &lt;/div&gt;
+        &lt;div data-elseif='v.key.val1 === 2'&gt;
+            v.key.val1 === 2
+        &lt;/div&gt;
+        &lt;div data-else=''&gt;
+            else
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>Call useDomAsTemplate in index.js.</span><br>
+                 <span>Treats the DOM passed to the first argument as a template.</span><br>
+                 <span>Pass the object used by the variable name v in the template as the second argument.</span><br>
+             </p>
+             <br>
+
+             <p>
+                 <span><a href="single_component_event.html">Next page</a> Single component event handling</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
