@@ -2,24 +2,24 @@
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>
-JavaScript フレームワーク fairy support js validate
+JavaScript Framework fairy support js validate
 </title>
 <link rel="stylesheet" href="./css/mb/common.css" type="text/css">
 <link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
 </head>
 <body>
 <header class="header">
-    <div class="title">JavaScript&nbsp;フレームワーク&nbsp;fairy&nbsp;support&nbsp;js</div>
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
 </header>
 <div class="body">
-     <div class="table-of-contents-link"><a href="index.html">目次</a></div>
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
      <div class="subtitle">validate</div>
      <article class="article">
          <section>
 
              <p>
-                 <span>値の検証処理を実装します</span><br>
-                 <span>src/js/msg/msg.jsonを作成しましょう</span><br>
+                 <span>Create a value validation process.</span><br>
+                 <span>Let's create src/js/msg/msg.json.</span><br>
              </p>
              <span class="code-title">src/js/msg/msg.json</span>
              <br>
@@ -37,7 +37,7 @@ JavaScript フレームワーク fairy support js validate
 }
 </pre>
              <p>
-                 <span>src/js/util/validator.jsを作成しましょう</span><br>
+                 <span>Let's create src/js/util/validator.js.</span><br>
              </p>
              <span class="code-title">src/js/util/validator.js</span>
              <br>
@@ -164,7 +164,7 @@ export class Validator {
 }
 </pre>
              <p>
-                 <span>src/js/modules/index.jsを修正しましょう</span><br>
+                 <span>Let's change src/js/modules/index.js.</span><br>
              </p>
              <span class="code-title">src/js/modules/index.js</span>
              <br>
@@ -243,7 +243,7 @@ export class Index {
 }
 </pre>
              <p>
-                 <span>src/page/index.htmlを修正しましょう</span><br>
+                 <span>Let's change src/page/index.html.</span><br>
              </p>
              <span class="code-title">src/page/index.html</span>
              <br>
@@ -290,30 +290,28 @@ sample
 </pre>
 
              <p>
-                 <span>index.jsで使っている$f.addMetaメソッドは第一引数に関する情報を格納するメソッドです。格納した情報は$f.getMetaで取得できます。getMetaの引数はaddMetaの第一引数です。格納した情報は$f.deleteMetaで削除できます。deleteMetaの引数はgetMetaと同じです</span><br>
-                 <span>index.jsで使っている$f.validateメソッドは第一引数オブジェクトの第二引数プロパティに値が格納されようとしたとき、第四引数に渡した関数を実行するメソッドです</span><br>
-                 <span>例えば、$f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);の場合</span><br>
-                 <span>this.textオブジェクトのvalueプロパティに値が格納されようとしたとき ValidatorクラスのinitValidate、textValidateメソッドが実行されます</span><br>
-                 <span>さらに$f.validateメソッドは第一引数オブジェクトに第三引数イベントが発生したとき、第四引数に渡した関数を実行します</span><br>
-                 <span>例えば、$f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);の場合</span><br>
-                 <span>this.textオブジェクトにinputイベントが発生したとき ValidatorクラスのinitValidate、textValidateメソッドが実行されます。イベントが発生しないオブジェクトのプロパティの場合、第三引数はnullにしてください</span><br>
-                 <span>$f.validateの第四引数に渡される関数は引数を5つ取ります</span><br>
-                 <span>第一引数：$f.validateの第一引数に渡した値</span><br>
-                 <span>第二引数：$f.validateの第二引数に渡した値</span><br>
-                 <span>第三引数：新たに格納しようとしている値</span><br>
-                 <span>第四引数：現在格納されている値</span><br>
-                 <span>第五引数：$f.validateの第五引数に渡した値。$f.validateに第五引数を指定しなかった場合、undefined</span><br>
-                 <span>$f.validateの戻り値はbooleanです。trueを返すと新たに格納しようとしている値を第一引数オブジェクトの第二引数プロパティにセットします。falseを返すとセットしません</span><br>
+                 <span>The $f.addMeta used in index.js is a method to store information about the first argument. The stored information can be get using $f.getMeta. The argument of getMeta is the first argument of addMeta. The stored information can be delete using $f.deleteMeta. The arguments of deleteMeta are the same as getMeta.</span><br>
+                 <span>The $f.validate used in index.js is a method that executes the function passed to the 4th argument when the value is to be stored in the 2nd argument field of the 1st argument object.</span><br>
+                 <span>For example, in the case of $f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);, When a value is to be stored in the value field of this.text, the initValidate and textValidate methods of the Validator class are executed.</span><br>
+                 <span>Furthermore, $f.validate executes the function passed to the 4th argument when the 3rd argument event occurs in the 1st argument object.</span><br>
+                 <span>For example, in the case of $f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);, When the input event occurs in this.text object, the initValidate and textValidate methods of the Validator class are executed. For the object where the event does not occur, the third argument should be null.</span><br>
+                 <span>The function passed to the 4th argument of $f.validate takes 5 arguments.</span><br>
+                 <span>First argument：Value passed to the first argument of $f.validate</span><br>
+                 <span>Second argument：Value passed to the second argument of $f.validate</span><br>
+                 <span>Third argument：New value to be stored</span><br>
+                 <span>Fourth argument：currently stored value</span><br>
+                 <span>Fifth argument：The value passed to the fifth argument of $f.validate. If the fifth argument is not passed in $f.validate, it will be undefined.</span><br>
+                 <span>The return value of $f.validate is boolean. If true is returned, the value to be newly stored is stored in the second argument field of the first argument object. Not stored if false is returned.</span><br>
              </p>
              <br>
 
              <br>
 
              <p>
-                 <span><a href="store.html">次ページ</a>値の保持</span>
+                 <span><a href="store.html">Next page</a> Store the value</span>
                  <br>
                  <br>
-                 <span><a href="index.html">目次</a></span>
+                 <span><a href="index.html">table of contents</a></span>
                  <br>
              </p>
 
