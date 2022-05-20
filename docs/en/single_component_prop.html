@@ -1,0 +1,147 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Binding DOM to single component field
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Binding DOM to single component field</div>
+     <article class="article">
+         <section>
+             
+             <h1>Single bind</h1>
+
+             <p>
+                 <span>Let's change src/js/components/sample/controller.js, src/js/components/sample/view.html</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+    }
+
+}
+</pre>
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>We created a tag with data-sample-obj attribute in view.html.</span><br>
+                 <span>When you run and enter a value in the text field on the screen, the value you entered is outputted in the tag with data-sample-obj=&quot;obj&quot;.</span><br>
+                 <span>This framework automatically binds the tag with the data-{component name}-obj attribute in the view.html to the field of the class of controller.js corresponding to the view.html.</span><br>
+                 <span>this.obj in controller.js will be the object of the tag with data-{component name}-obj=&quot;obj&quot;.</span><br>
+                 <span>Unlike the data-{component name}-name attribute, the data-{component name}-obj attribute cannot be specified multiple times by separating them with commas.</span><br>
+             </p>
+             <br>
+             
+             <h1>Multiple bind</h1>
+
+             <p>
+                 <span>Let's change src/js/components/sample/controller.js, src/js/components/sample/view.html</span><br>
+             </p>
+             
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_input(event) {
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+        /*
+        This is exactly the same
+        this.list.forEach((item) => {
+            item.textContent = event.target.value;
+        });
+        */
+        
+    }
+
+}
+</pre>
+
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-list=&quot;list&quot;&gt;&lt;/div&gt;
+&lt;div data-sample-list=&quot;list&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+
+             
+             <p>
+                 <span>I created a tag with the data-sample-list attribute in view.html.</span><br>
+                 <span>When you run and enter a value in the text field on the screen, the value you entered is outputted in the tag with data-sample-list=&quot;list&quot;.</span><br>
+                 <span>This framework automatically binds the tag with the data-{component name}-list attribute value in the web page to the field of the class of the controller.js.</span><br>
+                 <span>The difference from data-{component name}-obj is that data-{component name}-obj is unique value on the screen, but data-{component name}-list is not unique values ​​on the screen.</span><br>
+                 <span>To get the object with data-{component name}-list in js, execute the values ​​method and process it one by one using for.</span><br>
+                 <span>Alternatively, you can use the forEach method and pass a function as an argument for processing.</span><br>
+                 <span>Unlike the data-{component name}-name attribute, the data-{component name}-list attribute cannot be specified multiple times separated by commas.</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>Pre-processing and post-processing when bind</h1>
+             <p>
+                 <span>Same as module, you can define pre-processing and post-processing when binded by beforeBindObj, afterBindObj, beforeBindList, afterBindList method.</span>
+             </p>
+             
+             <h1>Pre-processing and post-processing when unbind</h1>
+             <p>
+                 <span>Same as module, beforeRemoveObj, afterRemoveObj, beforeRemoveList, afterRemoveList methods can be used to define pre-processing and post-processing when the connection is unbind.</span><br>
+             </p>
+             
+             <h1>Delete process</h1>
+             <p>
+                 <span>Exactly the same as module. See <a href="module_prop.html">module</a>.</span><br>
+             </p>
+             
+             <h1>Replacement process</h1>
+             <p>
+                 <span>Exactly the same as module. See <a href="module_prop.html">module</a>.</span><br>
+             </p>
+             
+             <br>
+             
+             <p>
+                 <span><a href="single_component_init.html">Next page</a> Single component initial processing</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

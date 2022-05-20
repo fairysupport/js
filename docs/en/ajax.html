@@ -1,0 +1,293 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Ajax
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Ajax</div>
+     <article class="article">
+         <section>
+             <h1>Pass the request data directly. Process with callback function.</h1>
+
+             <p>
+                 <span>Let's change envValue.local.json, index.html、index.js.</span><br>
+             </p>
+             <span class="code-title">src/js/env/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    "apiRoot" : "http://localhost:8080"
+}</pre>
+
+
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.ajax($f.envValue('apiRoot') + '/json.php', {'sample_key': 'sample_value'})
+        .setLoadend(200, this.success.bind(this))
+        .setLoadend(null, this.error.bind(this))
+        .send();
+    }
+
+    success(event, xhr) {
+        this.obj.textContent = JSON.stringify(xhr.response);
+    }
+
+    error(event, xhr) {
+        this.obj.textContent += xhr.status;
+    }
+
+}
+</pre>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>Let's create json.php and place it on a web server with CORS settings.</span><br>
+                 <span>Please prepare your own web server with CORS settings.</span><br>
+                 <span>Here, as an example, use the header method in PHP to set CORS. Suppose PHP server is http://localhost:8080.</span><br>
+             </p>
+             <span class="code-title">json.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $jsonRequest['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+             <p>
+                 <span>As an example, We have shown a server program that return json in PHP. Suppose this is located directly under the document root.</span><br>
+             </p>
+             <br>
+
+
+             <p>
+                 <span>About $f.ajax.</span><br>
+                 <span>The first argument is URL and the second argument is the request parameter.</span><br>
+                 <span>By default, it is sent by POST. If you want to change the HTTP method, pass the HTTP method as a character string as the third argument.(Example：'GET'、'POST'、'PUT'、'DELETE')</span><br>
+                 <span>By default, request parameters are sent in JSON. If you want to send in query parameter format, pass the string'query' as the fourth argument. If you want to send in json format, please pass the string'json'.</span><br>
+                 <span>You can implement what happens when the request is completed (successful or unsuccessful) using setLoadend. The first argument is the HTTP status and the second argument is the callback function.</span><br>
+                 <span>Event object and XMLHttpRequest object are passed as arguments to the callback function of the second argument.</span><br>
+                 <span>If null is passed as the first argument of setLoadend, it will be the default process when the request is completed.</span><br>
+                 <span>In this example, we are executing a call that passes 200 as the first argument of setLoadend and a call that passes null. In this case, if the HTTP status is 200, the callback function with 200 passed as the first argument of setLoadend will be executed, and if the HTTP status is not 200 (in most cases, an error or timeout), the callback function with null passed as the first argument of setLoadend will be executed.</span><br>
+                 <span>Will be sent by send.</span><br>
+                 <span>The return value of $f.ajax can use the property and method of the same name in XMLHttpRequest</span><br>
+                 <span>The return value of $f.ajax also has methods that XMLHttpRequest doesn't have.</span><br>
+                 <span>The description of the method that the return of $f.ajax has but not the XMLHttpRequest.</span><br>
+                 <span>The setWithCredentials method takes a boolean argument. Passing true will send a cookie. Equivalent to setting the withCredentials property to true. The setWithCredentials method is provided so that it can be used in the method chain.</span><br>
+                 <span>The setResponseType method takes the value contained in XMLHttpRequestResponseType as an argument. Equivalent to setting the responseType property. The setResponseType method is provided so that it can be used in the method chain.</span><br>
+                 <span>The setTimeout method takes an unsigned long as an argument. Equivalent to setting the timeout property. The setTimeout method is provided so that it can be used in the method chain.</span><br>
+                 <span>The setProgress method is exactly the same as setLoadend. The first argument is the HTTP status and the second argument is the callback function. When the progress event occurs, the callback function set in the second argument is executed based on the HTTP status set in the first argument.</span><br>
+                 <span>In the setReadystatechange method, the first argument is readyState, which represents the state of XMLHttpRequest, the second argument is the HTTP status, and the third argument is the callback function. When readyState changes, the callback function set in the third argument is executed based on the values ​​set in the first and second arguments. If you pass null to the first argument like setLoadend, it will be the operation when it is not set readyState, and if you pass null to the second argument like setLoadend, it will be the operation when it is not set HTTP status.</span><br>
+             </p>
+             <br>
+             <p>
+                 <span>$f.ajax will automatically have a responseType of json. If you call $f.ajaxText, the responseType will be text. The usage of $f.ajaxText is exactly the same as $f.ajax. The arguments are the same.</span><br>
+                 <span>For $f.ajax and $f.ajaxText, X-Requested-With, Accept and Content-Type are automatically set in the request header. If you want to get the state where nothing is set in the request header and responseType, use $f.emptyAjax. The usage of $f.emptyAjax exactly the same as $f.ajax.The arguments are the same.</span><br>
+             </p>
+
+             <h1>Pass the request data directly. Process with Promise.</h1>
+
+             <p>
+                 <span>Let's change index.js.</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.ajax($f.envValue('apiRoot') + '/json.php', {'sample_key': 'sample_value'})
+        .sendPromise()
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this))
+        ;
+    }
+
+    success(xhr) {
+        this.obj.textContent = JSON.stringify(xhr.response);
+    }
+
+    error(xhr) {
+        this.obj.textContent += xhr.status;
+    }
+
+}
+</pre>
+             <p>
+                 <span>Use sendPromise instead of send to return a Promise.</span><br>
+                 <span>If the HTTP status is 200, Promise will resolve. If HTTP status is not 200, Promise will reject.</span><br>
+                 <span>Unlike the send callback function, no event object is passed.</span><br>
+                 <span>When using sendPromise, setLoadend method and onloadend field cannot be used.</span><br>
+             </p>
+             <br>
+
+
+             <h1>Pass request data as form object</h1>
+
+             <p>
+                 <span>Let's change index.html, index.js</span><br>
+             </p>
+
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.ajaxByForm($f.envValue('apiRoot') + '/json.php', this.sampleForm)
+        .setLoadend(200, this.success.bind(this))
+        .setLoadend(null, this.error.bind(this))
+        .send();
+    }
+
+    success(event, xhr) {
+        this.obj.textContent = JSON.stringify(xhr.response);
+    }
+
+    error(event, xhr) {
+        this.obj.textContent += xhr.status;
+    }
+
+}
+</pre>
+             <p>
+                 <span>Let's change json.php.</span><br>
+             </p>
+             <span class="code-title">json.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$responseJson = array(
+    'key1' =&gt; '&lt;input type=&quot;text&quot;&gt;',
+    'key2' =&gt; array(
+        'val1' =&gt; 2
+    ),
+    'key3' =&gt; array(
+        &quot;key1&quot; =&gt; &quot;str1&quot;,
+        &quot;key2&quot; =&gt; &quot;str2&quot;,
+        &quot;key3&quot; =&gt; &quot;str3&quot;,
+        &quot;key4&quot; =&gt; &quot;str4&quot;,
+        &quot;key5&quot; =&gt; &quot;str5&quot;
+    ),
+    'request_value' =&gt; $_REQUEST['sample_key']
+);
+
+echo json_encode($responseJson);
+</pre>
+
+             <p>
+                 <span>About $f.ajaxByForm</span><br>
+                 <span>The first argument is URL and the second argument is the form object to send.</span><br>
+                 <span>For ajaxByForm, the HTTP method is always POST. Cannot be changed.</span><br>
+                 <span>Unlike $f.ajax, you cannot set the request parameter format. You can't send with json.</span><br>
+                 <span>$f.ajaxByForm will automatically set the responseType to json. If you use $f.ajaxTextByForm instead of $f.ajaxByForm, the responseType will be text. The usage of $f.ajaxTextByForm is exactly the same as $f.ajaxByForm.</span><br>
+                 <span>For $f.ajaxByForm and $f.ajaxTextByForm, X-Requested-With and Accept are automatically set in the request header. If you want to get the state where nothing is set in the request header and responseType, use $f.emptyAjaxByForm. The usage of $f.emptyAjaxByForm is exactly the same as $f.ajaxByForm.</span><br>
+                 <span>ajaxByForm, ajaxTextByForm, emptyAjaxByForm also return a Promise when using sendPromise.</span><br>
+             </p>
+             <br>
+
+
+             <p>
+                 <span><a href="validate.html">Next page</a> Validate</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

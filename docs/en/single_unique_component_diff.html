@@ -1,0 +1,49 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Difference between single component and unique component
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Difference between single component and unique component</div>
+     <article class="article">
+         <section>
+             
+             <p>
+                 <span>A single component will have only one instance of controller.js in the system, even if you run loadSingleComponent multiple times.</span><br>
+                 <span>The instance of controller.js of single component will be reused from the first new one.</span><br>
+                 <span>When data-{component name}-obj is used for view.html, if loadSingleComponent is executed multiple times, the data-{component name}-obj in the last loaded view.html will be binded to controller.js.</span><br>
+                 <span>After a single component is loaded, it will automatically binded with controller.js when the data-{component name}-name, data-{component name}-obj, and data-{component name}-list attributes appear in the DOM on the screen.</span><br>
+                 <span>Single components can get an instance from anywhere with $f.getComponentController('component name').  The argument is the same as the second argument of loadSingleComponent.</span><br>
+                 <br>
+                 <span>Unique component creates a new instance each time you run loadUniqueComponent multiple times.</span><br>
+                 <span>After the unique component is loaded, the bind with controller.js will be updated even if the data-{component name}-name, data-{component name}-obj, data-{component name}-list attribute changes in the DOM on the screen.</span><br>
+                 <span>Unique component cannot get an instance with $f.getComponentController('component name').</span><br>
+                 
+             </p>
+             <br>
+             <p>
+                 <span><a href="component_env_value.html">Next page</a> Component constants</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Component message
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Component message</div>
+     <article class="article">
+         <section>
+             <h1>Whole system</h1>
+
+             <p>
+                 <span>Let's change src/js/components/sample/controller.js.</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert(
+            $f.componentMsg(this, 'key1', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'}) + &quot;\n&quot; +
+            $f.componentMsg(this, 'key2', {'replace1': 'val1', 'replace2': 'val2', 'replace3': 'val3'})
+        );
+    }
+
+}
+</pre>
+
+             <p>
+                 <span>Let's create src/js/components/msg.json, src/js/components/msg.ja.json, src/js/components/msg.ja-JP.json, src/js/components/msg.en.json, src/js/components/msg.en-US.json.</span><br>
+             </p>
+             <span class="code-title">msg.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.ja.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.ja-JP.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">msg.en-US.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             
+             <p>
+                 <span>After executing and clicking the sample button, let's click the component sample button.</span><br>
+                 <span>The value in the json file created under src/js/components is output.</span><br>
+                 <span>$f.componentMsg called in controller.js is method that return the value in msg.json created under src/js/components.</span><br>
+                 <span>componentMsg receives the component instance as the first argument and the key of msg.json as the second argument.</span><br>
+                 <span>The third argument of the componentMsg method is the value that replaces the part enclosed in ${} in json. If you don't want to replace it, please add \.</span><br>
+                 <span>Since msg.json is json, enclose the key and value in double quotes. Not a single quote.</span><br>
+                 <span>msg.json used in the component is created under src/js/components. This is a framework rule.</span><br>
+                 <span>Also, you can prepare msg.{Language}.json as well as msg.json.</span><br>
+                 <span>The language to be used is applied in the order of priority of the value of the query parameter lang, the value of navigator.language.</span><br>
+                 <span>Therefore, if you access the URL with ?lang=en, the value defined in msg.en.json will be output.</span><br>
+                 <span>If msg.{Language to use}.json does not exist, msg.json will be applied.</span><br>
+                 <span>Therefore, if you delete msg.ja.json, msg.ja-JP.json, msg.en.json, msg.en-US.json and access web page, the value defined in msg.json will be output.</span><br>
+             </p>
+             <br>
+             
+             <h1>Component specific</h1>
+
+             <p>
+                 <span>Let's change src/js/components/sample/msg.json, src/js/components/sample/msg.ja.json, src/js/components/sample/msg.ja-JP.json, src/js/components/sample/msg.en.json, src/js/components/sample/msg.en-US.json.</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/msg.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => component ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => component ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">src/js/components/sample/msg.ja.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => component ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => component ja ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">src/js/components/sample/msg.ja-JP.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => component ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => component ja-JP ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">src/js/components/sample/msg.en.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => component en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => component en ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             <span class="code-title">src/js/components/sample/msg.en-US.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;key1 => component en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+    ,&quot;key2&quot; : &quot;key2 => component en-US ${replace1}--\\${replace1}--${replace1}--${replace2}--${replace3}&quot;
+}
+</pre>
+             
+             <p>
+                 <span>After executing and clicking the sample button, let's click the component sample button.</span><br>
+                 <span>The value in the json file created under src/js/components/sampleis output.</span><br>
+                 <span>msg.json created under src/js/components/sample can be used only when the first argument is an instance of src/js/components/sample/controller.js.</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="component_web_param.html">Next page</a> Receive the value from the server in order to pass component</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

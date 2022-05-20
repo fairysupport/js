@@ -1,0 +1,168 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Component constants
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Component constants</div>
+     <article class="article">
+         <section>
+             <h1>Whole system</h1>
+
+             <p>
+                 <span>Let's change index.html, index.js to the following.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadUniqueComponent(this.obj, 'sample')
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+
+             <p>
+                 <span>Let's change src/js/components/sample/controller.js, src/js/components/sample/view.html.</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert($f.componentEnvValue(this, 'key1') + ' ' + $f.componentEnvValue(this, 'key2') + ' ' + $f.componentEnvValue(this, 'key3'));
+    }
+
+}
+</pre>
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;button data-sample-name=&quot;sample&quot;&gt;component sample&lt;/button&gt;
+</pre>
+
+             <p>
+                 <span>Let's create src/js/components/envValue.json, src/js/components/envValue.local.json</span><br>
+             </p>
+             <span class="code-title">src/js/components/envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key1&quot; : &quot;value1&quot;
+    ,&quot;key2&quot; : &quot;value2&quot;
+}
+</pre>
+             <span class="code-title">src/js/components/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;key2&quot; : &quot;value2_local&quot;
+    ,&quot;key3&quot; : &quot;value3_local&quot;
+}
+</pre>
+             
+             <p>
+                 <span>After executing and clicking the sample button, let's click the component sample button.</span><br>
+                 <span>value1&nbsp;value2_local&nbsp;value3_local are output</span><br>
+                 <span>The $f.componentEnvValue called in controller.js is the method that returns the value of envValue.json under src/js/components.</span><br>
+                 <span>componentEnvValue receives the component instance as the first argument and the key of envValue.json as the second argument.</span><br>
+                 <span>Since envValue.json is json, enclose the key and value in double quotes. Not a single quote.</span><br>
+                 <span>Create envValue.json used for component under src/js/components. . This is a framework rule.</span><br>
+                 <span>Also, you can prepare envValue.{Environment}.json as well as envValue.json.</span><br>
+                 <span>If both envValue.json and envValue.local.json have the same key, envValue.local.json takes precedence.</span><br>
+             </p>
+             <br>
+             
+             <h1>Component specific</h1>
+
+             <p>
+                 <span>Let's create src/js/components/sample/envValue.json, src/js/components/sample/envValue.local.json</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;key2&quot; : &quot;sample_value2&quot;
+}
+</pre>
+             <span class="code-title">src/js/components/sample/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;key3&quot; : &quot;sample_value3_local&quot;
+}
+</pre>
+             
+             
+             <p>
+                 <span>After executing and clicking the sample button, let's click the component sample button.</span><br>
+                 <span>value1&nbsp;sample_value2&nbsp;sample_value3_local are output.</span><br>
+                 <span>envValue.json created under src/js/components/sample can be used only when the first argument of componentEnvValue method is an instance of src/js/components/sample/controller.js.</span><br>
+             </p>
+             <br>
+             
+             
+             <p>
+                 <span><a href="component_msg.html">Next page</a> Component message</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

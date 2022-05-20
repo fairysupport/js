@@ -1,0 +1,70 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Single component initial processing
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Single component initial processing</div>
+     <article class="article">
+         <section>
+             <h1>Initial processing</h1>
+
+             <p>
+                 <span>Let's change src/js/components/sample/controller.js to the following.</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    init(data) {
+        console.log(&quot;init&quot;);
+        console.log(data);
+    }
+
+    sample_input(event) {
+        
+        for (const item of this.list.values()) {
+            item.textContent = event.target.value;
+        }
+        
+    }
+
+}
+</pre>
+             
+             <p>
+                 <span>view.html and controller.js are not yet binded in the constructor</span><br>
+                 <span>When view.html and controller.js are binded together, the framework calls the init method. The argument of the init method is an object that can be used with the variable name v in view.html.</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="unique_component.html">Next page</a> Unique component</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

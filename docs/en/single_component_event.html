@@ -1,0 +1,166 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Single component event handling
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Single component event handling</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>In this framework, a component a combination of template and JavaScript.</span><br>
+             </p>
+             
+             <h1>Event processing</h1>
+
+             <p>
+                 <span>Let's change index.html, index.js to the following.</span><br>
+             </p>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadSingleComponent(this.obj, 'sample', {'key1': 'val1'})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+    
+    success() {
+        console.log(&quot;success&quot;);
+    }
+    
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+    
+}
+</pre>
+             <p>
+                 <span>Let's create src/js/components/sample/controller.js, src/js/components/sample/view.html</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        alert(&quot;Hello component&quot;);
+    }
+
+}
+</pre>
+             <span class="code-title">src/js/components/sample/view.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;button data-sample-name=&quot;sample&quot;&gt;click&lt;/button&gt;
+</pre>
+             <p>
+                 <span>Let's run it and click the sample button.</span><br>
+                 <span>src/js/components/sample/view.html with the third argument of $f.loadSingleComponent embedded is output.</span><br>
+                 <span>Pass the directory name under src/js/components as the second argument of loadSingleComponent.</span><br>
+                 <span>The directory name under src/js/components is called the component name in this framework.</span><br>
+                 <span>For components, create two files, controller.js and view.html, under src/js/components.</span><br>
+                 <span>loadSingleComponent method load src/js/components/{component name}/view.html and import src/js/components/{component name}/controller.js.</span><br>
+                 <span>Then, bind the tag with the data-{component name}-name attribute in view.html to the method of the controller.js class.</span><br>
+                 <span>If you declare a method named &quot;data-{component name}-name attribute value&quot;_&quot;event name&quot; in controller.js, the tag with data-{component name}-name attribute in view.html is binded to the method named &quot;data-{component name}-name attribute value&quot;_&quot;event name&quot; in controller.js by this framework.</span><br>
+                 <span>Furthermore, the loadSingleComponent method replaces the body part of the first argument with view.html with the third argument embedded.</span><br>
+                 <span>The return value of loadSingleComponent is Promise. view.html is embedded in web page and then web page binded with controller.js, then Promise will be resolved.</span><br>
+                 <span>view.html is treated as a <a href="tpl.html">template</a>.</span><br>
+                 <span>In the template you can use the third argument of the loadSingleComponent method with the variable name v.</span><br>
+                 <span>It is a rule of this framework to make the class name of controller.js the first uppercase camel case of the directory name.</span><br>
+                 <span>If you set appendLoadSingleComponent instead of loadSingleComponent, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeLoadSingleComponent instead of loadSingleComponent, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If you set afterLoadSingleComponent instead of loadSingleComponent, the body part will be added immediately after the first argument instead of replacing.</span><br>
+                 <span>You can also create sub directory under src/js/components. In that case, pass a string as the second argument of loadSingleComponent, separated by periods. The data-{component name}-name attribute value should be hyphenated.</span><br>
+                 <span>For example, if you created src/js/components/sub/sample/controller.js and view.html, you pass 'sub.sample' as the second argument of loadSingleComponent. The data-{component name}-name attribute is data-sub-sample-name. The class name of controller.js will be Sample.</span><br>
+                 <span>If the component name is camel case, pass the string as camel case to the second argument of loadSingleComponent. data-{component name}-name attribute should be hyphenated</span><br>
+                 <span>For example, if you created src/js/components/sampleCamel/controller.js and view.html, you pass 'sampleCamel' as the second argument of loadSingleComponent. The data-{component name}-name attribute will be data-sample-camel-name. The class name of controller.js will be SampleCamel.</span><br>
+             </p>
+             <br>
+             
+             <h1>Multiple processing</h1>
+             
+             <p>
+                 <span>Same as module, you can bind multiple methods separated by commas</span><br>
+             </p>
+             
+             <h1>Pre-processing, post-processing</h1>
+             <p>
+                 <span>Same as module, beforeEvent and afterEvent methods can define common pre-processing and post-processing of events.</span><br>
+                 <span>If the previously executed method returns false, the later method will not be executed.</span><br>
+             </p>
+             
+             <h1>Pre-processing and post-processing when bind</h1>
+             <p>
+                 <span>Same as module, beforeName and afterName methods can define pre-processing and post-processing when a tag with data-{component name}-name attribute is binded with a method of this class.</span><br>
+             </p>
+             
+             <h1>Pre-processing and post-processing when the bind is broken</h1>
+             <p>
+                 <span>Same as module, beforeRemoveName, afterRemoveName method can define pre-processing and post-processing when the bind between the tag with data-{component name}-name attribute and the method of this class is broken.</span><br>
+             </p>
+             
+             <h1>Error handling</h1>
+             <p>
+                 <span>If the errorHandle method is defined in module, the errorHandle method of module will be executed when an exception is thrown in the process.</span><br>
+             </p>
+             
+             <h1>End processing</h1>
+             <p>
+                 <span>If the finalHandle method is defined in the module, the finalHandle method of the module will be executed regardless of whether the component processing is successful or the exception is thrown.</span><br>
+             </p>
+             <br>
+             <p>
+                 <span><a href="single_component_prop.html">Next page</a> Binding DOM to single component field</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

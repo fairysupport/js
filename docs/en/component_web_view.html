@@ -1,0 +1,242 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Receive the view of the component from the server
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Receive the view of the component from the server</div>
+     <article class="article">
+         <section>
+
+             <h1>Receive the view of the component from the server. Part1.</h1>
+
+             <p>
+                 <span>Get the view of a component from an external server.</span><br>
+                 <span>Let's change index.js, index.html</span><br>
+             </p>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resHtmlSingleComponent(this.obj,
+                                  'sample',
+                                  $f.envValue('apiRoot') + '/tpl2.php',
+                                  {'sample_key': 'sample_value'},
+                                  {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    success() {
+        console.log(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <p>
+                 <span>Let's create tpl2.php and place it on a web server with CORS settings.</span><br>
+                 <span>Please prepare your own web server with CORS settings.</span><br>
+                 <span>Here, as an example, use the header method in PHP to set CORS. Suppose PHP server is http://localhost:8080.</span><br>
+             </p>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+$rawRequest = file_get_contents(&quot;php://input&quot;);
+$jsonRequest = json_decode($rawRequest, true);
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo htmlspecialchars($jsonRequest['sample_key'], ENT_QUOTES)?&gt;&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>Let's change  src/js/components/sample/controller.js.</span><br>
+             </p>
+             <span class="code-title">src/js/components/sample/controller.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor(data) {
+    }
+
+    init(data) {
+        console.log(&quot;init&quot;);
+        console.log(data);
+    }
+
+    sample_input(event) {
+        this.obj.textContent = event.target.value;
+    }
+
+}
+</pre>
+             <p>
+                 <span>For a single component, use the resHtmlSingleComponent method. For unique components, use resHtmlUniqueComponent.</span><br>
+                 <span>Pass the component name as the second argument.</span><br>
+                 <span>Pass the URL that return view as the third argument.</span><br>
+                 <span>In the 4th argument, pass the request parameter to be sent to the URL that return view.</span><br>
+                 <span>Pass the object used by the variable name v in the view as the fifth argument.</span><br>
+                 <span>If you want to set withCredentials to true (if you want to send a cookie), give true to the 6th argument.</span><br>
+                 <span>resHtmlSingleComponent and resHtmlUniqueComponent will POST the data passed in the 4th argument to the URL given in the 3rd argument. Treat the response as view.html.</span><br>
+                 <span>If you use appendResHtmlSingleComponent and appendResHtmlUniqueComponent instead of resHtmlSingleComponent and resHtmlUniqueComponent, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeResHtmlSingleComponent and beforeResHtmlUniqueComponent instead of resHtmlSingleComponent and resHtmlUniqueComponent, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If afterResHtmlSingleComponent and afterResHtmlUniqueComponent are used instead of resHtmlSingleComponent and resHtmlUniqueComponent, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+
+
+             <h1>Receive the view of the component from the server. Part2.</h1>
+
+             <p>
+                 <span>We sent the json to the server previously, but you can also send the form.</span><br>
+                 <span>Let's change index.js, index.html, tpl2.php.</span><br>
+             </p>
+
+             <span class="code-title">index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.resHtmlSingleComponentByForm(this.obj,
+                                  'sample',
+                                  $f.envValue('apiRoot') + '/tpl2.php',
+                                  this.sampleForm,
+                                  {'key1': '&lt;input type=&quot;text&quot;&gt;', 'key2': {'val1': 2}, 'key3': {&quot;key1&quot;: &quot;str1&quot;, &quot;key2&quot;: &quot;str2&quot;, &quot;key3&quot;: &quot;str3&quot;, &quot;key4&quot;: &quot;str4&quot;, &quot;key5&quot;: &quot;str5&quot;}})
+        .then(this.success.bind(this))
+        .catch(this.error.bind(this));
+    }
+
+    success() {
+        console.log(&quot;success&quot;);
+    }
+
+    error(exception) {
+        alert(&quot;error&quot;);
+        console.error(exception);
+    }
+
+}
+</pre>
+             <span class="code-title">index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-obj=&quot;sampleForm&quot;&gt;
+            &lt;input name=&quot;sample_key&quot; type=&quot;text&quot; value=&quot;sample_value&quot;&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">tpl2.php</span>
+             <br>
+             <pre class="code-view">
+&lt;?php
+header(&quot;Access-Control-Allow-Credentials: true&quot;);
+header(&quot;Access-Control-Allow-Origin: http://localhost:8000&quot;);
+header(&quot;Access-Control-Allow-Headers: Accept, Content-Type, X-Requested-With&quot;);
+header(&quot;Content-Type: application/json; charset=UTF-8&quot;);
+
+?&gt;
+&lt;div&gt;--requestData--&lt;/div&gt;
+&lt;div&gt;&lt;?php echo $_REQUEST['sample_key']?&gt;&lt;/div&gt;
+&lt;div data-text='v.key1'&gt;&lt;/div&gt;
+&lt;div data-sample-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-sample-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>For a single component, use the resHtmlSingleComponentByForm method. For unique components, use resHtmlUniqueComponentByForm.</span><br>
+                 <span>Pass the component name as the second argument.</span><br>
+                 <span>Pass the URL that return view as the third argument.</span><br>
+                 <span>Pass the form object to be sent to the URL that return view as the fourth argument.</span><br>
+                 <span>Pass the object used by the variable name v in the view as the fifth argument.</span><br>
+                 <span>If you want to set withCredentials to true (if you want to send a cookie), give true to the 6th argument.</span><br>
+                 <span>resHtmlSingleComponentByForm and resHtmlUniqueComponentByForm will POST the form passed in the 4th argument to the URL passed in the 3rd argument. Treat the response as view.html.</span><br>
+                 <span>If you use appendResHtmlSingleComponentByForm and appendResHtmlUniqueComponentByForm instead of resHtmlSingleComponentByForm and resHtmlUniqueComponentByForm, the body part will be added to the body part instead of replacing it.</span><br>
+                 <span>If you set beforeResHtmlSingleComponentByForm and beforeResHtmlUniqueComponentByForm instead of resHtmlSingleComponentByForm and resHtmlUniqueComponentByForm, the body part will be added just before the first argument instead of replacing.</span><br>
+                 <span>If afterResHtmlSingleComponentByForm and afterResHtmlUniqueComponentByForm are used instead of resHtmlSingleComponentByForm and resHtmlUniqueComponentByForm, the body part will be added immediately after the first argument instead of replacing.</span><br>
+             </p>
+             <br>
+
+             <p>
+                 <span><a href="ajax.html">Next page</a> Ajax</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
