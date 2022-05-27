@@ -1,0 +1,152 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Others
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Others</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>You can add query parameters as an anti-cache when getting module, component, template, msg.json.</span><br>
+                 <span>Add the data-version attribute to the script tag loading fairysupport.min.js. In case of data-version="1", ?1 is added.</span><br>
+             </p>
+             <pre class="code-view">
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot; data-version=&quot;1&quot;&gt;&lt;/script&gt;
+</pre>
+
+             
+             <p>
+                 <span>This framework first load the module. You can define a function if an error occurs at that time.</span><br>
+                 <span>Let's define function fairysupportInitFail(retryCount, error){}.</span><br>
+                 <span>If fairysupportInitFail return true, it will go to load module, msg.json again.</span><br>
+                 <span>The first argument of fairysupportInitFail is the number of reload.</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script&gt;
+function fairysupportInitFail(retryCount, error){
+    console.error(error);
+    if (retryCount &gt;= 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+&lt;/script&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <br>
+             
+             
+             <p>
+                 <span>You can also define a retry when loading a template that is in a separate file fails.</span><br>
+                 <span>Let's define function fairysupportTemplateFail(retryCount, error){}.</span><br>
+                 <span>If fairysupportTemplateFail return true, it will go to load the template again.</span><br>
+                 <span>The first argument of fairysupportTemplateFail is the number of reload.</span><br>
+             </p>
+             
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script&gt;
+function fairysupportTemplateFail(retryCount, error){
+    console.error(error);
+    if (retryCount &gt;= 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+&lt;/script&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <br>
+             
+             
+             <p>
+                 <span>You can also define a retry if the component fails to load.</span><br>
+                 <span>Let's define function fairysupportComponentFail(retryCount, error){}.</span><br>
+                 <span>If fairysupportComponentFail return true, it will go to load the component again.</span><br>
+                 <span>The first argument of fairysupportComponentFail is the number of reload.</span><br>
+             </p>
+             
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script&gt;
+function fairysupportComponentFail(retryCount, error){
+    console.error(error);
+    if (retryCount &gt;= 3) {
+        return false;
+    } else {
+        return true;
+    }
+}
+&lt;/script&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+             <br>
+             
+             <p>
+                 <span><a href="target_version.html">Next page</a> Target browser</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

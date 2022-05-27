@@ -1,0 +1,319 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Different values for each environment
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Different values for each environment</div>
+     <article class="article">
+         <section>
+             <h1>Whole system</h1>
+
+             <p>
+                 <span>Let's create src/env/envValue.json and src/env/envValue.local.json.</span><br>
+             </p>
+             <span class="code-title">src/env/envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;jsRoot&quot; : &quot;http://localhost:8000/js&quot;
+    ,&quot;pageRoot&quot; : &quot;http://localhost:8000/page&quot;
+    ,&quot;sample&quot; : &quot;../util/sample.js&quot;
+    ,&quot;color&quot; : &quot;#00FA9A&quot;
+}
+</pre>
+             <span class="code-title">src/env/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;jsRoot&quot; : &quot;http://localhost:8000/js&quot;
+    ,&quot;pageRoot&quot; : &quot;http://localhost:8000/page&quot;
+    ,&quot;sample&quot; : &quot;../util/sample.js&quot;
+    ,&quot;color&quot; : &quot;#00FA9A&quot;
+}
+</pre>
+
+             <p>
+                 <span>Let's create src/css/app.css.</span><br>
+             </p>
+             <span class="code-title">src/css/app.css</span>
+             <br>
+             <pre class="code-view">
+DIV {
+  background-color: $envValue(color);
+}
+</pre>
+
+             <p>
+                 <span>Let's create src/frame/sample.html, src/page/index.html and src/page/index2.html.</span><br>
+             </p>
+             <span class="code-title">src/frame/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;$envValue(jsRoot)/fairysupport.min.js&quot; data-page-root=&quot;$envValue(pageRoot)&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+$page()
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+</pre>
+             <span class="code-title">src/page/index2.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>Let's create src/js/modules/index.js, src/js/modules/index2.js, src/js/util/sample.js and src/js/util/sample2.js.</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/modules/index2.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index2 {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/util/sample.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    execute() {
+        console.log('sample#execute');
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/util/sample2.js</span>
+             <br>
+             <pre class="code-view">
+export class Sample {
+
+    constructor() {
+    }
+
+    execute() {
+        console.log('sample2#execute');
+    }
+    
+}
+</pre>
+             
+             <p>
+                 <span>Let's take a look at distWork/page, distWork/js and distWork/css, after npm&nbsp;run&nbsp;watch_local is run.</span><br>
+                 <span>$envValue() part has been replaced.</span><br>
+                 <span>If you write $envValue() in files under src/page, src/js and src/css, the corresponding element will be searched from envValue.json under src/env, $envValue() will be replaced, output to distWork.</span><br>
+                 <span>If you want to write the string as $envValue() in the file under src/page, add \.</span><br>
+             </p>
+             <br>
+             
+             
+             <h1>Page specific</h1>
+
+             <p>
+                 <span>Let's create src/env/css/index/envValue.local.json and src/env/css/index2/envValue.local.json.</span><br>
+             </p>
+             <span class="code-title">src/env/css/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;color&quot; : &quot;#ff4500&quot;
+}
+</pre>
+             <span class="code-title">src/env/css/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;color&quot; : &quot;#4169e1&quot;
+}
+</pre>
+
+             <p>
+                 <span>Let's create src/env/js/modules/index/envValue.local.json and src/env/js/modules/index2/envValue.local.json.</span><br>
+             </p>
+             <span class="code-title">src/env/js/modules/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;sample&quot; : &quot;../util/sample.js&quot;
+}
+</pre>
+             <span class="code-title">src/env/js/modules/index2/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+    &quot;sample&quot; : &quot;../util/sample2.js&quot;
+}
+</pre>
+
+             <p>
+                 <span>Let's create src/env/page/index/envValue.local.json and src/env/page/index2/envValue.local.json.</span><br>
+             </p>
+             <span class="code-title">src/env/page/index/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sample&quot; : &quot;sample value&quot;
+}
+</pre>
+             <span class="code-title">src/env/page/index2/envValue.local.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;sample&quot; : &quot;sample value 2&quot;
+}
+</pre>
+
+             <p>
+                 <span>Let's create src/css/index/app.css and src/css/index2/app.css.</span><br>
+             </p>
+             <span class="code-title">src/css/index/app.css</span>
+             <br>
+             <pre class="code-view">
+DIV {
+  background-color: $envValue(color);
+}
+</pre>
+             <span class="code-title">src/css/index2/app.css</span>
+             <br>
+             <pre class="code-view">
+DIV {
+  background-color: $envValue(color);
+}
+</pre>
+
+             <p>
+                 <span>Let's create src/js/modules/index.js and src/js/modules/index2.js.</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             <span class="code-title">src/js/modules/index2.js</span>
+             <br>
+             <pre class="code-view">
+import {Sample} from '$envValue(sample)';
+
+export class Index2 {
+
+    constructor() {
+        this.sample = new Sample();
+    }
+
+    sample_click() {
+        console.log('\$envValue(sample) =&gt; ' + '$envValue(sample)');
+        this.sample.execute();
+    }
+    
+}
+</pre>
+             
+             <p>
+                 <span>Let's create src/page/index.html and src/page/index2.html.</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;$envValue(sample)&lt;/button&gt;&lt;/div&gt;
+</pre>
+             <span class="code-title">src/page/index2.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;$envValue(sample)&lt;/button&gt;&lt;/div&gt;
+</pre>
+             
+             <p>
+                 <span>Let's take a look at distWork/page, distWork/js and distWork/css, after npm&nbsp;run&nbsp;watch_local is run.</span><br>
+                 <span>$envValue() is replaced.</span><br>
+                 <span>envValue.json placed under src/env is a value that replace $envValue in css, js and page files that match the location of the stored directory.</span><br>
+             </p>
+             
+             <br>
+             <p>
+                 <span><a href="img.html">Next page</a> Image</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Embedded
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Embedded</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>Let's change src/page/index.html.</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(aaa.bbb.sample)
+&lt;div style=&quot;margin-left: 10px; background-color: #0000ff; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;page&lt;/span&gt;
+    &lt;div&gt;\$frame(aaa.bbb.sample)&lt;/div&gt;
+    $embed(aaa.bbb.sample)
+    &lt;div&gt;\$embed(aaa.bbb.sample)&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+             <p>
+                 <span>Let's change src/frame/aaa/bbb/sample.html.</span><br>
+             </p>
+             <span class="code-title">src/frame/aaa/bbb/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style=&quot;margin-left: 0px; background-color: #000000; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;frame&lt;/span&gt;
+    $embed(aaa.bbb.sample)
+    &lt;div style=&quot;margin-right: 10px;&quot;&gt;\$embed(aaa.bbb.sample)&lt;/div&gt;
+    &lt;div style=&quot;margin-right: 10px;&quot;&gt;\$page()&lt;/div&gt;
+    $page()
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>Let's create src/embed/aaa/bbb/sample.html.</span><br>
+             </p>
+             <span class="code-title">src/embed/aaa/bbb/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div style=&quot;margin-left: 20px; background-color: #008000; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;embed&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;aaa&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;bbb&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;sample&lt;/span&gt;
+    $embed(aaa.bbb.sample2)
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;\$embed(aaa.bbb.sample2)&lt;/span&gt;
+&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>Let's create src/embed/aaa/bbb/sample2.html.</span><br>
+             </p>
+             <span class="code-title">src/embed/aaa/bbb/sample2.html</span>
+             <br>
+             <pre class="code-view">
+&lt;div style=&quot;margin-left: 30px; background-color: #ff0000; color: #ffffff&quot;&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;embed&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;aaa&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;bbb&lt;/span&gt;
+    &lt;span style=&quot;margin-right: 10px;&quot;&gt;sample2&lt;/span&gt;
+&lt;/div&gt;
+</pre>
+
+             <p>
+                 <span>Let's take a look at distWork/page/index.html, after npm&nbsp;run&nbsp;watch_local is run.</span><br>
+                 <span>src/frame/aaa/bbb/sample.html, src/page/index.html, src/embed/aaa/bbb/sample.html and src/embed/aaa/bbb/sample2.html is merged.</span><br>
+                 <span>If $embed() is written in the files under src/page, src/frame and src/embed, the files written in $embed() are searched from under src/embed and $embed() is replaced.</span><br>
+                 <span>The extension of the file under src/embed will be html.</span><br>
+                 <span>If you want to write the string as $embed() in the files under src/page, src/frame and src/embed, add \.</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="css.html">Next page</a> CSS</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

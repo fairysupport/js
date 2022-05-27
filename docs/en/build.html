@@ -1,0 +1,72 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Build
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Build</div>
+     <article class="article">
+         <section>
+             <h1>distWork</h1>
+             <p>
+                 <span>build_prd, build_stg, build_dev, build_local are defined in package.json. It is the script that creates distWork from src.</span><br>
+                 <span>When generating distWork from src, The environment given to fairysupport_js in package.json and envValue.json, envValue.{environment}.json under src/js/env are bundled in js under src/js/modules.</span><br>
+                 <span>msg.json, msg.{language}.json under src/js/msg/ is merged  from parent directory to child directory.</span><br>
+                 <span>envValue.json, envValue.{environment}.json, view.html under src/js/components are bundled in controller.js under src/js/components</span><br>
+                 <span>msg.json, msg.{language}.json under src/js/components is merged from parent directory to child directory.</span><br>
+                 <span>app.css under src/css is merged from parent directory to child directory.</span><br>
+                 <span>If you are using $frame in files under src/page, html under src/frame and file under src/page is merged.</span><br>
+                 <span>If you are using $embed in files unser src/page, html under src/frame, html under src/embed, include html under src/embed.</span><br>
+                 <span>If you are using $envValue in files unser src/js, src/page and src/css, $envValue is replaced by envValue.json, envValue.{environment}.json under src/env.</span><br>
+                 <span>Merge app.css with src/page.</span><br>
+                 <span>If you are using $img in files under src/js, src/page and src/css, $img is replaced by image file under src/img.</span><br>
+                 <span>Generate fairysupport.min.js under distWork.</span><br>
+                 <span>During the build, a file called fairy_support_js.lock will be created at the same level directory as package.json.</span><br>
+                 <span>If fairy_support_js.lock remains after shutting down the PC or dropping the process during the build, delete fairy_support_js.lock and rebuild.</span><br>
+             </p>
+             
+             <br>
+             
+             <h1>dist</h1>
+             
+             <p>
+                 <span>Move to the directory where package.json is located using the command line</span>
+             </p>
+             <pre class="exec-view">npm run minify</pre>
+             <p>
+             
+             <p>
+                 <span>As you can see in package.json, minify just runs grunt to compress the file and copy it from distWork to dist.</span><br>
+                 <span>The settings are written in Gruntfile.js. You can use any compression tool.</span><br>
+                 <span>The dist directory will be the final product.</span><br>
+             </p>
+             
+
+             <br>
+             
+             <p>
+                 <span><a href="web_component.html">Next page</a> Web component</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

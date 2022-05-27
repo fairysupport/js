@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Frame
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Frame</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>Let's change src/page/index.html.</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(aaa.bbb.sample)
+&lt;div&gt;\$frame(aaa.bbb.sample)&lt;/div&gt;
+&lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;input type=&quot;text&quot; data-name=&quot;sample&quot;&gt;&lt;/div&gt;
+</pre>
+             <p>
+                 <span>Let's create src/frame/aaa/bbb/sample.html.</span><br>
+             </p>
+             <span class="code-title">src/frame/aaa/bbb/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;\$page()&lt;/div&gt;
+$page()
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>Let's take a look at distWork/page/index.html after npm&nbsp;run&nbsp;watch_local is run.</span><br>
+                 <span>src/frame/aaa/bbb/sample.html and src/page/index.html are merged.</span><br>
+                 <span>If $frame() is written in the file under src/page, the file written in $frame() is searched from under src/frame, $page() is replaced the contents of the file under src/page, and output under distWork/page.</span><br>
+                 <span>The extension of the file under src/page can be anything, but the extension of the file under src/frame will be html.</span><br>
+                 <span>If you want to write the string as $page() in the file under src/page, add \.</span><br>
+                 <span>If you want to write the string as $frame() in the html file under src/frame, add \.</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="embed.html">Next page</a> Embedded</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

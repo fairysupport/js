@@ -1,0 +1,144 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Image
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Image</div>
+     <article class="article">
+         <section>
+             <span class="code-title">src/frame/sample.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;$envValue(jsRoot)/fairysupport.min.js&quot; data-page-root=&quot;$envValue(pageRoot)&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+$page()
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+$frame(sample)
+&lt;div data-obj=&quot;obj&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;sample&quot;&gt;&lt;/div&gt;
+&lt;div&gt;&lt;img src='$img(aaa/bbb/a.png)'&gt;&lt;/div&gt;
+&lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+</pre>
+
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+    }
+
+    sample_click(event) {
+        $f.loadStringTemplate(this.obj, this.template());
+    }
+    
+    template() {
+        return `
+            &lt;div&gt;&lt;img src='$img(aaa/bbb/a.png)'&gt;&lt;/div&gt;
+        `;
+    }
+}
+</pre>
+
+             <span class="code-title">src/css/index/app.css</span>
+             <br>
+             <pre class="code-view">
+.sample {
+   background-image: url(&quot;$img(aaa/bbb/a.png)&quot;);
+   background-repeat: no-repeat;
+   width:100px;
+   height:100px; 
+}
+</pre>
+
+
+             <span class="code-title">src/env/envValue.json</span>
+             <br>
+             <pre class="code-view">
+{
+     &quot;jsRoot&quot; : &quot;http://localhost:8000/js&quot;
+    ,&quot;pageRoot&quot; : &quot;http://localhost:8000/page&quot;
+}
+</pre>
+
+             <span class="code-title">src/img/domain.txt</span>
+             <br>
+             <pre class="code-view">
+http://localhost/img/
+</pre>
+
+             <span class="code-title">src/img/domain.local.txt</span>
+             <br>
+             <pre class="code-view">
+http://localhost:8000/img/
+</pre>
+
+
+             <span class="code-title">src/img/maxSize.txt</span>
+             <br>
+             <pre class="code-view">
+10000
+</pre>
+
+             <span class="code-title">src/img/maxSize.local.txt</span>
+             <br>
+             <pre class="code-view">
+10000
+</pre>
+
+             <span class="code-title">src/img/aaa/bbb/a.png</span>
+             <br>
+             <pre class="code-view">
+Please put some suitable image
+</pre>
+
+
+             <p>
+                 <span>Let's take a look at distWork/page, distWork/js and distWork/css, after npm&nbsp;run&nbsp;watch_local is run.</span><br>
+                 <span>$img() is replaced.</span><br>
+                 <span>If you write $img() in files under src/page, src/js and src/css, framework search corresponding file from src/img, If it is less than or equal to the number of bytes written in src/img/maxSize.{environment}.txt, $img() will be replaced with the base64 encoded value, if it is larger than the number of bytes written in src/img/maxSize.{environment}.txt, framework replace $img() with the string prefixed with the content in src/img/domain.{environment}.txt.</span><br>
+                 <span>If you want to write the string as $img(), add \.</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="build.html">Next page</a> Build</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

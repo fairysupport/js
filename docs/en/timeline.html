@@ -1,0 +1,117 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js Timeline
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">Timeline</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>Let's change src/js/modules/index.js.</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+        
+    }
+
+    sample_click(event) {
+        $f.timeline([
+            {'ms': 0,     'prop': [
+                                    {'obj': this.bind1, 'value': {'style': {'color': 'white', 'backgroundColor': 'black', 'position': 'relative', 'left': '0px'  }, 'textContent': () =&gt; {return (new Date());}}},
+                                    {'obj': this.bind2, 'value': {'style': {'color': 'red',   'backgroundColor': 'blue',  'position': 'relative', 'left': '0px'  }, 'textContent': '0'}}
+                                 ]},
+            {'ms': 20,    'prop': [
+                                    {'obj': this.bind1, 'value': {'style': {'color': 'white', 'backgroundColor': 'black', 'position': 'relative', 'left': '10px' }, 'textContent': () =&gt; {return (new Date());}}},
+                                    {'obj': this.bind2, 'value': {'style': {'color': 'red',   'backgroundColor': 'blue',  'position': 'relative', 'left': '10px' }, 'textContent': '20'}}
+                                 ]},
+            {'ms': 40,    'prop': [
+                                    {'obj': this.bind1, 'value': {'style': {'color': 'white', 'backgroundColor': 'black', 'position': 'relative', 'left': '20px' }, 'textContent': () =&gt; {return (new Date());}}},
+                                    {'obj': this.bind2, 'value': {'style': {'color': 'red',   'backgroundColor': 'blue',  'position': 'relative', 'left': '20px' }, 'textContent': '40'}}
+                                 ]},
+            {'ms': 60,    'prop': [
+                                    {'obj': this.bind1, 'value': {'style': {'color': 'white', 'backgroundColor': 'black', 'position': 'relative', 'left': '30px' }, 'textContent': () =&gt; {return (new Date());}}},
+                                    {'obj': this.bind2, 'value': {'style': {'color': 'red',   'backgroundColor': 'blue',  'position': 'relative', 'left': '30px' }, 'textContent': '60'}}
+                                 ]},
+            {'ms': 80,    'prop': [
+                                    {'obj': this.bind1, 'value': {'style': {'color': 'white', 'backgroundColor': 'black', 'position': 'relative', 'left': '40px' }, 'textContent': () =&gt; {return (new Date());}}},
+                                    {'obj': this.bind2, 'value': {'style': {'color': 'red',   'backgroundColor': 'blue',  'position': 'relative', 'left': '40px' }, 'textContent': '80'}}
+                                 ]},
+            {'ms': 100,    'prop': [
+                                    {'obj': this.bind1, 'value': {'style': {'color': 'white', 'backgroundColor': 'black', 'position': 'relative', 'left': '50px' }, 'textContent': () =&gt; {return (new Date());}}},
+                                    {'obj': this.bind2, 'value': {'style': {'color': 'red',   'backgroundColor': 'blue',  'position': 'relative', 'left': '50px' }, 'textContent': '100'}}
+                                 ]},
+            {'ms': 120,    'prop': [
+                                    {'obj': this.bind1, 'value': {'style': {'color': 'white', 'backgroundColor': 'black', 'position': 'relative', 'left': '60px' }, 'textContent': () =&gt; {return (new Date());}}},
+                                    {'obj': this.bind2, 'value': {'style': {'color': 'red',   'backgroundColor': 'blue',  'position': 'relative', 'left': '60px' }, 'textContent': '120'}}
+                                 ]},
+        ])
+    }
+
+}
+</pre>
+             <p>
+                 <span>Let's change src/page/index.html.</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;bind1&lt;/div&gt;
+    &lt;div data-obj=&quot;bind2&quot;&gt;bind2&lt;/div&gt;
+    &lt;div&gt;&lt;button data-name=&quot;sample&quot;&gt;sample&lt;/button&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>You can change the properties of an object after a certain amount of time by calling $f.timeline.</span><br>
+                 <span>$f.timeline takes an array as an argument.</span><br>
+                 <span>The argument array is an associative array with ms key and prop key.</span><br>
+                 <span>The ms element defines how many milliseconds after which the property value changes.</span><br>
+                 <span>The prop element defines the property value to change.</span><br>
+                 <span>The prop element is an array, and the elements of the array are associative array with obj key and value key.</span><br>
+                 <span>The obj element is an object that changes the property value.</span><br>
+                 <span>The value element is a property value. If the property value is a function, the return value of the function will be the property value.</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="frame.html">Next page</a> Frame</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>

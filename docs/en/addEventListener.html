@@ -1,0 +1,98 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+JavaScript Framework fairy support js AddEventListener
+</title>
+<link rel="stylesheet" href="./css/mb/common.css" type="text/css">
+<link rel="stylesheet" href="./css/pc/common.css" type="text/css" media="screen and (min-width:740px)">
+</head>
+<body>
+<header class="header">
+    <div class="title">JavaScript&nbsp;Framework&nbsp;fairy&nbsp;support&nbsp;js</div>
+</header>
+<div class="body">
+     <div class="table-of-contents-link"><a href="index.html">table of contents</a></div>
+     <div class="subtitle">AddEventListener</div>
+     <article class="article">
+         <section>
+             <p>
+                 <span>Let's change  src/js/modules/index.js.</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+export class Index {
+
+    constructor() {
+        
+    }
+
+    init() {
+        $f.linkEvent(window, this, ['contextmenu', 'resize', 'scroll']);
+    }
+
+    contextmenu(event) {
+        console.log(&quot;contextmenu&quot;);
+        console.log(event);
+    }
+
+    resize(event) {
+        console.log(&quot;resize&quot;);
+        console.log(event);
+    }
+
+    scroll(event) {
+        console.log(&quot;scroll&quot;);
+        console.log(event);
+    }
+
+}
+</pre>
+             <p>
+                 <span>Let's change src/page/index.html.</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;addEventListener&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+             
+             <p>
+                 <span>You can addEventListener by calling $f.linkEvent.</span><br>
+                 <span>$f.linkEvent(window, this, ['contextmenu', 'resize', 'scroll']); is the same as doing window.addEventListener('contextmenu', this.contextmenu.bind(this)); , window.addEventListener('resize', this.resize.bind(this)); and window.addEventListener('scroll', this.scroll.bind(this));.</span><br>
+                 <span>For example, when coding WebSocket, you can do as follows.</span><br>
+                 <span>this.ws = new WebSocket('ws://localhost:8888');</span><br>
+                 <span>$f.linkEvent(this.ws, this, ['open', 'message', 'close', 'error']);</span><br>
+             </p>
+             <br>
+             
+             <p>
+                 <span><a href="timeline.html">Next page</a> Timeline</span>
+                 <br>
+                 <br>
+                 <span><a href="index.html">table of contents</a></span>
+                 <br>
+             </p>
+
+             <br>
+
+         </section>
+     </article>
+</div>
+<footer class="footer">
+</footer>
+</body>
+</html>
