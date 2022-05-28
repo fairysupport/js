@@ -29,7 +29,7 @@ export class Index {
     }
 
     init() {
-        $f.linkEvent(window, this, ['contextmenu', 'resize', 'scroll']);
+        this.eventFunction = $f.linkEvent(window, this, ['contextmenu', 'resize', 'scroll']);
     }
 
     contextmenu(event) {
@@ -77,9 +77,10 @@ sample
                  <span>window.addEventListener('resize', this.resize.bind(this));</span><br>
                  <span>window.addEventListener('scroll', this.scroll.bind(this));</span><br>
                  <span>をしたのと同じことになります</span><br>
+                 <span>$f.linkEventの戻り値は、キーがイベント名、値が登録した関数のオブジェクトです</span><br>
                  <span>WebSocketを実装するときは下記のようにできます</span><br>
                  <span>this.ws = new WebSocket('ws://localhost:8888');</span><br>
-                 <span>$f.linkEvent(this.ws, this, ['open', 'message', 'close', 'error']);</span><br>
+                 <span>this.eventFunction = $f.linkEvent(this.ws, this, ['open', 'message', 'close', 'error']);</span><br>
              </p>
              <br>
              

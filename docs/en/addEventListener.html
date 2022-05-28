@@ -29,7 +29,7 @@ export class Index {
     }
 
     init() {
-        $f.linkEvent(window, this, ['contextmenu', 'resize', 'scroll']);
+        this.eventFunction = $f.linkEvent(window, this, ['contextmenu', 'resize', 'scroll']);
     }
 
     contextmenu(event) {
@@ -73,9 +73,10 @@ sample
              <p>
                  <span>You can addEventListener by calling $f.linkEvent.</span><br>
                  <span>$f.linkEvent(window, this, ['contextmenu', 'resize', 'scroll']); is the same as doing window.addEventListener('contextmenu', this.contextmenu.bind(this)); , window.addEventListener('resize', this.resize.bind(this)); and window.addEventListener('scroll', this.scroll.bind(this));.</span><br>
+                 <span>The return of $f.linkEvent is the object that key is the event name and the value is the registered function.</span><br>
                  <span>For example, when coding WebSocket, you can do as follows.</span><br>
                  <span>this.ws = new WebSocket('ws://localhost:8888');</span><br>
-                 <span>$f.linkEvent(this.ws, this, ['open', 'message', 'close', 'error']);</span><br>
+                 <span>this.eventFunction = $f.linkEvent(this.ws, this, ['open', 'message', 'close', 'error']);</span><br>
              </p>
              <br>
              

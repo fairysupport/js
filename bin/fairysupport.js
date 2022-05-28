@@ -4109,9 +4109,12 @@ function ___fairysupport(){
     }
 
     this.linkEvent = function (fromObj, toObj, eventList){
+        let result = Object.create(null);
         for (const eventName of eventList) {
-            fromObj.addEventListener(eventName, toObj[eventName].bind(toObj));
+            result[eventName] = toObj[eventName].bind(toObj);
+            fromObj.addEventListener(eventName, result[eventName]);
         }
+        return result;
     }
 
     this.getReqLang = function () {
