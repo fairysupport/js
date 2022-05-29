@@ -33,6 +33,8 @@ JavaScript フレームワーク fairy support js ビルド
                  <span>distWork配下にfairysupport.min.jsを生成します</span><br>
                  <span>ビルド中はpackage.jsonと同階層にfairy_support_js.lockというファイルができます</span><br>
                  <span>ビルド中にPCをシャットダウンしたり、プロセスを落としたりしてfairy_support_js.lockが残った場合、fairy_support_js.lockを消して再ビルドしてください</span><br>
+                 <span>package.jsonで定義されているbuild_prd、build_stg、build_dev、build_localが実行しているfairysupport_jsは第二引数にsrcの場所、第三引数にdistWorkを渡すことができます</span><br>
+                 <span>つまり、&quot;build_local&quot;: &quot;fairysupport_js local&quot;は、&quot;build_local&quot;: &quot;fairysupport_js local ./  ./&quot;と同じです</span><br>
              </p>
              
              <br>
