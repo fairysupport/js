@@ -27,6 +27,25 @@ JavaScript フレームワーク fairy support js ユニークコンポーネン
                  <span>loadUniqueComponentではなく、afterLoadUniqueComponentにすると、ボディ部を置換ではなく、第一引数の直後に追加します</span><br>
                  <span>イベント処理、プロパティと画面上の要素の紐づけ、初期処理、全て使い方はシングルコンポーネントと同じです</span><br>
              </p>
+             
+             <h1>テンプレート、コンポーネントのview.htmlからユニークコンポーネントを呼び出す</h1>
+
+             <p>
+                 <span>例</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': 'val1'};
+&lt;/script&gt;
+&lt;div data-unique-component='sample' data-unique-component-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
+                 <span>data-unique-component属性値はloadUniqueComponentの第二引数と同じです</span><br>
+                 <span>data-unique-component-variable属性値はloadUniqueComponentの第三引数と同じです</span><br>
+                 <span>data-unique-component、data-unique-component-variable属性が付いたタグの内部にユニークコンポーネントがロードされます</span><br>
+             </p>
+             
              <br>
              <p>
                  <span><a href="single_unique_component_diff.html">次ページ</a>シングルコンポーネントとユニークコンポーネントの違い</span>

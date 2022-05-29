@@ -372,8 +372,6 @@ function ___fairysupport(){
                     }
 
                 } else if (record.type === 'childList') {
-                    let initFunc = null;
-                    let bindCb = null;
                     for (let i = 0; i < record.removedNodes.length; i++) {
                         if (removeSet.has(record.removedNodes.item(i)) && addSet.has(record.removedNodes.item(i))) {
                             continue;
@@ -385,61 +383,6 @@ function ___fairysupport(){
                             continue;
                         }
                         fs.bindAllNest(record.addedNodes.item(i));
-
-                        if (fs.componentDomInitFuncMap.has(record.addedNodes.item(i))) {
-                            initFunc = fs.componentDomInitFuncMap.get(record.addedNodes.item(i));
-                            fs.componentDomInitFuncMap.delete(record.addedNodes.item(i));
-                            fs.componentDomInitCntMap.set(initFunc, fs.componentDomInitCntMap.get(initFunc) + 1);
-                            if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
-                                let componentInitMark = fs.componentDomComponentInitMarkMap.get(initFunc);
-                                
-                                fs.componentDomInitCntMap.delete(initFunc);
-                                fs.componentDomInitTotalMap.delete(initFunc);
-                                fs.componentDomComponentInitMarkMap.delete(initFunc);
-                                let initFuncRet = null;
-                                try {
-                                    initFuncRet = initFunc();
-                                } catch(exception) {
-                                    if (componentInitMark && fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
-                                        fs.clazz.obj.errorHandle(null, exception);
-                                    } else {
-                                        throw exception;
-                                    }
-                                } finally {
-                                    if (componentInitMark && fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
-                                        fs.clazz.obj.finalHandle(null, initFuncRet);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (fs.bindDomInitFuncMap.has(record.addedNodes.item(i))) {
-                            bindCb = fs.bindDomInitFuncMap.get(record.addedNodes.item(i));
-                            fs.bindDomInitFuncMap.delete(record.addedNodes.item(i));
-                            fs.bindDomInitCntMap.set(bindCb, fs.bindDomInitCntMap.get(bindCb) + 1);
-                            if (fs.bindDomInitCntMap.get(bindCb) === fs.bindDomInitTotalMap.get(bindCb)) {
-                                let componentInitMark = fs.bindDomComponentInitMarkMap.get(bindCb);
-                                
-                                fs.bindDomInitCntMap.delete(bindCb);
-                                fs.bindDomInitTotalMap.delete(bindCb);
-                                fs.bindDomComponentInitMarkMap.delete(bindCb);
-                                
-                                let initFuncRet = null;
-                                try {
-                                    initFuncRet = bindCb();
-                                } catch(exception) {
-                                    if (componentInitMark && fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
-                                        fs.clazz.obj.errorHandle(null, exception);
-                                    } else {
-                                        throw exception;
-                                    }
-                                } finally {
-                                    if (componentInitMark && fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
-                                        fs.clazz.obj.finalHandle(null, initFuncRet);
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -447,6 +390,65 @@ function ___fairysupport(){
         let config = {attributes: true, childList: true, subtree: true , attributeOldValue: true};
         observer.observe(bodyObj[0], config);
         fs.bindBody();
+    };
+    
+    this.initExecForController = function (fs, addNode) {
+        
+        if (fs.componentDomInitFuncMap.has(addNode)) {
+            let initFunc = fs.componentDomInitFuncMap.get(addNode);
+            fs.componentDomInitFuncMap.delete(addNode);
+            fs.componentDomInitCntMap.set(initFunc, fs.componentDomInitCntMap.get(initFunc) + 1);
+            if (fs.componentDomInitCntMap.get(initFunc) === fs.componentDomInitTotalMap.get(initFunc)) {
+                let componentInitMark = fs.componentDomComponentInitMarkMap.get(initFunc);
+                
+                fs.componentDomInitCntMap.delete(initFunc);
+                fs.componentDomInitTotalMap.delete(initFunc);
+                fs.componentDomComponentInitMarkMap.delete(initFunc);
+                let initFuncRet = null;
+                try {
+                    initFuncRet = initFunc();
+                } catch(exception) {
+                    if (componentInitMark && fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                        fs.clazz.obj.errorHandle(null, exception);
+                    } else {
+                        throw exception;
+                    }
+                } finally {
+                    if (componentInitMark && fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
+                        fs.clazz.obj.finalHandle(null, initFuncRet);
+                    }
+                }
+            }
+        }
+
+        if (fs.bindDomInitFuncMap.has(addNode)) {
+            let bindCb = fs.bindDomInitFuncMap.get(addNode);
+            fs.bindDomInitFuncMap.delete(addNode);
+            fs.bindDomInitCntMap.set(bindCb, fs.bindDomInitCntMap.get(bindCb) + 1);
+            if (fs.bindDomInitCntMap.get(bindCb) === fs.bindDomInitTotalMap.get(bindCb)) {
+                let componentInitMark = fs.bindDomComponentInitMarkMap.get(bindCb);
+                
+                fs.bindDomInitCntMap.delete(bindCb);
+                fs.bindDomInitTotalMap.delete(bindCb);
+                fs.bindDomComponentInitMarkMap.delete(bindCb);
+                
+                let initFuncRet = null;
+                try {
+                    initFuncRet = bindCb();
+                } catch(exception) {
+                    if (componentInitMark && fs.clazz.obj.errorHandle && typeof fs.clazz.obj.errorHandle === 'function') {
+                        fs.clazz.obj.errorHandle(null, exception);
+                    } else {
+                        throw exception;
+                    }
+                } finally {
+                    if (componentInitMark && fs.clazz.obj.finalHandle && typeof fs.clazz.obj.finalHandle === 'function') {
+                        fs.clazz.obj.finalHandle(null, initFuncRet);
+                    }
+                }
+            }
+        }
+        
     };
 
     this.addInitFuncForAfterObserver = function (viewDom, initFunc, componentInitMark){
@@ -485,6 +487,9 @@ function ___fairysupport(){
                 this.bindAllNest(child);
             }
         }
+        
+        this.initExecForController(this, obj);
+        
     };
 
     this.bindAllSingle = function (obj, func){
@@ -817,7 +822,7 @@ function ___fairysupport(){
         }
     };
 
-    this.loadComponentReqMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl){
+    this.loadComponentReqMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl, immediatelyResolve){
 
         if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
 
@@ -829,31 +834,31 @@ function ___fairysupport(){
                 req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
             }
             req.timeout = fsTimeout;
-            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl){
+            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl, immediatelyResolve){
                     return function (e, xhr) {
                         if (200 === xhr.status) {
                             let json = xhr.response;
-                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json);
+                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json, immediatelyResolve);
                         } else if (404 === xhr.status) {
-                            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
+                            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl, immediatelyResolve);
                         } else {
                             let failResult = fairysupportComponentFail(retryCount, xhr);
                             if (failResult) {
-                                fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl);
+                                fs.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl, immediatelyResolve);
                             }
                         }
                     }
                 }
-            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl);
+            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl, immediatelyResolve);
             req.send();
 
         } else {
-            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
+            fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl, immediatelyResolve);
         }
 
     };
 
-    this.loadComponentBrowserMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl){
+    this.loadComponentBrowserMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl, immediatelyResolve){
 
         if (confLang !== null && confLang !== undefined && confLang !== '') {
 
@@ -865,31 +870,31 @@ function ___fairysupport(){
                 req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg' + queryLangStr + '.json' + '?' + fs.version, null, 'GET', 'query');
             }
             req.timeout = fsTimeout;
-            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl){
+            req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl, immediatelyResolve){
                     return function (e, xhr) {
                         if (200 === xhr.status) {
                             let json = xhr.response;
-                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json);
+                            nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json, immediatelyResolve);
                         } else if (404 === xhr.status) {
-                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
+                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl, immediatelyResolve);
                         } else {
                             let failResult = fairysupportComponentFail(retryCount, xhr);
                             if (failResult) {
-                                fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl);
+                                fs.loadComponentBrowserMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl, immediatelyResolve);
                             }
                         }
                     }
                 }
-            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl);
+            )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl, immediatelyResolve);
             req.send();
 
         } else {
-            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl);
+            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, 0, componentDirUrl, immediatelyResolve);
         }
 
     };
 
-    this.loadComponentDefaultMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl){
+    this.loadComponentDefaultMsg = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentDirUrl, immediatelyResolve){
 
         let req = null;
         if (componentDirUrl !== null && componentDirUrl !== undefined) {
@@ -898,33 +903,33 @@ function ___fairysupport(){
             req = this.ajax(componentRoot + componentValueMap['componentPath'] + 'msg.json' + '?' + fs.version, null, 'GET', 'query');
         }
         req.timeout = fsTimeout;
-        req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl){
+        req.onloadend = (function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl, immediatelyResolve){
                 return function (e, xhr) {
                     if (200 === xhr.status) {
                         let json = xhr.response;
-                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json);
+                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, json, immediatelyResolve);
                     } else if (404 === xhr.status) {
-                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, {});
+                        nextFunc(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, null, componentDirUrl, {}, immediatelyResolve);
                     } else {
                         let failResult = fairysupportComponentFail(retryCount, xhr);
                         if (failResult) {
-                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl);
+                            fs.loadComponentDefaultMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, ++retryCount, componentDirUrl, immediatelyResolve);
                         }
                     }
                 }
             }
-        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl);
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, nextFunc, retryCount, componentEnvValueObj, componentDirUrl, immediatelyResolve);
         req.send();
 
     };
 
-    this.singleComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr){
+    this.singleComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, immediatelyResolve){
 
-        this.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, this.singleComponentInsertFuncExec.bind(fs), 0);
+        this.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, this.singleComponentInsertFuncExec.bind(fs), 0, null, immediatelyResolve);
 
     };
 
-    this.singleComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
+    this.singleComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj, immediatelyResolve){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -936,12 +941,12 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, msgObj))
-        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
+        .then(fs.loadSingleComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, msgObj, immediatelyResolve))
+        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj, immediatelyResolve){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount, err);
                     if (failResult) {
-                        fs.singleComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount, componentDirUrl, msgObj);
+                        fs.singleComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount, componentDirUrl, msgObj, immediatelyResolve);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
                             errCb(err);
@@ -949,12 +954,12 @@ function ___fairysupport(){
                     }
                 }
             }
-        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj))
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj, immediatelyResolve))
         ;
 
     };
 
-    this.loadSingleComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, msgObj){
+    this.loadSingleComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, msgObj, immediatelyResolve){
         return function (Module){
 
             if (viewStr === undefined || viewStr === null) {
@@ -994,16 +999,16 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, fs.componentControllerList[componentPath]);
+            let insertComponentFunc = fs.getInsertComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, fs.componentControllerList[componentPath], immediatelyResolve);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, controllerObj){
+    this.getInsertComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, controllerObj, immediatelyResolve){
         return function (){
 
-            let cb = (function (fs, dom, componentValueMap, argObj, func, position) {
+            let cb = (function (fs, dom, componentValueMap, argObj, func, position, immediatelyResolve) {
                 return function(viewDom) {
 
                     let initFunc = fs.getComponentMethod(fs, componentValueMap['componentPath'], 'init', argObj, func);
@@ -1040,9 +1045,13 @@ function ___fairysupport(){
                         dom.innerHTML = "";
                         dom.appendChild(viewDom);
                     }
+                    
+                    if (true === immediatelyResolve) {
+                        func();
+                    }
 
                 };
-            })(fs, dom, componentValueMap, argObj, func, position);
+            })(fs, dom, componentValueMap, argObj, func, position, immediatelyResolve);
 
             if (argObj === null || argObj === undefined) {
                 argObj = Object.create(null);
@@ -1746,7 +1755,7 @@ function ___fairysupport(){
                         let firstElement = null;
                         for ($___fairysupport_param(paramObj, localValue, forStart); $___fairysupport_param(paramObj, localValue, forEnd); $___fairysupport_param(paramObj, localValue, forStep)) {
                             let newChild = child.cloneNode(true);
-                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true);
+                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true).catch((error) => {throw error;});
                             skipObjMap.set(newChild, newChild);
                             child.parentNode.insertBefore(newChild, child);
                             if (firstFlg) {
@@ -1787,7 +1796,11 @@ function ___fairysupport(){
                         child.innerHTML = '';
                         child.parentNode.removeChild(child);
                         child = firstElement;
-                        dataset = child.dataset;
+                        if (child !== null && child !== undefined && child.dataset !== null && child.dataset !== undefined) {
+                            dataset = child.dataset;
+                        } else {
+                            dataset = Object.create(null);
+                        }
 
                     }
 
@@ -1804,7 +1817,7 @@ function ___fairysupport(){
                             localValue[foreachKey] = localForeachKey;
                             localValue[foreachValue] = localForeachValue;
                             let newChild = child.cloneNode(true);
-                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true);
+                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true).catch((error) => {throw error;});
                             skipObjMap.set(newChild, newChild);
                             child.parentNode.insertBefore(newChild, child);
                             if (firstFlg) {
@@ -1845,7 +1858,11 @@ function ___fairysupport(){
                         child.innerHTML = '';
                         child.parentNode.removeChild(child);
                         child = firstElement;
-                        dataset = child.dataset;
+                        if (child !== null && child !== undefined && child.dataset !== null && child.dataset !== undefined) {
+                            dataset = child.dataset;
+                        } else {
+                            dataset = Object.create(null);
+                        }
 
                     }
 
@@ -1856,7 +1873,7 @@ function ___fairysupport(){
                         let firstElement = null;
                         while ($___fairysupport_param(paramObj, localValue, whileValue)) {
                             let newChild = child.cloneNode(true);
-                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true);
+                            await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true).catch((error) => {throw error;});
                             skipObjMap.set(newChild, newChild);
                             child.parentNode.insertBefore(newChild, child);
                             if (firstFlg) {
@@ -1897,7 +1914,11 @@ function ___fairysupport(){
                         child.innerHTML = '';
                         child.parentNode.removeChild(child);
                         child = firstElement;
-                        dataset = child.dataset;
+                        if (child !== null && child !== undefined && child.dataset !== null && child.dataset !== undefined) {
+                            dataset = child.dataset;
+                        } else {
+                            dataset = Object.create(null);
+                        }
 
                     }
 
@@ -1941,13 +1962,127 @@ function ___fairysupport(){
                             value = dataValue;
                         }
 
-                        let tpl = "";
+                        
+                        let templateVariable = dataset.templateVariable;
+                        delete child.dataset.templateVariable;
+                        
+                        let templateVariableObj = Object.create(null);
                         try {
-                            tpl = await this.getTemplate(value);
+                            templateVariableObj = $___fairysupport_param(paramObj, localValue, templateVariable);
+                        } catch (templateError) {
+                            templateVariableObj = templateVariable;
+                        }
+                        
+
+                        try {
+                            await this.loadTemplate(child, value, templateVariableObj, null, 0, null, true).catch((error) => {throw error;});
                         } catch(error) {
                             throw error;
                         }
-                        child.innerHTML = tpl;
+                        
+                    }
+
+                    dataValue = dataset.singleComponent;
+                    if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                        delete child.dataset.singleComponent;
+
+                        let value = "";
+                        try {
+                            value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        } catch (templateError) {
+                            value = dataValue;
+                        }
+                        
+                        
+                        let singleComponentVariable = dataset.singleComponentVariable;
+                        delete child.dataset.singleComponentVariable;
+                        
+                        let singleComponentVariableObj = Object.create(null);
+                        try {
+                            singleComponentVariableObj = $___fairysupport_param(paramObj, localValue, singleComponentVariable);
+                        } catch (componentError) {
+                            singleComponentVariableObj = singleComponentVariable;
+                        }
+                        
+
+                        try {
+                            await this.innerLoadSingleComponent(child, value, singleComponentVariableObj).catch((error) => {throw error;});
+                        } catch(error) {
+                            throw error;
+                        }
+                        
+                    }
+
+                    dataValue = dataset.uniqueComponent;
+                    if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                        delete child.dataset.uniqueComponent;
+
+                        let value = "";
+                        try {
+                            value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        } catch (templateError) {
+                            value = dataValue;
+                        }
+                        
+                        
+                        let uniqueComponentVariable = dataset.uniqueComponentVariable;
+                        delete child.dataset.uniqueComponentVariable;
+                        
+                        let uniqueComponentVariableObj = Object.create(null);
+                        try {
+                            uniqueComponentVariableObj = $___fairysupport_param(paramObj, localValue, uniqueComponentVariable);
+                        } catch (componentError) {
+                            uniqueComponentVariableObj = uniqueComponentVariable;
+                        }
+                        
+
+                        try {
+                            await this.innerLoadUniqueComponent(child, value, uniqueComponentVariableObj).catch((error) => {throw error;});
+                        } catch(error) {
+                            throw error;
+                        }
+                        
+                    }
+
+                    dataValue = dataset.webComponent;
+                    if (child !== null && child !== undefined && dataValue !== null && dataValue !== undefined) {
+                        delete child.dataset.webComponent;
+
+                        let value = "";
+                        try {
+                            value = $___fairysupport_param(paramObj, localValue, dataValue);
+                        } catch (templateError) {
+                            value = dataValue;
+                        }
+                        
+                        
+                        let webComponentVariable = dataset.webComponentVariable;
+                        delete child.dataset.webComponentVariable;
+                        
+                        let webComponentVariableObj = Object.create(null);
+                        try {
+                            webComponentVariableObj = $___fairysupport_param(paramObj, localValue, webComponentVariable);
+                        } catch (componentError) {
+                            webComponentVariableObj = webComponentVariable;
+                        }
+                        
+                        
+                        let webComponentUrl = dataset.webComponentUrl;
+                        delete child.dataset.webComponentUrl;
+                        
+                        try {
+                            webComponentUrl = $___fairysupport_param(paramObj, localValue, webComponentUrl);
+                        } catch (componentError) {
+                            webComponentUrl = webComponentUrl;
+                        }
+                        
+
+                        try {
+                            await this.innerLoadWebComponent(child, webComponentUrl, value, webComponentVariableObj).catch((error) => {throw error;});
+                        } catch(error) {
+                            throw error;
+                        }
+                        
                     }
 
                     dataValue = dataset.text;
@@ -1984,7 +2119,7 @@ function ___fairysupport(){
                     }
 
                     if (child !== null && child !== undefined && !skipObjMap.has(child)) {
-                        await this.developTpl(child, paramObj, localValue, retObj, errCb, null, false);
+                        await this.developTpl(child, paramObj, localValue, retObj, errCb, null, false).catch((error) => {throw error;});
                     }
 
                 }
@@ -2108,15 +2243,17 @@ function ___fairysupport(){
     this.afterLoadStringTemplate = function (dom, viewStr, argObj){
         return this.loadStringTemplate(dom, viewStr, argObj, 'after');
     };
-    this.loadStringTemplate = function (dom, viewStr, argObj, position, timing){
+    this.loadStringTemplate = function (dom, viewStr, argObj, position, timing, immediatelyResolve){
 
-        return new Promise((function(fs, dom, viewStr, argObj, position, timing){
+        return new Promise((function(fs, dom, viewStr, argObj, position, timing, immediatelyResolve){
                 return function (resolve, reject) {
 
-                    let cb = (function(fs, dom, position, resolve){
+                    let cb = (function(fs, dom, position, resolve, immediatelyResolve){
                         return function(viewDom){
-
-                            fs.addInitFuncForAfterObserver(viewDom, resolve, false);
+                            
+                            if (!immediatelyResolve) {
+                                fs.addInitFuncForAfterObserver(viewDom, resolve, false);
+                            }
 
                             if ('before' === position && dom.parentNode) {
                                 dom.parentNode.insertBefore(viewDom, dom);
@@ -2132,13 +2269,18 @@ function ___fairysupport(){
                                 dom.innerHTML = "";
                                 dom.appendChild(viewDom);
                             }
+                            
+                            if (true === immediatelyResolve) {
+                                resolve();
+                            }
+                            
                         }
-                    })(fs, dom, position, resolve);
+                    })(fs, dom, position, resolve, immediatelyResolve);
 
                     fs.getTplDom(viewStr, argObj, reject, cb);
 
                 };
-            })(this, dom, viewStr, argObj, position, timing)
+            })(this, dom, viewStr, argObj, position, timing, immediatelyResolve)
         );
     };
 
@@ -2154,7 +2296,7 @@ function ___fairysupport(){
         return this.loadTemplate(dom, templatePackeage, argObj, 'after');
     };
 
-    this.loadTemplate = function (dom, templatePackeage, argObj, position, retryCount, timing){
+    this.loadTemplate = function (dom, templatePackeage, argObj, position, retryCount, timing, immediatelyResolve){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -2180,15 +2322,15 @@ function ___fairysupport(){
                 req.setRequestHeader('Accept', 'text/*');
                 req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.responseType = 'text';
-                req.onloadend = (function(fs, dom, templatePackeage, argObj, position, retryCount, timing, resolve, reject){
+                req.onloadend = (function(fs, dom, templatePackeage, argObj, position, retryCount, timing, resolve, reject, immediatelyResolve){
                         return function (e, xhr) {
                             if (200 === xhr.status) {
                                 let viewStr = xhr.response;
-                                fs.loadStringTemplate(dom, viewStr, argObj, position, timing).then(resolve).catch(reject);
+                                fs.loadStringTemplate(dom, viewStr, argObj, position, timing, immediatelyResolve).then(resolve).catch(reject);
                             } else {
                                 let failResult = fairysupportTemplateFail(retryCount, xhr);
                                 if (failResult) {
-                                    fs.loadTemplate(dom, templatePackeage, argObj, position, ++retryCount, timing).then(resolve).catch(reject);
+                                    fs.loadTemplate(dom, templatePackeage, argObj, position, ++retryCount, timing, immediatelyResolve).then(resolve).catch(reject);
                                 } else {
                                     try {
                                         throw new Error('error : load template : ' + templateViewPath + " : " + ('statusText' in xhr ? xhr.statusText : "") + " : " + ('responseText' in xhr ? xhr.responseText : ""));
@@ -2199,11 +2341,11 @@ function ___fairysupport(){
                             }
                         }
                     }
-                )(fs, dom, templatePackeage, argObj, position, retryCount, timing, resolve, reject);
+                )(fs, dom, templatePackeage, argObj, position, retryCount, timing, resolve, reject, immediatelyResolve);
                 req.send();
 
             };
-        })(this, dom, templatePackeage, argObj, position, retryCount, timing, templateViewPath));
+        })(this, dom, templatePackeage, argObj, position, retryCount, timing, templateViewPath, immediatelyResolve));
 
     };
 
@@ -2449,17 +2591,21 @@ function ___fairysupport(){
         return this.loadWebComponent(dom, componentDirUrl, componentPackeage, argObj, 'after');
     };
 
-    this.loadWebComponent = function (dom, componentDirUrl, componentPackeage, argObj, position){
+    this.innerLoadWebComponent = function (dom, componentDirUrl, componentPackeage, argObj){
+        return this.loadWebComponent(dom, componentDirUrl, componentPackeage, argObj, null, true);
+    };
+
+    this.loadWebComponent = function (dom, componentDirUrl, componentPackeage, argObj, position, immediatelyResolve){
 
         let componentValueMap = this.getComponentValue(componentPackeage);
         let componentControllerPath = componentDirUrl + '/' + componentValueMap['componentPath'] + 'controller.js';
 
-        return new Promise((function(fs, dom, argObj, position, componentValueMap, componentControllerPath, componentDirUrl){
+        return new Promise((function(fs, dom, argObj, position, componentValueMap, componentControllerPath, componentDirUrl, immediatelyResolve){
             return function (resolve, reject) {
-                 fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, null, componentDirUrl);
+                 fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, null, componentDirUrl, immediatelyResolve);
 
             };
-        })(this, dom, argObj, position, componentValueMap, componentControllerPath, componentDirUrl));
+        })(this, dom, argObj, position, componentValueMap, componentControllerPath, componentDirUrl, immediatelyResolve));
 
     };
 
@@ -2475,17 +2621,21 @@ function ___fairysupport(){
         return this.loadUniqueComponent(dom, componentPackeage, argObj, 'after');
     };
 
-    this.loadUniqueComponent = function (dom, componentPackeage, argObj, position){
+    this.innerLoadUniqueComponent = function (dom, componentPackeage, argObj){
+        return this.loadUniqueComponent(dom, componentPackeage, argObj, null, true);
+    };
+
+    this.loadUniqueComponent = function (dom, componentPackeage, argObj, position, immediatelyResolve){
 
         let componentValueMap = this.getComponentValue(componentPackeage);
         let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
 
-        return new Promise((function(fs, dom, argObj, position, componentValueMap, componentControllerPath){
+        return new Promise((function(fs, dom, argObj, position, componentValueMap, componentControllerPath, immediatelyResolve){
             return function (resolve, reject) {
-                 fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position);
+                 fs.uniqueComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, null, null, immediatelyResolve);
 
             };
-        })(this, dom, argObj, position, componentValueMap, componentControllerPath));
+        })(this, dom, argObj, position, componentValueMap, componentControllerPath, immediatelyResolve));
 
     };
 
@@ -2705,13 +2855,13 @@ function ___fairysupport(){
 
     };
 
-    this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentDirUrl){
+    this.uniqueComponentInsertFunc = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentDirUrl, immediatelyResolve){
 
-        this.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, this.uniqueComponentInsertFuncExec.bind(fs), 0, componentDirUrl);
+        this.loadComponentReqMsg(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, this.uniqueComponentInsertFuncExec.bind(fs), 0, componentDirUrl, immediatelyResolve);
 
     };
 
-    this.uniqueComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
+    this.uniqueComponentInsertFuncExec = function (fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj, immediatelyResolve){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
@@ -2723,12 +2873,12 @@ function ___fairysupport(){
         }
 
         import(componentControllerPath + '?' + fs.version)
-        .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, componentDirUrl, msgObj))
-        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj){
+        .then(fs.loadUniqueComponentControllerMethodList(fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, componentDirUrl, msgObj, immediatelyResolve))
+        .catch((function(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj, immediatelyResolve){
                 return function (err) {
                     let failResult = fairysupportComponentFail(retryCount, err);
                     if (failResult) {
-                        fs.uniqueComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount, componentDirUrl, msgObj);
+                        fs.uniqueComponentInsertFuncExec(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, ++retryCount, componentDirUrl, msgObj, immediatelyResolve);
                     } else {
                         if (errCb !== null && errCb !== undefined) {
                             errCb(err);
@@ -2736,12 +2886,12 @@ function ___fairysupport(){
                     }
                 }
             }
-        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj))
+        )(fs, dom, componentValueMap, componentControllerPath, argObj, cb, errCb, position, viewStr, componentEnvValueObj, retryCount, componentDirUrl, msgObj, immediatelyResolve))
         ;
 
     };
 
-    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, componentDirUrl, msgObj){
+    this.loadUniqueComponentControllerMethodList = function (fs, dom, componentValueMap, viewStr, argObj, func, position, errCb, componentEnvValueObj, componentDirUrl, msgObj, immediatelyResolve){
         return function (Module){
 
             if (viewStr === undefined || viewStr === null) {
@@ -2773,16 +2923,16 @@ function ___fairysupport(){
                 }
             }
 
-            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap, errCb, componentDirUrl);
+            let insertComponentFunc = fs.getInsertUniqueComponent(fs, dom, componentValueMap, viewStr, argObj, func, position, uniqueComponentControllerObj, uniqueComponentControllerMethodList, uniqueDataNameEventMap, errCb, componentDirUrl, immediatelyResolve);
             insertComponentFunc();
 
         };
     };
 
-    this.getInsertUniqueComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap, errCb, componentDirUrl){
+    this.getInsertUniqueComponent = function (fs, dom, componentValueMap, viewStr, argObj, func, position, controllerObj, methodList, dataNameEventMap, errCb, componentDirUrl, immediatelyResolve){
         return function (){
 
-            let cb = (function(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap, componentDirUrl){
+            let cb = (function(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap, componentDirUrl, immediatelyResolve){
                 return function(viewDom){
 
                     let initFunc = fs.getUniqueComponentMethod(fs, controllerObj, methodList, 'init', argObj, func);
@@ -2811,9 +2961,13 @@ function ___fairysupport(){
                         dom.innerHTML = "";
                         dom.appendChild(viewDom);
                     }
+                    
+                    if (true === immediatelyResolve) {
+                        func();
+                    }
 
                 };
-            })(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap, componentDirUrl);
+            })(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap, componentDirUrl, immediatelyResolve);
 
             if (argObj === null || argObj === undefined) {
                 argObj = Object.create(null);
@@ -2975,17 +3129,21 @@ function ___fairysupport(){
         return this.loadSingleComponent(dom, componentPackeage, argObj, 'after');
     };
 
-    this.loadSingleComponent = function (dom, componentPackeage, argObj, position){
+    this.innerLoadSingleComponent = function (dom, componentPackeage, argObj){
+        return this.loadSingleComponent(dom, componentPackeage, argObj, null, true);
+    };
+
+    this.loadSingleComponent = function (dom, componentPackeage, argObj, position, immediatelyResolve){
 
         let componentValueMap = this.getComponentValue(componentPackeage);
         let componentControllerPath = componentRoot + componentValueMap['componentPath'] + 'controller.js';
 
-        return new Promise((function(fs, dom, componentValueMap, componentControllerPath, argObj, position){
+        return new Promise((function(fs, dom, componentValueMap, componentControllerPath, argObj, position, immediatelyResolve){
             return function (resolve, reject) {
-                fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position);
+                fs.singleComponentInsertFunc(fs, dom, componentValueMap, componentControllerPath, argObj, resolve, reject, position, null, immediatelyResolve);
             };
 
-        })(this, dom, componentValueMap, componentControllerPath, argObj, position));
+        })(this, dom, componentValueMap, componentControllerPath, argObj, position, immediatelyResolve));
 
     };
 

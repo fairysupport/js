@@ -133,6 +133,28 @@ export class Sample {
                  <span>コンポーネントのview.html内のdata-list-web属性値を持つタグとコンポーネントのcontroller.jsクラスのプロパティは自動的に結びつけられます</span><br><br>
                  <span>Webコンポーネントは<a href="unique_component.html">ユニークコンポーネント</a>扱いとなります。<a href="single_component_event.html">シングルコンポーネント</a>にはできません</span><br>
              </p>
+             
+             <br>
+             
+             <h1>テンプレート、コンポーネントのview.htmlからWebコンポーネントを呼び出す</h1>
+
+             <p>
+                 <span>例</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': 'val1'};
+&lt;/script&gt;
+&lt;div data-web-component-url='http://localhost:8080/web_component' data-web-component='sample' data-web-component-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
+                 <span>data-web-component-url属性値はloadWebComponentの第二引数と同じです</span><br>
+                 <span>data-web-component属性値はloadWebComponentの第三引数と同じです</span><br>
+                 <span>data-web-component-variable属性値はloadWebComponentの第四引数と同じです</span><br>
+                 <span>data-web-component、data-web-component-url、data-web-component-variable属性が付いたタグの内部にwebコンポーネントがロードされます</span><br>
+             </p>
+             
              <br>
              
              <p>

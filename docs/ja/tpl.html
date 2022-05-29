@@ -319,8 +319,19 @@ export class Index {
              <h1>テンプレートのネスト</h1>
 
              <p>
-                 <span>data-template属性を設定するとテンプレートからテンプレートを呼び出せます</span><br>
+                 <span>例</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': '&lt;input type="text"&gt;', 'key2': {'val1': 2}, 'key3': {"key1": "str1", "key2": "str2", "key3": "str3", "key4": "str4", "key5": "str5"}};
+&lt;/script&gt;
+&lt;div data-template='tpl' data-template-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
                  <span>data-template属性値はloadTemplateの第二引数と同じです</span><br>
+                 <span>data-template-variable属性値はloadTemplateの第三引数と同じです</span><br>
+                 <span>data-template、data-template-variable属性が付いたタグの内部にテンプレートがロードされます</span><br>
              </p>
 
              <h1>テンプレートに渡す変数をサーバーから受け取る。その1</h1>

@@ -134,6 +134,27 @@ export class Sample {
              </p>
              <br>
              
+             <h1>Call a web component from a template, view.html of component</h1>
+
+             <p>
+                 <span>Example</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': 'val1'};
+&lt;/script&gt;
+&lt;div data-web-component-url='http://localhost:8080/web_component' data-web-component='sample' data-web-component-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
+                 <span>The data-web-component-url attribute value is the same as the second argument of loadWebComponent.</span><br>
+                 <span>The data-web-component attribute value is the same as the third argument of loadWebComponent.</span><br>
+                 <span>The data-web-component-variable attribute value is the same as the fourth argument of loadWebComponent.</span><br>
+                 <span>The web component is loaded inside the tag with the data-web-component, data-web-component-url, data-web-component-variable attributes.</span><br>
+             </p>
+             
+             <br>
+             
              <p>
                  <span><a href="other.html">Next page</a> Others</span>
                  <br>

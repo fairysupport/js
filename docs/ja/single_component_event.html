@@ -146,6 +146,25 @@ export class Sample {
              <p>
                  <span>moduleにfinalHandleメソッドが定義されていると、コンポーネントの処理が成功しても例外がthrowされてもmoduleのfinalHandleメソッドが実行されます</span><br>
              </p>
+             
+             <h1>テンプレート、コンポーネントのview.htmlからシングルコンポーネントを呼び出す</h1>
+
+             <p>
+                 <span>例</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': 'val1'};
+&lt;/script&gt;
+&lt;div data-single-component='sample' data-single-component-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
+                 <span>data-single-component属性値はloadSingleComponentの第二引数と同じです</span><br>
+                 <span>data-single-component-variable属性値はloadSingleComponentの第三引数と同じです</span><br>
+                 <span>data-single-component、data-single-component-variable属性が付いたタグの内部にシングルコンポーネントがロードされます</span><br>
+             </p>
+             
              <br>
              <p>
                  <span><a href="single_component_prop.html">次ページ</a>シングルコンポーネントのプロパティと画面上の要素の紐づけ</span>

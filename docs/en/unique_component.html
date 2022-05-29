@@ -27,6 +27,25 @@ JavaScript Framework fairy support js Unique component
                  <span>If afterLoadUniqueComponent is used instead of loadUniqueComponent, the body part will be added immediately after the first argument instead of replacing it.</span><br>
                  <span>event handling, binding DOM to component field, initial processing, all usage is the same as a single component.</span><br>
              </p>
+             
+             <h1>Call a unique component from the template or view.html of component</h1>
+
+             <p>
+                 <span>Example</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': 'val1'};
+&lt;/script&gt;
+&lt;div data-unique-component='sample' data-unique-component-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
+                 <span>The data-unique-component attribute value is the same as the second argument of loadUniqueComponent.</span><br>
+                 <span>The data-unique-component-variable attribute value is the same as the third argument of loadUniqueComponent.</span><br>
+                 <span>A unique component is loaded inside a tag with the data-unique-component, data-unique-component-variable attributes.</span><br>
+             </p>
+             
              <br>
              <p>
                  <span><a href="single_unique_component_diff.html">Next page</a> Difference between single component and unique component</span>

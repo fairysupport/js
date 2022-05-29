@@ -319,8 +319,19 @@ export class Index {
              <h1>Template nesting</h1>
 
              <p>
-                 <span>You can call a template from a template by setting the data-template attribute.</span><br>
+                 <span>Example</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': '&lt;input type="text"&gt;', 'key2': {'val1': 2}, 'key3': {"key1": "str1", "key2": "str2", "key3": "str3", "key4": "str4", "key5": "str5"}};
+&lt;/script&gt;
+&lt;div data-template='tpl' data-template-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
                  <span>The data-template attribute value is the same as the second argument of loadTemplate.</span><br>
+                 <span>The data-template-variable attribute value is the same as the third argument of loadTemplate.</span><br>
+                 <span>The template is loaded inside the tag with the data-template and data-template-variable attributes.</span><br>
              </p>
 
              <h1>Receive the variables to pass to the template from the server. Part 1</h1>

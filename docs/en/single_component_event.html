@@ -146,6 +146,25 @@ export class Sample {
              <p>
                  <span>If the finalHandle method is defined in the module, the finalHandle method of the module will be executed regardless of whether the component processing is successful or the exception is thrown.</span><br>
              </p>
+             
+             <h1>Call a single component from the template or view.html of component</h1>
+
+             <p>
+                 <span>Example</span><br>
+             </p>
+
+             <pre class="code-view">
+&lt;script data-load-only='true'&gt;
+        l.nestVal = {'key1': 'val1'};
+&lt;/script&gt;
+&lt;div data-single-component='sample' data-single-component-variable='l.nestVal'&gt;&lt;/div&gt;</pre>
+
+             <p>
+                 <span>The data-single-component attribute value is the same as the second argument of loadSingleComponent.</span><br>
+                 <span>The data-single-component-variable attribute value is the same as the third argument of loadSingleComponent.</span><br>
+                 <span>A single component is loaded inside a tag with the data-single-component, data-single-component-variable attributes.</span><br>
+             </p>
+             
              <br>
              <p>
                  <span><a href="single_component_prop.html">Next page</a> Binding DOM to single component field</span>
