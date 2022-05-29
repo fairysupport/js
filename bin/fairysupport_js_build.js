@@ -8,6 +8,11 @@ if (process.argv.length >= 4) {
     curDir = process.argv[3].toString().trim();
 }
 
+let outputDir = curDir;
+if (process.argv.length >= 5) {
+    outputDir = process.argv[4].toString().trim();
+}
+
 let envTxt = "";
 if (process.argv.length >= 3) {
     envTxt = process.argv[2].toString().trim();
@@ -67,8 +72,8 @@ try {
     }
     
     const src = path.join(curDir, "src");
-    rmAll(path.join(curDir, "distWork"));
-    const distWork = createDir(curDir, "distWork");
+    rmAll(path.join(outputDir, "distWork"));
+    const distWork = createDir(outputDir, "distWork");
     
     function allCopy(src, distWork) {
         const fileList = fs.readdirSync(src);
