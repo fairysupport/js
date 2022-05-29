@@ -2558,7 +2558,7 @@ function ___fairysupport(){
     };
 
     this.useDomAsTemplate = function (dom, argObj){
-        return this.loadStringTemplate(dom, dom.outerHTML, argObj);
+        return this.loadStringTemplate(dom, dom.innerHTML, argObj);
     };
 
     this.execUniqueComponentMethod = function (controllerObj, methodList, methodName, argList){
