@@ -32,29 +32,30 @@ JavaScript Framework fairy support js Build
                  <span>Generate fairysupport.min.js under distWork.</span><br>
                  <span>During the build, a file called fairy_support_js.lock will be created at the same level directory as package.json.</span><br>
                  <span>If fairy_support_js.lock remains after shutting down the PC or dropping the process during the build, delete fairy_support_js.lock and rebuild.</span><br>
-                 <span>The fairysupport_js executed by build_prd, build_stg, build_dev, build_local defined in package.json can receive the location of src in the second argument and distWork in the third argument.</span><br>
+                 <span>The fairysupport_js executed by build_prd, build_stg, build_dev, build_local defined in package.json can receive the location of src in the second argument and the location of distWork in the third argument.</span><br>
                  <span>That is, &quot;build_local&quot;: &quot;fairysupport_js local&quot; is the same as &quot;build_local&quot;: &quot;fairysupport_js local ./  ./&quot;.</span><br>
+                 <span style='color:#ff0000;'>The distWork directory is deleted when the build is done. Please be careful.</span><br>
              </p>
-             
+
              <br>
-             
+
              <h1>dist</h1>
-             
+
              <p>
                  <span>Move to the directory where package.json is located using the command line</span>
              </p>
              <pre class="exec-view">npm run minify</pre>
              <p>
-             
+
              <p>
                  <span>As you can see in package.json, minify just runs grunt to compress the file and copy it from distWork to dist.</span><br>
                  <span>The settings are written in Gruntfile.js. You can use any compression tool.</span><br>
                  <span>The dist directory will be the final product.</span><br>
              </p>
-             
+
 
              <br>
-             
+
              <p>
                  <span><a href="web_component.html">Next page</a> Web component</span>
                  <br>

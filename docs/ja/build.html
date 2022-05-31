@@ -33,29 +33,30 @@ JavaScript フレームワーク fairy support js ビルド
                  <span>distWork配下にfairysupport.min.jsを生成します</span><br>
                  <span>ビルド中はpackage.jsonと同階層にfairy_support_js.lockというファイルができます</span><br>
                  <span>ビルド中にPCをシャットダウンしたり、プロセスを落としたりしてfairy_support_js.lockが残った場合、fairy_support_js.lockを消して再ビルドしてください</span><br>
-                 <span>package.jsonで定義されているbuild_prd、build_stg、build_dev、build_localが実行しているfairysupport_jsは第二引数にsrcの場所、第三引数にdistWorkを渡すことができます</span><br>
+                 <span>package.jsonで定義されているbuild_prd、build_stg、build_dev、build_localが実行しているfairysupport_jsは第二引数にsrcの場所、第三引数にdistWorkの場所を渡すことができます</span><br>
                  <span>つまり、&quot;build_local&quot;: &quot;fairysupport_js local&quot;は、&quot;build_local&quot;: &quot;fairysupport_js local ./  ./&quot;と同じです</span><br>
+                 <span style='color:#ff0000;'>ビルドの際、distWorkディレクトリは削除されます。お気をつけください</span><br>
              </p>
-             
+
              <br>
-             
+
              <h1>dist</h1>
-             
+
              <p>
                  <span>package.jsonがあるディレクトリにコマンドラインで移動</span>
              </p>
              <pre class="exec-view">npm run minify</pre>
              <p>
-             
+
              <p>
                  <span>package.jsonを見ていただければわかりますが、minifyはgruntを実行してファイルを圧縮してdistWorkからdistへコピーしているだけです</span><br>
                  <span>設定はGruntfile.jsに書いてあります。圧縮ツールは何を使ってもかまいません</span><br>
                  <span>distディレクトリが最終生成物になります</span><br>
              </p>
-             
+
 
              <br>
-             
+
              <p>
                  <span><a href="web_component.html">次ページ</a>Webコンポーネント</span>
                  <br>
