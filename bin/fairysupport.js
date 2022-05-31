@@ -2146,7 +2146,9 @@ function ___fairysupport(){
                         grandChild = grandChildList.item(grandChildIdx);
                         child.removeChild(grandChild);
                         grandChildIdx--;
-                        child.parentNode.insertBefore(grandChild, child);
+                        if (child.parentNode) {
+                            child.parentNode.insertBefore(grandChild, child);
+                        }
                     }
                 }
                 child.parentNode.removeChild(child);

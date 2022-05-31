@@ -159,14 +159,14 @@ export class Index {
                  <span>You can use a local variable called l in the template. l is an object. This is the rule of this framework.</span><br>
                  <span>data-attr set the attribute value using setAttribute.</span><br>
                  <span>data-prop set the value in the DOM using the = operator. You can specify nested object.</span><br>
-                 <span>data-if output the body part if the value is true.</span><br>
-                 <span>data-elseif is executed if the previous data-if value is false, and output the body part if the given value is true.</span><br>
-                 <span>data-else output the body part if the previous data-if and data-elseif values ​​are false.</span><br>
-                 <span>Use data-for-start, data-for-end, and data-for-step together. The data-for-start is evaluated first, and while data-for-end is true, the body part is repeatedly output. Data-for-step is evaluated every time the body part is output.</span><br>
+                 <span>data-if output the tag if the value is true.</span><br>
+                 <span>data-elseif is executed if the previous data-if value is false, and output the tag if the given value is true.</span><br>
+                 <span>data-else output the tag if the previous data-if and data-elseif values ​​are false.</span><br>
+                 <span>Use data-for-start, data-for-end, and data-for-step together. The data-for-start is evaluated first, and while data-for-end is true, the tag is repeatedly output. Data-for-step is evaluated every time the tag is output.</span><br>
                  <span>data-continue returns to the beginning of the loop. The value to be set specifies how many loops to return to. Specify 2 to return to the beginning of the top-level loop of the double loop.</span><br>
                  <span>The data-break breaks out of the loop. The value to be set specifies how many loops to return to. Specify 2 to return to the beginning of the top-level loop of the double loop.</span><br>
                  <span>Use data-foreach, data-foreach-key, and data-foreach-value together. Iterates over the array or object specified in data-foreach. The string specified in data-foreach-key becomes the key of the local variable l, and the key of the array or object specified in data-foreach is stored there. The string specified in data-foreach-value becomes the key of the local variable l, and the element value of the array or object specified in data-foreach is stored there.</span><br>
-                 <span>data-while output the body part repeatedly while the specified expression is true.</span><br>
+                 <span>data-while output the tag repeatedly while the specified expression is true.</span><br>
                  <span>If there are attributes binded to js such as data-name, data-obj, data-list, they will be automatically binded by the framework.</span><br>
                  <span>If you use appendLoadStringTemplate instead of loadStringTemplate, the body part will be added to the body part instead of replacing it.</span><br>
                  <span>If you set beforeLoadStringTemplate instead of loadStringTemplate, the body part will be added just before the first argument instead of replacing.</span><br>
