@@ -1561,7 +1561,7 @@ function ___fairysupport(){
     this.getTplDom = function(viewStr, paramObj, errCb, cb){
 
         let template = document.createElement('template');
-        template.innerHTML = viewStr;
+        template.innerHTML = "\n".concat(viewStr);
         let viewDom = template.content;
 
         if (paramObj === null || paramObj === undefined) {
