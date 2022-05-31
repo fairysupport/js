@@ -1747,13 +1747,21 @@ function ___fairysupport(){
                     let forStart = dataset.forStart;
                     let forEnd = dataset.forEnd;
                     let forStep = dataset.forStep;
+                    let forSkip = dataset.forSkip;
                     if (child !== null && child !== undefined && forStart !== null && forStart !== undefined && forEnd !== null && forEnd !== undefined && forStep !== null && forStep !== undefined) {
                         delete child.dataset.forStart;
                         delete child.dataset.forEnd;
                         delete child.dataset.forStep;
+                        delete child.dataset.forSkip;
                         let firstFlg = true;
                         let firstElement = null;
                         for ($___fairysupport_param(paramObj, localValue, forStart); $___fairysupport_param(paramObj, localValue, forEnd); $___fairysupport_param(paramObj, localValue, forStep)) {
+                            
+                            let forSkipValue = $___fairysupport_param(paramObj, localValue, forSkip);
+                            if (forSkipValue) {
+                                continue;
+                            }
+                            
                             let newChild = child.cloneNode(true);
                             await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true).catch((error) => {throw error;});
                             skipObjMap.set(newChild, newChild);
@@ -1807,13 +1815,28 @@ function ___fairysupport(){
                     let foreachArray = dataset.foreach;
                     let foreachKey = dataset.foreachKey;
                     let foreachValue = dataset.foreachValue;
+                    let foreachSkip = dataset.foreachSkip;
+                    let foreachEnd = dataset.foreachEnd;
                     if (child !== null && child !== undefined && foreachArray !== null && foreachArray !== undefined && foreachKey !== null && foreachKey !== undefined && foreachValue !== null && foreachValue !== undefined) {
                         delete child.dataset.foreach;
                         delete child.dataset.foreachKey;
                         delete child.dataset.foreachValue;
+                        delete child.dataset.foreachSkip;
+                        delete child.dataset.foreachEnd;
                         let firstFlg = true;
                         let firstElement = null;
                         for (const [localForeachKey, localForeachValue] of Object.entries($___fairysupport_param(paramObj, localValue, foreachArray))) {
+                            
+                            let foreachSkipValue = $___fairysupport_param(paramObj, localValue, foreachSkip);
+                            if (foreachSkipValue) {
+                                continue;
+                            }
+                            
+                            let foreachEndValue = $___fairysupport_param(paramObj, localValue, foreachEnd);
+                            if (foreachEndValue) {
+                                break;
+                            }
+                            
                             localValue[foreachKey] = localForeachKey;
                             localValue[foreachValue] = localForeachValue;
                             let newChild = child.cloneNode(true);
@@ -1867,11 +1890,19 @@ function ___fairysupport(){
                     }
 
                     let whileValue = dataset.while;
+                    let whileSkip = dataset.whileSkip;
                     if (child !== null && child !== undefined && whileValue !== null && whileValue !== undefined) {
                         delete child.dataset.while;
+                        delete child.dataset.whileSkip;
                         let firstFlg = true;
                         let firstElement = null;
                         while ($___fairysupport_param(paramObj, localValue, whileValue)) {
+                            
+                            let whileSkipValue = $___fairysupport_param(paramObj, localValue, whileSkip);
+                            if (whileSkipValue) {
+                                continue;
+                            }
+                            
                             let newChild = child.cloneNode(true);
                             await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true).catch((error) => {throw error;});
                             skipObjMap.set(newChild, newChild);
