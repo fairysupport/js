@@ -1827,6 +1827,9 @@ function ___fairysupport(){
                         let firstElement = null;
                         for (const [localForeachKey, localForeachValue] of Object.entries($___fairysupport_param(paramObj, localValue, foreachArray))) {
                             
+                            localValue[foreachKey] = localForeachKey;
+                            localValue[foreachValue] = localForeachValue;
+                            
                             let foreachSkipValue = $___fairysupport_param(paramObj, localValue, foreachSkip);
                             if (foreachSkipValue) {
                                 continue;
@@ -1837,8 +1840,6 @@ function ___fairysupport(){
                                 break;
                             }
                             
-                            localValue[foreachKey] = localForeachKey;
-                            localValue[foreachValue] = localForeachValue;
                             let newChild = child.cloneNode(true);
                             await this.developTpl(newChild, paramObj, localValue, retObj, errCb, null, true).catch((error) => {throw error;});
                             skipObjMap.set(newChild, newChild);
