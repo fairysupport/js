@@ -1891,12 +1891,20 @@ function ___fairysupport(){
 
                     let whileValue = dataset.while;
                     let whileSkip = dataset.whileSkip;
+                    let whileStep = dataset.whileStep;
                     if (child !== null && child !== undefined && whileValue !== null && whileValue !== undefined) {
                         delete child.dataset.while;
                         delete child.dataset.whileSkip;
+                        delete child.dataset.whileStep;
                         let firstFlg = true;
                         let firstElement = null;
+                        let stepFirstFlg = true;
                         while ($___fairysupport_param(paramObj, localValue, whileValue)) {
+                            
+                            if (!stepFirstFlg) {
+                                $___fairysupport_param(paramObj, localValue, whileStep);
+                            }
+                            stepFirstFlg = false;
                             
                             let whileSkipValue = $___fairysupport_param(paramObj, localValue, whileSkip);
                             if (whileSkipValue) {

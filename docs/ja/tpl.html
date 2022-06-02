@@ -166,7 +166,7 @@ export class Index {
                  <span>data-continueはループの先頭に戻ります。設定する値は何個上のループに戻るかを指定します。二重ループの最上位ループ先頭に戻る場合は2を指定します</span><br>
                  <span>data-breakはループのから抜けます。設定する値は何個上のループに戻るかを指定します。二重ループの最上位ループ先頭に戻る場合は2を指定します</span><br>
                  <span>data-foreach、data-foreach-key、data-foreach-value、data-foreach-skip、data-foreach-endはセットで使います。data-foreachに指定された配列やオブジェクトを繰り返し処理します。data-foreach-keyに指定した文字列がローカル変数lのキーとなり、そこにdata-foreachに指定された配列やオブジェクトのキーが格納されます。data-foreach-valueに指定した文字列がローカル変数lのキーとなり、そこにdata-foreachに指定された配列やオブジェクトの要素値が格納されます。data-foreach-skipがtrueの場合、繰り返し処理をしません。data-foreach-endがtrueの場合、繰り返し処理を終了します。</span><br>
-                 <span>data-whileは指定された式がtrueの間、タグを繰り返し出力します。data-while-skipがtrueの場合、繰り返し処理をしません。</span><br>
+                 <span>data-while、data-while-skip、data-while-stepはセットで使います。data-whileは指定された式がtrueの間、タグを繰り返し出力します。data-while-skipがtrueの場合、繰り返し処理をしません。data-while-stepは2回目以降の繰り返し処理の際に実行されます。</span><br>
                  <span>data-name、data-obj、data-listなど、jsに結びつく属性があれば、フレームワークによって自動的に結びつけられます</span><br>
                  <span>loadStringTemplateではなく、appendLoadStringTemplateにすると、ボディ部を置換ではなく、ボディ部に追加します</span><br>
                  <span>loadStringTemplateではなく、beforeLoadStringTemplateにすると、ボディ部を置換ではなく、第一引数の直前に追加します</span><br>
