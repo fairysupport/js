@@ -47,116 +47,97 @@ export class Validator {
     constructor() {
     }
 
-    initValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
-        meta.msgObj.textContent = &quot;&quot;;
+    initValidate (target, property, newValue, oldValue, arg, event) {
+        arg.msgObj.textContent = &quot;&quot;;
         return true;
     }
 
-    propRequireValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target)[property];
-        if (newValue === null || newValue === undefined) {
-            console.error(meta.name + ' : ' + $f.msg('errorRequired'));
+    propRequireValidate (target, property, newValue, oldValue, arg, event) {
+        if (newValue === undefined || newValue === null || newValue === '') {
+            console.error(arg.name + ' : ' + $f.msg('errorRequired'));
             return false;
         } else {
             return true;
         }
     }
 
-    propLengthValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target)[property];
-        if (newValue !== null && newValue !== undefined && (newValue.length &lt; meta.minLen || meta.maxLen &lt; newValue.length)) {
-            console.error(meta.name + ' : ' + $f.msg('errorMinMaxLength', {'min': meta.minLen, 'max': meta.maxLen}));
+    propLengthValidate (target, property, newValue, oldValue, arg, event) {
+        if (newValue !== undefined && newValue !== null && (newValue.length &lt; arg.minLen || arg.maxLen &lt; newValue.length)) {
+            console.error(arg.name + ' : ' + $f.msg('errorMinMaxLength', {'min': arg.minLen, 'max': arg.maxLen}));
             return false;
         } else {
             return true;
         }
     }
 
-    textValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
-        if (newValue.length &lt; meta.minLen || meta.maxLen &lt; newValue.length) {
-            meta.msgObj.textContent = $f.msg('errorMinMaxLength', {'min': meta.minLen, 'max': meta.maxLen});
+    textValidate (target, property, newValue, oldValue, arg, event) {
+        if (newValue.length &lt; arg.minLen || arg.maxLen &lt; newValue.length) {
+            arg.msgObj.textContent = $f.msg('errorMinMaxLength', {'min': arg.minLen, 'max': arg.maxLen});
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
 
-    radioValueValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
-        if (newValue !== old) {
-            meta.msgObj.textContent = $f.msg('errorRadioValue');
+    radioValueValidate (target, property, newValue, oldValue, arg, event) {
+        if (newValue !== oldValue) {
+            arg.msgObj.textContent = $f.msg('errorRadioValue');
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
 
-    radioCheckValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
+    radioCheckValidate (target, property, newValue, oldValue, arg, event) {
         if (newValue !== true && newValue !== false) {
-            meta.msgObj.textContent = $f.msg('errorRadiType');
+            arg.msgObj.textContent = $f.msg('errorRadiType');
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
 
-    checkValueValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
-        if (newValue !== old) {
-            meta.msgObj.textContent = $f.msg('errorCheckValue');
+    checkValueValidate (target, property, newValue, oldValue, arg, event) {
+        if (newValue !== oldValue) {
+            arg.msgObj.textContent = $f.msg('errorCheckValue');
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
 
-    checkCheckValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
+    checkCheckValidate (target, property, newValue, oldValue, arg, event) {
         if (newValue !== true && newValue !== false) {
-            meta.msgObj.textContent = $f.msg('errorCheckType');
+            arg.msgObj.textContent = $f.msg('errorCheckType');
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
 
-    selectValueValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
-        if (newValue &lt; meta.min || meta.max &lt; newValue) {
-            meta.msgObj.textContent = $f.msg('errorMinMaxValue', {'min': meta.min, 'max': meta.max});
+    selectValueValidate (target, property, newValue, oldValue, arg, event) {
+        if (!arg.values.has(newValue)) {
+            arg.msgObj.textContent = $f.msg('errorSelectValue');
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
 
-    selectIndexValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
-        if (newValue &lt; meta.min || meta.max &lt; newValue) {
-            meta.msgObj.textContent = $f.msg('errorSelectedIndex', {'min': meta.min, 'max': meta.max});
+    selectIndexValidate (target, property, newValue, oldValue, arg, event) {
+        if (newValue &lt; arg.min || arg.max &lt; newValue) {
+            arg.msgObj.textContent = $f.msg('errorSelectedIndex', {'min': arg.min, 'max': arg.max});
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
 
-    selectOptionValidate (target, property, newValue, old, arg) {
-        let meta = $f.getMeta(target);
+    selectOptionValidate (target, property, newValue, oldValue, arg, event) {
         if (newValue !== true && newValue !== false) {
-            meta.msgObj.textContent = $f.msg('errorSelectValue');
+            arg.msgObj.textContent = $f.msg('errorSelectValue');
             return false;
         } else {
-            meta.msgObj.textContent = &quot;&quot;;
             return true;
         }
     }
@@ -179,42 +160,27 @@ export class Index {
 
     init() {
 
-        $f.addMeta(this.text, {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1});
-        $f.addMeta(this.radio1, {&quot;msgObj&quot;: this.bind2});
-        $f.addMeta(this.radio2, {&quot;msgObj&quot;: this.bind2});
-        $f.addMeta(this.checkbox, {&quot;msgObj&quot;: this.bind4});
-        $f.addMeta(this.singleSelect, {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind5});
-        $f.addMeta(this.singleSelect.options[0], {&quot;msgObj&quot;: this.bind5});
-        $f.addMeta(this.singleSelect.options[1], {&quot;msgObj&quot;: this.bind5});
-        $f.addMeta(this.singleSelect.options[2], {&quot;msgObj&quot;: this.bind5});
-        $f.addMeta(this.multipleSelect, {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind7});
-        $f.addMeta(this.multipleSelect.options[0], {&quot;msgObj&quot;: this.bind7});
-        $f.addMeta(this.multipleSelect.options[1], {&quot;msgObj&quot;: this.bind7});
-        $f.addMeta(this.multipleSelect.options[2], {&quot;msgObj&quot;: this.bind7});
-        $f.addMeta(this.textarea, {&quot;minLen&quot;: 5, &quot;maxLen&quot;: 10, &quot;msgObj&quot;: this.bind9});
-        $f.addMeta(this, {&quot;prop1&quot;: {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;name&quot;: &quot;Index-&gt;prop1&quot;}});
-
         let v = new Validator();
 
-        $f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);
-        $f.validate(this.radio1, 'value', ['input'], [v.initValidate.bind(v), v.radioValueValidate.bind(v)]);
-        $f.validate(this.radio1, 'checked', ['input'], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)]);
-        $f.validate(this.radio2, 'value', ['input'], [v.initValidate.bind(v), v.radioValueValidate.bind(v)]);
-        $f.validate(this.radio2, 'checked', ['input'], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)]);
-        $f.validate(this.checkbox, 'value', ['input'], [v.initValidate.bind(v), v.checkValueValidate.bind(v)]);
-        $f.validate(this.checkbox, 'checked', ['input'], [v.initValidate.bind(v), v.checkCheckValidate.bind(v)]);
-        $f.validate(this.singleSelect, 'value', ['input'], [v.initValidate.bind(v), v.selectValueValidate.bind(v)]);
-        $f.validate(this.singleSelect, 'selectedIndex', null, [v.initValidate.bind(v), v.selectIndexValidate.bind(v)]);
-        $f.validate(this.singleSelect.options[0], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
-        $f.validate(this.singleSelect.options[1], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
-        $f.validate(this.singleSelect.options[2], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
-        $f.validate(this.multipleSelect, 'value', ['input'], [v.initValidate.bind(v), v.selectValueValidate.bind(v)]);
-        $f.validate(this.multipleSelect, 'selectedIndex', null, [v.initValidate.bind(v), v.selectIndexValidate.bind(v)]);
-        $f.validate(this.multipleSelect.options[0], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
-        $f.validate(this.multipleSelect.options[1], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
-        $f.validate(this.multipleSelect.options[2], 'selected', null, [v.initValidate.bind(v), v.selectOptionValidate.bind(v)]);
-        $f.validate(this.textarea, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);
-        $f.validate(this, 'prop1', null, [v.propRequireValidate.bind(v), v.propLengthValidate.bind(v)]);
+        $f.validate('group1', this.text, 'value', ['blur', null], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1});
+        $f.validate('group1', this.radio1, 'value', ['input', null], [v.initValidate.bind(v), v.radioValueValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.radio1, 'checked', ['input', null], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.radio2, 'value', ['input', null], [v.initValidate.bind(v), v.radioValueValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.radio2, 'checked', ['input', null], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.checkbox, 'value', ['input', null], [v.initValidate.bind(v), v.checkValueValidate.bind(v)], {&quot;msgObj&quot;: this.bind4});
+        $f.validate('group1', this.checkbox, 'checked', ['input', null], [v.initValidate.bind(v), v.checkCheckValidate.bind(v)], {&quot;msgObj&quot;: this.bind4});
+        $f.validate('group1', this.singleSelect, 'value', ['input', null], [v.initValidate.bind(v), v.selectValueValidate.bind(v)], {&quot;values&quot;: new Set([&quot;aa&quot;, &quot;bb&quot;, &quot;cc&quot;]), &quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect, 'selectedIndex', [null], [v.initValidate.bind(v), v.selectIndexValidate.bind(v)], {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect.options[0], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect.options[1], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect.options[2], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.multipleSelect, 'value', ['input', null], [v.initValidate.bind(v), v.selectValueValidate.bind(v)], {&quot;values&quot;: new Set([&quot;aaa&quot;, &quot;bbb&quot;, &quot;ccc&quot;]), &quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect, 'selectedIndex', [null], [v.initValidate.bind(v), v.selectIndexValidate.bind(v)], {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect.options[0], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect.options[1], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect.options[2], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.textarea, 'value', ['blur', null], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 5, &quot;maxLen&quot;: 10, &quot;msgObj&quot;: this.bind9});
+        $f.validate('group1', this, 'prop1', [null], [v.propRequireValidate.bind(v), v.propLengthValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;name&quot;: &quot;Index-&gt;prop1&quot;});
 
     }
 
@@ -290,25 +256,253 @@ sample
 </pre>
 
              <p>
-                 <span>index.jsで使っている$f.addMetaメソッドは第一引数に関する情報を格納するメソッドです。格納した情報は$f.getMetaで取得できます。getMetaの引数はaddMetaの第一引数です。格納した情報は$f.deleteMetaで削除できます。deleteMetaの引数はgetMetaと同じです</span><br>
-                 <span>index.jsで使っている$f.validateメソッドは第一引数オブジェクトの第二引数プロパティに値が格納されようとしたとき、第四引数に渡した関数を実行するメソッドです</span><br>
-                 <span>例えば、$f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);の場合</span><br>
-                 <span>this.textオブジェクトのvalueプロパティに値が格納されようとしたとき ValidatorクラスのinitValidate、textValidateメソッドが実行されます</span><br>
-                 <span>さらに$f.validateメソッドは第一引数オブジェクトに第三引数イベントが発生したとき、第四引数に渡した関数を実行します</span><br>
-                 <span>例えば、$f.validate(this.text, 'value', ['input'], [v.initValidate.bind(v), v.textValidate.bind(v)]);の場合</span><br>
-                 <span>this.textオブジェクトにinputイベントが発生したとき ValidatorクラスのinitValidate、textValidateメソッドが実行されます。イベントが発生しないオブジェクトのプロパティの場合、第三引数はnullにしてください</span><br>
-                 <span>$f.validateの第四引数に渡される関数は引数を5つ取ります</span><br>
-                 <span>第一引数：$f.validateの第一引数に渡した値</span><br>
-                 <span>第二引数：$f.validateの第二引数に渡した値</span><br>
-                 <span>第三引数：新たに格納しようとしている値</span><br>
-                 <span>第四引数：現在格納されている値</span><br>
-                 <span>第五引数：$f.validateの第五引数に渡した値。$f.validateに第五引数を指定しなかった場合、undefined</span><br>
-                 <span>$f.validateの戻り値はbooleanです。trueを返すと新たに格納しようとしている値を第一引数オブジェクトの第二引数プロパティにセットします。falseを返すとセットしません</span><br>
+                 <span>index.jsで使っている$f.validateメソッドは、第2引数オブジェクトに第4引数イベントが発生するとき、第5引数に渡した関数を実行するメソッドです</span><br>
+                 <span>例えば、$f.validate('group1', this.text, 'value', ['blur'], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1});の場合</span><br>
+                 <span>this.textオブジェクトにblurイベントが発生したとき、ValidatorクラスのinitValidate、textValidateメソッドが実行されます</span><br>
+                 <span>第4引数には配列で複数イベントを渡すことができます。nullを渡すと第2引数の第3引数プロパティに=演算子で値を格納する時という意味になります</span><br>
+                 <span>例えば、$f.validate('group1', this.text, 'value', [null], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1});の場合</span><br>
+                 <span>this.textオブジェクトのvalueプロパティに=演算子で値が格納されるとき、ValidatorクラスのinitValidate、textValidateメソッドが実行されます</span><br>
+                 <span>$f.validateの第5引数に渡される関数は引数を6つ取ります</span><br>
+                 <span>第1引数：$f.validateの第2引数に渡した値</span><br>
+                 <span>第2引数：$f.validateの第3引数に渡した値</span><br>
+                 <span>第3引数：第2引数の第3引数プロパティに格納する値</span><br>
+                 <span>第4引数：focus、blur、=演算子、Validatorによるtrue返却の4つの内、直近で発生したイベントによって格納された値。この値は、$f.validateの第4引数の要素(イベント)ごとに管理されます。つまり、Validatorによるtrue返却によって設定された値は、Validatorが実行されたイベントのoldValueを上書きますが、他のイベントのoldValueは上書きません。</span><br>
+                 <span>第5引数：$f.validateの第6引数に渡した値</span><br>
+                 <span>第6引数：イベントオブジェクト</span><br>
+                 <span>以降、$f.validateの第5引数に渡された関数をValidatorと呼びます</span><br>
+                 <span>Validatorの戻り値はbooleanです。全てのValidatorがtrueを返すと$f.validateの第2引数オブジェクトの第3引数プロパティにValidatorの第3引数を格納します。Validatorが1つでもfalseを返すと$f.validateの第2引数オブジェクトの第3引数プロパティにValidatorの第4引数を格納します。</span><br>
              </p>
              <br>
+             
+             <h1>手動実行</h1>
 
+             <p>
+                 <span>src/js/modules/index.jsを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
              <br>
+             <pre class="code-view">
+import {Validator} from '../util/validator.js';
 
+export class Index {
+
+    constructor() {
+        this.prop1 = 'abc';
+    }
+
+    init() {
+
+        let v = new Validator();
+
+        $f.validate('group1', this.text, 'value', ['blur', null], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1});
+        $f.validate('group1', this.radio1, 'value', ['input', null], [v.initValidate.bind(v), v.radioValueValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.radio1, 'checked', ['input', null], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.radio2, 'value', ['input', null], [v.initValidate.bind(v), v.radioValueValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.radio2, 'checked', ['input', null], [v.initValidate.bind(v), v.radioCheckValidate.bind(v)], {&quot;msgObj&quot;: this.bind2});
+        $f.validate('group1', this.checkbox, 'value', ['input', null], [v.initValidate.bind(v), v.checkValueValidate.bind(v)], {&quot;msgObj&quot;: this.bind4});
+        $f.validate('group1', this.checkbox, 'checked', ['input', null], [v.initValidate.bind(v), v.checkCheckValidate.bind(v)], {&quot;msgObj&quot;: this.bind4});
+        $f.validate('group1', this.singleSelect, 'value', ['input', null], [v.initValidate.bind(v), v.selectValueValidate.bind(v)], {&quot;values&quot;: new Set([&quot;aa&quot;, &quot;bb&quot;, &quot;cc&quot;]), &quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect, 'selectedIndex', [null], [v.initValidate.bind(v), v.selectIndexValidate.bind(v)], {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect.options[0], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect.options[1], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.singleSelect.options[2], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind5});
+        $f.validate('group1', this.multipleSelect, 'value', ['input', null], [v.initValidate.bind(v), v.selectValueValidate.bind(v)], {&quot;values&quot;: new Set([&quot;aaa&quot;, &quot;bbb&quot;, &quot;ccc&quot;]), &quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect, 'selectedIndex', [null], [v.initValidate.bind(v), v.selectIndexValidate.bind(v)], {&quot;min&quot;: 0, &quot;max&quot;: 2, &quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect.options[0], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect.options[1], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.multipleSelect.options[2], 'selected', [null], [v.initValidate.bind(v), v.selectOptionValidate.bind(v)], {&quot;msgObj&quot;: this.bind7});
+        $f.validate('group1', this.textarea, 'value', ['blur', null], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 5, &quot;maxLen&quot;: 10, &quot;msgObj&quot;: this.bind9});
+        $f.validate('group1', this, 'prop1', [null], [v.propRequireValidate.bind(v), v.propLengthValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;name&quot;: &quot;Index-&gt;prop1&quot;});
+
+    }
+
+    btn_click(event) {
+    
+        console.log($f.execValidator('group1', this.text));
+    
+        let vaild = $f.execGroupValidator('group1');
+        if (!vaild) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+    }
+}
+</pre>
+
+             <p>
+                 <span>execValidatorは、$f.validateの第1引数、第2引数に合致するValidatorを実行します</span><br>
+                 <span>execValidatorは、終了処理の戻り値でoldValueのキーがあっても無視します。oldValueAllEvent、oldValueSpecificEventのキーを無視しません。第3引数にtrueが渡された場合、forceNewValue、newValueのキーを無視しません。</span><br>
+                 <span>execGroupValidatorは、$f.validateの第1引数に合致するValidatorを実行します</span><br>
+                 <span>execGroupValidatorは、終了処理の戻り値でoldValueのキーがあっても無視します。oldValueAllEvent、oldValueSpecificEventのキーを無視しません。第2引数にtrueが渡された場合、forceNewValue、newValueのキーを無視しません。</span><br>
+                 <span>終了処理については下記で説明します</span><br>
+             </p>
+             <br>
+             
+             <h1>終了処理</h1>
+
+             <p>
+                 <span>src/js/util/validator.jsを変更しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/util/validator.js</span>
+             <br>
+             <pre class="code-view">
+export class Validator {
+
+    constructor() {
+    }
+
+    initValidate (target, property, newValue, oldValue, arg, event) {
+        arg.msgObj.textContent = &quot;&quot;;
+        return true;
+    }
+
+    textValidate (target, property, newValue, oldValue, arg, event) {
+        if (newValue.length &lt; arg.minLen || arg.maxLen &lt; newValue.length) {
+            arg.msgObj.textContent = $f.msg('errorMinMaxLength', {'min': arg.minLen, 'max': arg.maxLen});
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    textFinalize (target, property, newValue, oldValue, arg, event, valid, validResult) {
+        let result = {};
+        if (event && 'type' in event && 'input' === event.type) {
+            result['forceNewValue'] = newValue;
+            if (valid) {
+                result['oldValueAllEvent'] = newValue;
+            }
+        }
+        return result;
+    }
+    
+}
+</pre>
+             <p>
+                 <span>src/js/modules/index.jsを変更しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+import {Validator} from '../util/validator.js';
+
+export class Index {
+
+    constructor() {
+        this.prop1 = 'abc';
+    }
+
+    init() {
+
+        let v = new Validator();
+
+        $f.validate('group1', this.text, 'value', ['input', 'blur', null], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1}, v.textFinalize.bind(v));
+
+    }
+
+}
+</pre>
+             <p>
+                 <span>src/page/index.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-obj=&quot;text&quot; value=&quot;1234&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+             <p>
+                 <span>以降、$f.validateの第5引数に渡された関数をValidatorと呼びます</span><br>
+                 <span>$f.validateの第7引数に終了処理を渡すことができます</span><br>
+                 <span>$f.validateの第7引数に渡される関数は引数を8つ取ります</span><br>
+                 <span>第1～6引数：Validatorの引数と同じ</span><br>
+                 <span>第7引数：boolean。Validatorの内、1つでもfalseを返していれば、false</span><br>
+                 <span>第8引数：オブジェクト。キーはValidatorの戻り値。値は配列でValidator名</span><br>
+                 <span>$f.validateの第六引数に渡される関数の戻り値はオブジェクトです。オブジェクトの内容は下記です</span><br>
+                 <span>キー：newValue、値：Validatorの第3引数を置きかえます</span><br>
+                 <span>キー：forceNewValue、値：Validatorの第3引数を置きかえます。さらに、Validator終了処理の第7引数がfalseであっても、第2引数の第3引数プロパティの値をこの値で上書きます。</span><br>
+                 <span>キー：oldValue、値：Validatorの第4引数。Validatorの第4引数は、$f.validateの第4引数の要素(イベント)ごとに管理されます。Validatorの第6引数イベントにひもづくValidatorの第4引数を置きかえます</span><br>
+                 <span>キー：oldValueAllEvent、値：Validatorの第4引数。Validatorの第4引数は、$f.validateの第4引数の要素(イベント)ごとに管理されます。$f.validateの第4引数に渡された全イベントにひもづくValidatorの第4引数を置きかえます</span><br>
+                 <span>キー：oldValueSpecificEvent、値：オブジェクト。キーがイベント名、値がValidatorの第4引数。Validatorの第4引数は、$f.validateの第4引数の要素(イベント)ごとに管理されます。$f.validateの第4引数に渡されたイベントの内このオブジェクトのキーに合致するイベントにひもづくValidatorの第4引数を置きかえます</span><br>
+             
+             </p>
+             <br>
+             
+             
+             <h1>直近結果取得</h1>
+
+             <p>
+                 <span>src/js/modules/index.jsを変更しましょう</span><br>
+             </p>
+             <span class="code-title">src/js/modules/index.js</span>
+             <br>
+             <pre class="code-view">
+import {Validator} from '../util/validator.js';
+
+export class Index {
+
+    constructor() {
+        this.prop1 = 'abc';
+    }
+
+    init() {
+
+        let v = new Validator();
+
+        $f.validate('group1', this.text, 'value', ['input', 'blur', null], [v.initValidate.bind(v), v.textValidate.bind(v)], {&quot;minLen&quot;: 2, &quot;maxLen&quot;: 4, &quot;msgObj&quot;: this.bind1}, v.textFinalize.bind(v));
+
+    }
+
+    btn_click(event) {
+    
+        console.log($f.getValidateLatestResult('group1', this.text, 'value', 'blur'));
+    
+    }
+}
+</pre>
+             <p>
+                 <span>src/page/index.htmlを修正しましょう</span><br>
+             </p>
+             <span class="code-title">src/page/index.html</span>
+             <br>
+             <pre class="code-view">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;title&gt;
+sample
+&lt;/title&gt;
+&lt;script id=&quot;fs-js&quot; src=&quot;http://localhost:8000/js/fairysupport.min.js&quot; data-page-root=&quot;http://localhost:8000/page&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div data-obj=&quot;bind1&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;text&quot; data-obj=&quot;text&quot; value=&quot;1234&quot;&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;input type=&quot;button&quot; data-name=&quot;btn&quot; value=&quot;LatestResult&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+             <p>
+                 <span>getValidateLatestResultは、getValidateLatestResultに渡された引数が$f.validateの第1～3引数に合致し、$f.validateの第4引数のどれかに合致するValidatorの直近の結果を返します</span><br>
+             </p>
+             <br>
+             
+             
              <p>
                  <span><a href="store.html">次ページ</a>値の保持</span>
                  <br>

@@ -54,6 +54,10 @@ function ___fairysupport(){
     
     const uniqueComponentDomControllerMap = new WeakMap();
 
+    const validatorGroupObj = Object.create(null);
+    const validatorReverseMap = new WeakMap();
+    const validatorLatestResultObj = Object.create(null);
+    
     if (!('fairysupportInitFail' in window)) {
         window.fairysupportInitFail = function (retryCount, error) {
             console.error(error);
@@ -714,6 +718,26 @@ function ___fairysupport(){
     };
 
     this.removeAllSingle = function (obj){
+        
+        if (validatorReverseMap.has(obj)) {
+            let validatorGroupList = validatorReverseMap.get(obj);
+            for (let validatorGroup of validatorGroupList) {
+                if (validatorGroup in validatorGroupObj) {
+                    validatorGroupObj[validatorGroup].delete(obj);
+                    if (validatorGroupObj[validatorGroup].size <= 0) {
+                        delete validatorGroupObj[validatorGroup];
+                    }
+                }
+                if (validatorGroup in validatorLatestResultObj) {
+                    validatorLatestResultObj[validatorGroup].delete(obj);
+                    if (validatorLatestResultObj[validatorGroup].size <= 0) {
+                        delete validatorLatestResultObj[validatorGroup];
+                    }
+                }
+            }
+            validatorReverseMap.delete(obj);
+        }
+        
         this.deleteMeta(obj);
         let dataset = obj.dataset;
         if (dataset !== null && dataset !== undefined) {
@@ -4171,85 +4195,394 @@ function ___fairysupport(){
         metaMap.delete(element);
     };
 
-    this.validate = function (obj, prop, eventList, funcList, funcArg){
+    this.validate = function (group, obj, prop, eventList, funcList, funcArg, finishFunc){
         let preValueHolder = {
                 preVal: Object.create(null)
         };
-        this.wrapObjAccessor(obj, prop, funcList, preValueHolder, eventList, funcArg);
-    }
+        if (!Array.isArray(eventList)) {
+            eventList = [eventList];
+        }
+        this.wrapObjAccessor(group, obj, prop, funcList, preValueHolder, eventList, funcArg, finishFunc);
+    };
 
-    this.wrapObjAccessor = function (obj, prop, funcList, preValueHolder, eventList, funcArg){
+    this.wrapObjAccessor = function (group, obj, prop, funcList, preValueHolder, eventList, funcArg, finishFunc){
 
         let protoPropertyDescriptor = this.getPrototypePropertyDescriptor(obj, prop);
 
-        let getFunc = (function(protoPropertyDescriptor, obj){
-            return function(){
-                return protoPropertyDescriptor.get.call(obj);
+        if (eventList !== null && eventList !== undefined) {
+            
+            if (!(group in validatorLatestResultObj)) {
+                validatorLatestResultObj[group] = new Map();
             }
-        })(protoPropertyDescriptor, obj);
-        let setFunc = (function(protoPropertyDescriptor, obj, funcList, funcArg, prop){
-            return function(arg){
-                let valid = true;
-                for (const func of funcList) {
-                    let funcResult = func(obj, prop, arg, protoPropertyDescriptor.get.call(obj), funcArg);
-                    if (!funcResult) {
-                        valid = funcResult;
-                    }
-                }
-                if (valid) {
-                    protoPropertyDescriptor.set.call(obj, arg);
+            if (!(validatorLatestResultObj[group].has(obj))) {
+                validatorLatestResultObj[group].set(obj, Object.create(null));
+            }
+            if (!(prop in validatorLatestResultObj[group].get(obj))) {
+                validatorLatestResultObj[group].get(obj)[prop] = Object.create(null);
+            }
+            for (const eventName of eventList) {
+                if (!(eventName in validatorLatestResultObj[group].get(obj)[prop])) {
+                    validatorLatestResultObj[group].get(obj)[prop][eventName] = true;
                 }
             }
-        })(protoPropertyDescriptor, obj, funcList, funcArg, prop);
-
-        Object.defineProperty(obj, prop, {
-            enumerable: true,
-            configurable: true,
-            get: getFunc,
-            set : setFunc
-        });
-
-        if (eventList !== null && eventList !== undefined && 'addEventListener' in obj) {
-            preValueHolder.preVal[prop] = obj[prop];
-            obj.addEventListener("focus",
-                                 (function(preValueHolder, obj, prop){
-                                    return function(){
-                                        preValueHolder.preVal[prop] = obj[prop];
-                                    };
-                                 })(preValueHolder, obj, prop), true);
-            let eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop){
-                return function (event) {
-                    let valid = true;
+            
+            let equalFlg = false;
+            this.preValueInit(preValueHolder, eventList, obj[prop]);
+            let eventFunc = null;
+            for (const eventName of eventList) {
+                if (eventName === null) {
+                    equalFlg = true;
+                    let getFunc = (function(protoPropertyDescriptor, obj){
+                        return function(){
+                            return protoPropertyDescriptor.get.call(obj);
+                        }
+                    })(protoPropertyDescriptor, obj);
+                    let setFunc = (function(protoPropertyDescriptor, obj, funcList, funcArg, prop, fs, preValueHolder, eventList, finishFunc, validatorLatestResultObj, group){
+                        return function(arg){
+                            let valid = true;
+                            let newReplaceFlg = false;
+                            let errorObj = Object.create(null);
+                            for (const func of funcList) {
+                                let funcResult = func(obj, prop, arg, preValueHolder.preVal[null], funcArg, null);
+                                if (!funcResult) {
+                                    valid = funcResult;
+                                }
+                                if (!(funcResult in errorObj)) {
+                                    errorObj[funcResult] = [];
+                                }
+                                errorObj[funcResult].push(func.name);
+                            }
+                            
+                            validatorLatestResultObj[group].get(obj)[prop][null] = valid;
+                            
+                            if (finishFunc) {
+                                let finishResult = finishFunc(obj, prop, arg, preValueHolder.preVal[null], funcArg, null, valid, errorObj);
+                                if (finishResult) {
+                                    if ('newValue' in finishResult) {
+                                        arg = finishResult['newValue'];
+                                    }
+                                    if ('forceNewValue' in finishResult) {
+                                        newReplaceFlg = true;
+                                        arg = finishResult['forceNewValue'];
+                                    }
+                                    if ('oldValue' in finishResult) {
+                                        fs.preValueEventInit(preValueHolder, null, finishResult['oldValue']);
+                                    }
+                                    if ('oldValueAllEvent' in finishResult) {
+                                        fs.preValueInit(preValueHolder, eventList, finishResult['oldValueAllEvent']);
+                                    }
+                                    if ('oldValueSpecificEvent' in finishResult) {
+                                        for (const [replaceEventName, replaceOldValue] of Object.entries(finishResult['oldValueSpecificEvent'])) {
+                                            if (replaceEventName in preValueHolder.preVal) {
+                                                fs.preValueEventInit(preValueHolder, replaceEventName, replaceOldValue);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (newReplaceFlg) {
+                                protoPropertyDescriptor.set.call(obj, arg);
+                                fs.preValueInit(preValueHolder, eventList, obj[prop]);
+                            } else if (valid) {
+                                protoPropertyDescriptor.set.call(obj, arg);
+                                fs.preValueInit(preValueHolder, eventList, obj[prop]);
+                            } else {
+                                protoPropertyDescriptor.set.call(obj, preValueHolder.preVal[null]);
+                                fs.preValueEventInit(preValueHolder, null, preValueHolder.preVal[null]);
+                            }
+                            
+                        }
+                    })(protoPropertyDescriptor, obj, funcList, funcArg, prop, this, preValueHolder, eventList, finishFunc, validatorLatestResultObj, group);
+            
+                    Object.defineProperty(obj, prop, {
+                        enumerable: true,
+                        configurable: true,
+                        get: getFunc,
+                        set : setFunc
+                    });
+                    
+                    
+                    let initValid = true;
+                    let newReplaceFlg = false;
+                    let errorObj = Object.create(null);
+                    let newVal = obj[prop];
                     for (const func of funcList) {
-                        let funcResult = func(obj, prop, obj[prop], preValueHolder.preVal[prop], funcArg);
+                        let funcResult = func(obj, prop, newVal, preValueHolder.preVal[null], funcArg, null);
+                        if (!funcResult) {
+                            initValid = funcResult;
+                        }
+                        if (!(funcResult in errorObj)) {
+                            errorObj[funcResult] = [];
+                        }
+                        errorObj[funcResult].push(func.name);
+                    }
+                    
+                    validatorLatestResultObj[group].get(obj)[prop][eventName] = initValid;
+                    
+                    let finishResult = null;
+                    if (finishFunc) {
+                        finishResult = finishFunc(obj, prop, newVal, preValueHolder.preVal[null], funcArg, null, initValid, errorObj);
+                        if (finishResult) {
+                            if ('newValue' in finishResult) {
+                                newVal = finishResult['newValue'];
+                            }
+                            if ('forceNewValue' in finishResult) {
+                                newReplaceFlg = true;
+                                newVal = finishResult['forceNewValue'];
+                            }
+                            if ('oldValue' in finishResult) {
+                                this.preValueEventInit(preValueHolder, null, finishResult['oldValue']);
+                            }
+                            if ('oldValueAllEvent' in finishResult) {
+                                this.preValueInit(preValueHolder, eventList, finishResult['oldValueAllEvent']);
+                            }
+                            if ('oldValueSpecificEvent' in finishResult) {
+                                for (const [replaceEventName, replaceOldValue] of Object.entries(finishResult['oldValueSpecificEvent'])) {
+                                    if (replaceEventName in preValueHolder.preVal) {
+                                        this.preValueEventInit(preValueHolder, replaceEventName, replaceOldValue);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (newReplaceFlg) {
+                        protoPropertyDescriptor.set.call(obj, newVal);
+                    } else if (initValid) {
+                        protoPropertyDescriptor.set.call(obj, newVal);
+                    } else {
+                        if (finishResult) {
+                            if ('oldValueSpecificEvent' in finishResult && null in finishResult['oldValueSpecificEvent']) {
+                                protoPropertyDescriptor.set.call(obj, finishResult['oldValueSpecificEvent'][null]);
+                            } else if ('oldValueAllEvent' in finishResult) {
+                                protoPropertyDescriptor.set.call(obj, finishResult['oldValueAllEvent']);
+                            } else if ('oldValue' in finishResult) {
+                                protoPropertyDescriptor.set.call(obj, finishResult['oldValue']);
+                            } else {
+                                protoPropertyDescriptor.set.call(obj, null);
+                            }
+                        } else {
+                            protoPropertyDescriptor.set.call(obj, null);
+                        }
+                    }
+                    this.preValueInit(preValueHolder, eventList, obj[prop]);
+                    
+                } else if ('addEventListener' in obj) {
+                    if (eventFunc === null) {
+                        obj.addEventListener("focus",
+                                             (function(preValueHolder, obj, prop, eventList, fs){
+                                                return function(){
+                                                    fs.preValueInit(preValueHolder, eventList, obj[prop]);
+                                                };
+                                             })(preValueHolder, obj, prop, eventList, this), true);
+                        obj.addEventListener('blur', 
+                                             (function (preValueHolder, obj, prop, eventList, fs){
+                                                return function (event) {
+                                                    fs.preValueInit(preValueHolder, eventList, obj[prop]);
+                                                };
+                                             })(preValueHolder, obj, prop, eventList, this), false);
+                        eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, fs, validatorLatestResultObj, group){
+                            return function (event) {
+                                if (!(event.type in preValueHolder.preVal)) {
+                                    fs.preValueEventInit(preValueHolder, event.type, obj[prop]);
+                                }
+                                let newReplaceFlg = false;
+                                let valid = true;
+                                let newVal = obj[prop];
+                                let errorObj = Object.create(null);
+                                for (const func of funcList) {
+                                    let funcResult = func(obj, prop, newVal, preValueHolder.preVal[event.type], funcArg, event);
+                                    if (!funcResult) {
+                                        valid = funcResult;
+                                    }
+                                    if (!(funcResult in errorObj)) {
+                                        errorObj[funcResult] = [];
+                                    }
+                                    errorObj[funcResult].push(func.name);
+                                }
+                                
+                                validatorLatestResultObj[group].get(obj)[prop][event.type] = valid;
+                                
+                                if (finishFunc) {
+                                    let finishResult = finishFunc(obj, prop, newVal, preValueHolder.preVal[event.type], funcArg, event, valid, errorObj);
+                                    if (finishResult) {
+                                        if ('newValue' in finishResult) {
+                                            newVal = finishResult['newValue'];
+                                        }
+                                        if ('forceNewValue' in finishResult) {
+                                            newReplaceFlg = true;
+                                            newVal = finishResult['forceNewValue'];
+                                        }
+                                        if ('oldValue' in finishResult) {
+                                            fs.preValueEventInit(preValueHolder, event.type, finishResult['oldValue']);
+                                        }
+                                        if ('oldValueAllEvent' in finishResult) {
+                                            fs.preValueInit(preValueHolder, eventList, finishResult['oldValueAllEvent']);
+                                        }
+                                        if ('oldValueSpecificEvent' in finishResult) {
+                                            for (const [replaceEventName, replaceOldValue] of Object.entries(finishResult['oldValueSpecificEvent'])) {
+                                                if (replaceEventName in preValueHolder.preVal) {
+                                                    fs.preValueEventInit(preValueHolder, replaceEventName, replaceOldValue);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (newReplaceFlg) {
+                                    protoPropertyDescriptor.set.call(obj, newVal);
+                                    fs.preValueEventInit(preValueHolder, event.type, newVal);
+                                } else if (valid) {
+                                    protoPropertyDescriptor.set.call(obj, newVal);
+                                    fs.preValueEventInit(preValueHolder, event.type, newVal);
+                                } else {
+                                    protoPropertyDescriptor.set.call(obj, preValueHolder.preVal[event.type]);
+                                    fs.preValueEventInit(preValueHolder, event.type, preValueHolder.preVal[event.type]);
+                                }
+                                
+                            };
+                        })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, this, validatorLatestResultObj, group);
+                    }
+                    obj.addEventListener(eventName, eventFunc, true);
+                }
+            }
+            if (!equalFlg) {
+                
+                let getFunc = (function(protoPropertyDescriptor, obj){
+                    return function(){
+                        return protoPropertyDescriptor.get.call(obj);
+                    }
+                })(protoPropertyDescriptor, obj);
+                let setFunc = (function(protoPropertyDescriptor, obj, prop, fs, eventList, preValueHolder){
+                    return function(arg){
+                        protoPropertyDescriptor.set.call(obj, arg);
+                        fs.preValueInit(preValueHolder, eventList, obj[prop]);
+                    }
+                })(protoPropertyDescriptor, obj, prop, this, eventList, preValueHolder);
+        
+                Object.defineProperty(obj, prop, {
+                    enumerable: true,
+                    configurable: true,
+                    get: getFunc,
+                    set : setFunc
+                });
+                
+            }
+            
+            if (!(group in validatorGroupObj)) {
+                validatorGroupObj[group] = new Map();
+            }
+            if (!(validatorGroupObj[group].has(obj))) {
+                validatorGroupObj[group].set(obj, []);
+            }
+            let validatorContent = Object.create(null);
+            validatorContent['prop'] = prop;
+            validatorContent['validator'] = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, fs, validatorLatestResultObj, group){
+                return function (newValFlg) {
+                    let valid = true;
+                    let newReplaceFlg = false;
+                    let newVal = obj[prop];
+                    let errorObj = Object.create(null);
+                    for (const func of funcList) {
+                        let funcResult = func(obj, prop, newVal, obj[prop], funcArg, undefined);
                         if (!funcResult) {
                             valid = funcResult;
                         }
+                        if (!(funcResult in errorObj)) {
+                            errorObj[funcResult] = [];
+                        }
+                        errorObj[funcResult].push(func.name);
                     }
-                    if (!valid) {
-                        protoPropertyDescriptor.set.call(obj, preValueHolder.preVal[prop]);
+                    
+                    validatorLatestResultObj[group].get(obj)[prop][undefined] = valid;
+                    
+                    if (finishFunc) {
+                        let finishResult = finishFunc(obj, prop, newVal, obj[prop], funcArg, undefined, valid, errorObj);
+                        if (finishResult) {
+                            if ('newValue' in finishResult) {
+                                newVal = finishResult['newValue'];
+                            }
+                            if ('forceNewValue' in finishResult) {
+                                newReplaceFlg = true;
+                                newVal = finishResult['forceNewValue'];
+                            }
+                            if ('oldValueAllEvent' in finishResult) {
+                                fs.preValueInit(preValueHolder, eventList, finishResult['oldValueAllEvent']);
+                            }
+                            if ('oldValueSpecificEvent' in finishResult) {
+                                for (const [replaceEventName, replaceOldValue] of Object.entries(finishResult['oldValueSpecificEvent'])) {
+                                    if (replaceEventName in preValueHolder.preVal) {
+                                        fs.preValueEventInit(preValueHolder, replaceEventName, replaceOldValue);
+                                    }
+                                }
+                            }
+                        }
                     }
-                    preValueHolder.preVal[prop] = obj[prop];
+                    
+                    if (newValFlg) {
+                        
+                        if (newReplaceFlg) {
+                            protoPropertyDescriptor.set.call(obj, newVal);
+                            fs.preValueInit(preValueHolder, eventList, obj[prop]);
+                        } else if (valid) {
+                            protoPropertyDescriptor.set.call(obj, newVal);
+                            fs.preValueInit(preValueHolder, eventList, obj[prop]);
+                        }
+                        
+                    }
+                    
+                    return valid;
+                    
                 };
-            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop);
-            for (const eventName of eventList) {
-                obj.addEventListener(eventName, eventFunc, true);
+            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, this, validatorLatestResultObj, group);
+            
+            validatorGroupObj[group].get(obj).push(validatorContent);
+            
+            if (!(validatorReverseMap.has(obj))) {
+                validatorReverseMap.set(obj, []);
+            }
+            validatorReverseMap.get(obj).push(group);
+            
+        }
+
+    };
+    
+    this.preValueInit = function (preValueHolder, eventList, value){
+        for (const eventName of eventList) {
+            this.preValueEventInit(preValueHolder, eventName, value);
+        }
+    };
+
+    this.preValueEventInit = function (preValueHolder, eventName, value){
+        preValueHolder.preVal[eventName] = value;
+    };
+    
+    this.execValidator = function (group, obj, newValFlg){
+        let result = true;
+        let validatorList = validatorGroupObj[group].get(obj);
+        for (let objValidator of validatorList) {
+            let valid = objValidator['validator'](newValFlg);
+            if (!valid) {
+                result = false;
             }
         }
+        return result;
+    };
 
-        let initValid = true;
-        for (const func of funcList) {
-            let funcResult = func(obj, prop, protoPropertyDescriptor.get.call(obj), protoPropertyDescriptor.get.call(obj), funcArg);
-            if (!funcResult) {
-                initValid = funcResult;
+    this.execGroupValidator = function (group, newValFlg){
+        let result = true;
+        let validatorMap = validatorGroupObj[group];
+        for (let obj of validatorMap.keys()) {
+            let valid = this.execValidator(group, obj, newValFlg);
+            if (!valid) {
+                result = false;
             }
         }
-        if (!initValid) {
-            protoPropertyDescriptor.set.call(obj, null);
-        }
+        return result;
+    };
 
-    }
-
+    this.getValidateLatestResult = function (group, obj, prop, eventName){
+        return validatorLatestResultObj[group].get(obj)[prop][eventName];
+    };
+    
     this.getPrototypePropertyDescriptor = function (obj, propName){
         let protoObj = Object.getPrototypeOf(obj);
         let protoPropertyDescriptor = null;
@@ -4306,7 +4639,7 @@ function ___fairysupport(){
             protoPropertyDescriptor = newProtoPropertyDescriptor
         }
         return protoPropertyDescriptor;
-    }
+    };
 
     this.linkEvent = function (fromObj, toObj, eventList){
         let result = Object.create(null);
@@ -4315,15 +4648,15 @@ function ___fairysupport(){
             fromObj.addEventListener(eventName, result[eventName]);
         }
         return result;
-    }
+    };
 
     this.getReqLang = function () {
         return reqLang;
-    }
+    };
 
     this.getConfLang = function () {
         return confLang;
-    }
+    };
 
     this.storeClass = class FairysupportStore {
         #data;
