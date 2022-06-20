@@ -57,7 +57,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -148,6 +148,7 @@ export class Index {
                  <span>The value of the third argument of $f.loadStringTemplate is embedded in the return value of the template method of index.js and output.</span><br>
                  <span>The loadStringTemplate method is a method that replaces the body part of the first argument by embedding the value passed to the third argument in the string passed to the second argument.</span><br>
                  <span>The return value is Promise. After the template is embedded in the web page , the newly embedded template can be binded with js, it will be resolved.</span><br>
+                 <span>The array of top-level nodes in the loaded template is passed to resolve.</span><br>
                  <span>Let's take a look at the template method of index.js that creates the second argument of the loadStringTemplate method.</span><br>
                  <span>Returning just a template literal.</span><br>
                  <span>By attaching the attribute starting with data- to the tag, the third argument passed to loadStringTemplate can be embedded.</span><br>
@@ -215,7 +216,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -366,7 +367,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -452,7 +453,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -553,7 +554,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -712,7 +713,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -864,7 +865,7 @@ export class Index {
         .catch(this.error.bind(this));
     }
 
-    success() {
+    success(nodeList) {
         this.obj.style.display = &quot;block&quot;;
     }
 

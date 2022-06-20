@@ -57,7 +57,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -148,6 +148,7 @@ export class Index {
                  <span>index.jsのtemplateメソッドの戻り値に、$f.loadStringTemplateの第三引数の値が埋め込まれて出力されます</span><br>
                  <span>loadStringTemplateメソッドは、第二引数に渡された文字列に、第三引数に渡された値を埋め込んで、第一引数のボディ部を置換するメソッドです</span><br>
                  <span>戻り値はPromiseです。テンプレートがwebページに埋め込まれ、新たに埋め込まれたテンプレートがjsと結びつけできたらresolveされます</span><br>
+                 <span>resolveにはloadされたテンプレートの最上位階層のnodeの配列が渡されます</span><br>
                  <span>loadStringTemplateメソッドの第二引数をつくっているindex.jsのtemplateメソッドを見てみましょう</span><br>
                  <span>ただのテンプレートリテラルを返しています</span><br>
                  <span>data-ではじまる属性をタグにつけることで、loadStringTemplateに渡された第三引数をいろいろな形で埋め込むことができます</span><br>
@@ -215,7 +216,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -366,7 +367,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -452,7 +453,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -553,7 +554,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -712,7 +713,7 @@ export class Index {
         this.obj2.textContent = event.target.value;
     }
 
-    success() {
+    success(nodeList) {
         alert(&quot;success&quot;);
     }
 
@@ -864,7 +865,7 @@ export class Index {
         .catch(this.error.bind(this));
     }
 
-    success() {
+    success(nodeList) {
         this.obj.style.display = &quot;block&quot;;
     }
 

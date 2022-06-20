@@ -785,28 +785,30 @@ function ___fairysupport(){
             }
 
             let targetInfo = this.targetDomMap.get(obj);
-            for (let targetInfoKey in targetInfo) {
-
-                let targetInfoValue = targetInfo[targetInfoKey];
-                let componentPath = targetInfoValue['componentPath'];
-                let componentCamel = targetInfoValue['componentCamel'];
-
-                bindObj = dataset[componentCamel + 'Obj'];
-                bindList = dataset[componentCamel + 'List'];
-                name = dataset[componentCamel + 'Name'];
-
-                if (bindObj !== null && bindObj !== undefined) {
-                    this.removeComponentSingleObj(obj, bindObj, componentPath);
+            if (targetInfo) {
+                for (let targetInfoKey in targetInfo) {
+    
+                    let targetInfoValue = targetInfo[targetInfoKey];
+                    let componentPath = targetInfoValue['componentPath'];
+                    let componentCamel = targetInfoValue['componentCamel'];
+    
+                    bindObj = dataset[componentCamel + 'Obj'];
+                    bindList = dataset[componentCamel + 'List'];
+                    name = dataset[componentCamel + 'Name'];
+    
+                    if (bindObj !== null && bindObj !== undefined) {
+                        this.removeComponentSingleObj(obj, bindObj, componentPath);
+                    }
+    
+                    if (bindList !== null && bindList !== undefined) {
+                        this.removeComponentSingleList(obj, bindList, componentPath);
+                    }
+    
+                    if (name !== null && name !== undefined) {
+                        this.removeComponentSingleEvent(obj, name, componentPath);
+                    }
+    
                 }
-
-                if (bindList !== null && bindList !== undefined) {
-                    this.removeComponentSingleList(obj, bindList, componentPath);
-                }
-
-                if (name !== null && name !== undefined) {
-                    this.removeComponentSingleEvent(obj, name, componentPath);
-                }
-
             }
 
         }
@@ -1034,8 +1036,17 @@ function ___fairysupport(){
 
             let cb = (function (fs, dom, componentValueMap, argObj, func, position, immediatelyResolve) {
                 return function(viewDom) {
+                    
+                    if (!(componentValueMap['componentPackeage'] in fs.componentPackageList)) {
+                        fs.componentPackageList[componentValueMap['componentPackeage']] = componentValueMap;
+                    }
 
-                    let initFunc = fs.getComponentMethod(fs, componentValueMap['componentPath'], 'init', argObj, func);
+                    let addNodeList = [];
+                    for (let i = 0; i < viewDom.childNodes.length; i++) {
+                        addNodeList.push(viewDom.childNodes.item(i));
+                    }
+                    
+                    let initFunc = fs.getComponentMethod(fs, componentValueMap['componentPath'], 'init', argObj, (function(func, addNodeList){return function(){func(addNodeList);};})(func, addNodeList));
 
                     let childList = viewDom.childNodes;
                     let child = null;
@@ -1055,23 +1066,25 @@ function ___fairysupport(){
                         }
                     }
 
-                    if ('before' === position && dom.parentNode) {
-                        dom.parentNode.insertBefore(viewDom, dom);
-                    } else if ('after' === position && dom.parentNode) {
-                        if (dom.nextSibling === null || dom.nextSibling === undefined) {
-                            dom.parentNode.appendChild(viewDom);
+                    if (dom) {
+                        if ('before' === position && dom.parentNode) {
+                            dom.parentNode.insertBefore(viewDom, dom);
+                        } else if ('after' === position && dom.parentNode) {
+                            if (dom.nextSibling === null || dom.nextSibling === undefined) {
+                                dom.parentNode.appendChild(viewDom);
+                            } else {
+                                dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                            }
+                        } else if ('append' === position) {
+                            dom.appendChild(viewDom);
                         } else {
-                            dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                            dom.innerHTML = "";
+                            dom.appendChild(viewDom);
                         }
-                    } else if ('append' === position) {
-                        dom.appendChild(viewDom);
-                    } else {
-                        dom.innerHTML = "";
-                        dom.appendChild(viewDom);
                     }
                     
                     if (true === immediatelyResolve) {
-                        func();
+                        func(addNodeList);
                     }
 
                 };
@@ -2317,27 +2330,34 @@ function ___fairysupport(){
                     let cb = (function(fs, dom, position, resolve, immediatelyResolve){
                         return function(viewDom){
                             
+                            let addNodeList = [];
+                            for (let i = 0; i < viewDom.childNodes.length; i++) {
+                                addNodeList.push(viewDom.childNodes.item(i));
+                            }
+                            
                             if (!immediatelyResolve) {
-                                fs.addInitFuncForAfterObserver(viewDom, resolve, false);
+                                fs.addInitFuncForAfterObserver(viewDom, (function(resolve, addNodeList){return function(){resolve(addNodeList);};})(resolve, addNodeList), false);
                             }
 
-                            if ('before' === position && dom.parentNode) {
-                                dom.parentNode.insertBefore(viewDom, dom);
-                            } else if ('after' === position && dom.parentNode) {
-                                if (dom.nextSibling === null || dom.nextSibling === undefined) {
-                                    dom.parentNode.appendChild(viewDom);
+                            if (dom) {
+                                if ('before' === position && dom.parentNode) {
+                                    dom.parentNode.insertBefore(viewDom, dom);
+                                } else if ('after' === position && dom.parentNode) {
+                                    if (dom.nextSibling === null || dom.nextSibling === undefined) {
+                                        dom.parentNode.appendChild(viewDom);
+                                    } else {
+                                        dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                                    }
+                                } else if ('append' === position) {
+                                    dom.appendChild(viewDom);
                                 } else {
-                                    dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                                    dom.innerHTML = "";
+                                    dom.appendChild(viewDom);
                                 }
-                            } else if ('append' === position) {
-                                dom.appendChild(viewDom);
-                            } else {
-                                dom.innerHTML = "";
-                                dom.appendChild(viewDom);
                             }
                             
                             if (true === immediatelyResolve) {
-                                resolve();
+                                resolve(addNodeList);
                             }
                             
                         }
@@ -2380,7 +2400,7 @@ function ___fairysupport(){
         templatePath = templatePath.substring(0, templatePath.length - 1);
         let templateViewPath = templateRoot + templatePath + '.html';
 
-        return new Promise((function(fs, dom, templatePackeage, argObj, position, retryCount, timing, templateViewPath){
+        return new Promise((function(fs, dom, templatePackeage, argObj, position, retryCount, timing, templateViewPath, immediatelyResolve){
             return function (resolve, reject) {
                 let req = fs.emptyAjax(templateViewPath + '?' + fs.version, null, 'GET', 'query');
                 req.timeout = fsTimeout;
@@ -3001,7 +3021,12 @@ function ___fairysupport(){
             let cb = (function(fs, dom, componentValueMap, argObj, func, position, controllerObj, methodList, dataNameEventMap, componentDirUrl, immediatelyResolve){
                 return function(viewDom){
 
-                    let initFunc = fs.getUniqueComponentMethod(fs, controllerObj, methodList, 'init', argObj, func);
+                    let addNodeList = [];
+                    for (let i = 0; i < viewDom.childNodes.length; i++) {
+                        addNodeList.push(viewDom.childNodes.item(i));
+                    }
+                    
+                    let initFunc = fs.getUniqueComponentMethod(fs, controllerObj, methodList, 'init', argObj, (function(func, addNodeList){return function(){func(addNodeList);};})(func, addNodeList));
                     fs.addInitFuncForAfterObserver(viewDom, initFunc, ('init' in methodList ? true : false));
 
                     let childList = viewDom.childNodes;
@@ -3013,23 +3038,25 @@ function ___fairysupport(){
                         }
                     }
 
-                    if ('before' === position && dom.parentNode) {
-                        dom.parentNode.insertBefore(viewDom, dom);
-                    } else if ('after' === position && dom.parentNode) {
-                        if (dom.nextSibling === null || dom.nextSibling === undefined) {
-                            dom.parentNode.appendChild(viewDom);
+                    if (dom) {
+                        if ('before' === position && dom.parentNode) {
+                            dom.parentNode.insertBefore(viewDom, dom);
+                        } else if ('after' === position && dom.parentNode) {
+                            if (dom.nextSibling === null || dom.nextSibling === undefined) {
+                                dom.parentNode.appendChild(viewDom);
+                            } else {
+                                dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                            }
+                        } else if ('append' === position) {
+                            dom.appendChild(viewDom);
                         } else {
-                            dom.parentNode.insertBefore(viewDom, dom.nextSibling);
+                            dom.innerHTML = "";
+                            dom.appendChild(viewDom);
                         }
-                    } else if ('append' === position) {
-                        dom.appendChild(viewDom);
-                    } else {
-                        dom.innerHTML = "";
-                        dom.appendChild(viewDom);
                     }
                     
                     if (true === immediatelyResolve) {
-                        func();
+                        func(addNodeList);
                     }
 
                 };
