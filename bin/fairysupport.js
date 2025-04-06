@@ -4,7 +4,11 @@ function ___fairysupport(){
 
     let pageUrl = new URL(window.location.href);
     let reqLang = pageUrl.searchParams.get("lang")
-    let confLang = window.navigator.language;
+    let languages = window.navigator.languages;
+	if (!(languages.includes(reqLang))) {
+		reqLang = null;
+	}
+	let confLang = window.navigator.language;
     let jsFwUrl = new URL(scriptObj.src);
     this.version = ('dataset' in scriptObj && 'version' in scriptObj.dataset) ? scriptObj.dataset.version : Date.now();
     let jsFwPath = jsFwUrl.origin + jsFwUrl.pathname.trim();
@@ -4270,7 +4274,7 @@ function ___fairysupport(){
                             let newReplaceFlg = false;
                             let errorObj = Object.create(null);
                             for (const func of funcList) {
-                                let funcResult = func(obj, prop, arg, preValueHolder.preVal[null], funcArg, null);
+                                let funcResult = func(obj, prop, arg, preValueHolder.preVal[null], funcArg, null, valid);
                                 if (!funcResult) {
                                     valid = funcResult;
                                 }
@@ -4334,7 +4338,7 @@ function ___fairysupport(){
                     let errorObj = Object.create(null);
                     let newVal = obj[prop];
                     for (const func of funcList) {
-                        let funcResult = func(obj, prop, newVal, preValueHolder.preVal[null], funcArg, null);
+                        let funcResult = func(obj, prop, newVal, preValueHolder.preVal[null], funcArg, null, initValid);
                         if (!funcResult) {
                             initValid = funcResult;
                         }
@@ -4417,7 +4421,7 @@ function ___fairysupport(){
                                 let newVal = obj[prop];
                                 let errorObj = Object.create(null);
                                 for (const func of funcList) {
-                                    let funcResult = func(obj, prop, newVal, preValueHolder.preVal[event.type], funcArg, event);
+                                    let funcResult = func(obj, prop, newVal, preValueHolder.preVal[event.type], funcArg, event, valid);
                                     if (!funcResult) {
                                         valid = funcResult;
                                     }
@@ -4509,7 +4513,7 @@ function ___fairysupport(){
                     let newVal = obj[prop];
                     let errorObj = Object.create(null);
                     for (const func of funcList) {
-                        let funcResult = func(obj, prop, newVal, obj[prop], funcArg, undefined);
+                        let funcResult = func(obj, prop, newVal, obj[prop], funcArg, undefined, valid);
                         if (!funcResult) {
                             valid = funcResult;
                         }
@@ -4684,6 +4688,15 @@ function ___fairysupport(){
     this.getConfLang = function () {
         return confLang;
     };
+
+	this.getLang = function () {
+		if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
+			return reqLang;
+		} else if (confLang !== null && confLang !== undefined && confLang !== '') {
+			return confLang;
+		}
+	    return '';
+	};
 
     this.storeClass = class FairysupportStore {
         #data;

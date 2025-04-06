@@ -47,12 +47,12 @@ export class Validator {
     constructor() {
     }
 
-    initValidate (target, property, newValue, oldValue, arg, event) {
+    initValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         arg.msgObj.textContent = &quot;&quot;;
         return true;
     }
 
-    propRequireValidate (target, property, newValue, oldValue, arg, event) {
+    propRequireValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue === undefined || newValue === null || newValue === '') {
             console.error(arg.name + ' : ' + $f.msg('errorRequired'));
             return false;
@@ -61,7 +61,7 @@ export class Validator {
         }
     }
 
-    propLengthValidate (target, property, newValue, oldValue, arg, event) {
+    propLengthValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue !== undefined && newValue !== null && (newValue.length &lt; arg.minLen || arg.maxLen &lt; newValue.length)) {
             console.error(arg.name + ' : ' + $f.msg('errorMinMaxLength', {'min': arg.minLen, 'max': arg.maxLen}));
             return false;
@@ -70,7 +70,7 @@ export class Validator {
         }
     }
 
-    textValidate (target, property, newValue, oldValue, arg, event) {
+    textValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue.length &lt; arg.minLen || arg.maxLen &lt; newValue.length) {
             arg.msgObj.textContent = $f.msg('errorMinMaxLength', {'min': arg.minLen, 'max': arg.maxLen});
             return false;
@@ -79,7 +79,7 @@ export class Validator {
         }
     }
 
-    radioValueValidate (target, property, newValue, oldValue, arg, event) {
+    radioValueValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue !== oldValue) {
             arg.msgObj.textContent = $f.msg('errorRadioValue');
             return false;
@@ -88,7 +88,7 @@ export class Validator {
         }
     }
 
-    radioCheckValidate (target, property, newValue, oldValue, arg, event) {
+    radioCheckValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue !== true && newValue !== false) {
             arg.msgObj.textContent = $f.msg('errorRadiType');
             return false;
@@ -97,7 +97,7 @@ export class Validator {
         }
     }
 
-    checkValueValidate (target, property, newValue, oldValue, arg, event) {
+    checkValueValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue !== oldValue) {
             arg.msgObj.textContent = $f.msg('errorCheckValue');
             return false;
@@ -106,7 +106,7 @@ export class Validator {
         }
     }
 
-    checkCheckValidate (target, property, newValue, oldValue, arg, event) {
+    checkCheckValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue !== true && newValue !== false) {
             arg.msgObj.textContent = $f.msg('errorCheckType');
             return false;
@@ -115,7 +115,7 @@ export class Validator {
         }
     }
 
-    selectValueValidate (target, property, newValue, oldValue, arg, event) {
+    selectValueValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (!arg.values.has(newValue)) {
             arg.msgObj.textContent = $f.msg('errorSelectValue');
             return false;
@@ -124,7 +124,7 @@ export class Validator {
         }
     }
 
-    selectIndexValidate (target, property, newValue, oldValue, arg, event) {
+    selectIndexValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue &lt; arg.min || arg.max &lt; newValue) {
             arg.msgObj.textContent = $f.msg('errorSelectedIndex', {'min': arg.min, 'max': arg.max});
             return false;
@@ -133,7 +133,7 @@ export class Validator {
         }
     }
 
-    selectOptionValidate (target, property, newValue, oldValue, arg, event) {
+    selectOptionValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue !== true && newValue !== false) {
             arg.msgObj.textContent = $f.msg('errorSelectValue');
             return false;
@@ -260,13 +260,14 @@ sample
                  <span>For example, in the case of $f.validate('group1', this.text, 'value', ['blur'], [v.initValidate.bind(v), v.textValidate.bind(v)], {"minLen": 2, "maxLen": 4, "msgObj": this.bind1}); when the blur event occurs in this.text object, the initValidate and textValidate methods of the Validator class are executed.</span><br>
                  <span>You can pass multiple events in an array as the 4th argument. If you pass null, it means when you store the value in the 3rd argument property of the 2nd argument using the = operator.</span><br>
                  <span>For example, in the case of $f.validate('group1', this.text, 'value', [null], [v.initValidate.bind(v), v.textValidate.bind(v)], {"minLen": 2, "maxLen": 4, "msgObj": this.bind1}); when you store the value in the value property of this.text object using the = operator, the initValidate and textValidate methods of the Validator class are executed.</span><br>
-                 <span>The function passed to the 5th argument of $f.validate takes 6 arguments.</span><br>
+                 <span>The function passed to the 5th argument of $f.validate takes 7 arguments.</span><br>
                  <span>1st argument: Value passed to the 2nd argument of $f.validate.</span><br>
                  <span>2nd argument: Value passed to the 3rd argument of $f.validate.</span><br>
                  <span>3rd argument: Value to be stored in the 3rd argument property of the 2nd argument.</span><br>
                  <span>4th argument: focus, blur, = operator or true return by Validator, the value stored by the most recently generated event. This value is managed for each element (event) of the 4th argument of $f.validate. That is, the value set by the true return by the Validator overwrites the oldValue of the event that ran the Validator, but not the oldValue of the other events.</span><br>
                  <span>5th argument: Value passed to the 6th argument of $f.validate.</span><br>
                  <span>6th argument: Event object.</span><br>
+                 <span>7th argument: boolean. If even one of the Validators returns false before getting here, it is false.</span><br>
                  <span>Hereafter, the function passed to the 5th argument of $f.validate is called Validator.</span><br>
                  <span>The return value of Validator is boolean. If all Validators return true, the 3rd argument of Validator is stored in the 3rd argument property of the 2nd argument object of $f.validate. If even one Validator returns false, the 4th argument of Validator is stored in the 3rd argument property of the 2nd argument object of $f.validate.</span><br>
              </p>
@@ -351,12 +352,12 @@ export class Validator {
     constructor() {
     }
 
-    initValidate (target, property, newValue, oldValue, arg, event) {
+    initValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         arg.msgObj.textContent = &quot;&quot;;
         return true;
     }
 
-    textValidate (target, property, newValue, oldValue, arg, event) {
+    textValidate (target, property, newValue, oldValue, arg, event, untilNowResult) {
         if (newValue.length &lt; arg.minLen || arg.maxLen &lt; newValue.length) {
             arg.msgObj.textContent = $f.msg('errorMinMaxLength', {'min': arg.minLen, 'max': arg.maxLen});
             return false;
