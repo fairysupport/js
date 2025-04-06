@@ -4411,7 +4411,7 @@ function ___fairysupport(){
                                                     fs.preValueInit(preValueHolder, eventList, obj[prop]);
                                                 };
                                              })(preValueHolder, obj, prop, eventList, this), false);
-                        eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, fs, validatorLatestResultObj, group){
+                        eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, fs, validatorLatestResultObj, group){
                             return function (event) {
                                 if (!(event.type in preValueHolder.preVal)) {
                                     fs.preValueEventInit(preValueHolder, event.type, obj[prop]);
@@ -4470,7 +4470,7 @@ function ___fairysupport(){
                                 }
                                 
                             };
-                        })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, this, validatorLatestResultObj, group);
+                        })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, this, validatorLatestResultObj, group);
                     }
                     obj.addEventListener(eventName, eventFunc, true);
                 }
@@ -4506,7 +4506,7 @@ function ___fairysupport(){
             }
             let validatorContent = Object.create(null);
             validatorContent['prop'] = prop;
-            validatorContent['validator'] = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, fs, validatorLatestResultObj, group){
+            validatorContent['validator'] = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, fs, validatorLatestResultObj, group){
                 return function (newValFlg) {
                     let valid = true;
                     let newReplaceFlg = false;
@@ -4563,7 +4563,7 @@ function ___fairysupport(){
                     return valid;
                     
                 };
-            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, prop, finishFunc, eventList, this, validatorLatestResultObj, group);
+            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, this, validatorLatestResultObj, group);
             
             validatorGroupObj[group].get(obj).push(validatorContent);
             
