@@ -5,10 +5,10 @@ function ___fairysupport(){
     let pageUrl = new URL(window.location.href);
     let reqLang = pageUrl.searchParams.get("lang")
     let languages = window.navigator.languages;
-	if (!(languages.includes(reqLang))) {
-		reqLang = null;
-	}
-	let confLang = window.navigator.language;
+    if (!(languages.includes(reqLang))) {
+        reqLang = null;
+    }
+    let confLang = window.navigator.language;
     let jsFwUrl = new URL(scriptObj.src);
     this.version = ('dataset' in scriptObj && 'version' in scriptObj.dataset) ? scriptObj.dataset.version : Date.now();
     let jsFwPath = jsFwUrl.origin + jsFwUrl.pathname.trim();
@@ -61,7 +61,11 @@ function ___fairysupport(){
     const validatorGroupObj = Object.create(null);
     const validatorReverseMap = new WeakMap();
     const validatorLatestResultObj = Object.create(null);
-    
+
+    const validatorGroupWeakMap = new WeakMap();
+    const validatorReverseWeakMap = new WeakMap();
+    const validatorLatestResultWeakMap = new WeakMap();
+
     if (!('fairysupportInitFail' in window)) {
         window.fairysupportInitFail = function (retryCount, error) {
             console.error(error);
@@ -741,7 +745,28 @@ function ___fairysupport(){
             }
             validatorReverseMap.delete(obj);
         }
-        
+
+        if (validatorReverseWeakMap.has(obj)) {
+            let validatorGroupList = validatorReverseWeakMap.get(obj);
+            for (let validatorGroup of validatorGroupList) {
+                if (validatorGroupWeakMap.has(validatorGroup)) {
+                    validatorGroupWeakMap.get(validatorGroup).delete(obj);
+                    if (validatorGroupWeakMap.get(validatorGroup).size <= 0) {
+                        delete validatorGroupWeakMap.get(validatorGroup);
+                        validatorGroupWeakMap.delete(validatorGroup);
+                    }
+                }
+                if (validatorLatestResultWeakMap.has(validatorGroup)) {
+                    validatorLatestResultWeakMap.get(validatorGroup).delete(obj);
+                    if (validatorLatestResultWeakMap.get(validatorGroup).size <= 0) {
+                        delete validatorLatestResultWeakMap.get(validatorGroup);
+                        validatorLatestResultWeakMap.delete(validatorGroup);
+                    }
+                }
+            }
+            validatorReverseWeakMap.delete(obj);
+        }
+
         this.deleteMeta(obj);
         let dataset = obj.dataset;
         if (dataset !== null && dataset !== undefined) {
@@ -4242,21 +4267,40 @@ function ___fairysupport(){
 
         if (eventList !== null && eventList !== undefined) {
             
-            if (!(group in validatorLatestResultObj)) {
-                validatorLatestResultObj[group] = new Map();
-            }
-            if (!(validatorLatestResultObj[group].has(obj))) {
-                validatorLatestResultObj[group].set(obj, Object.create(null));
-            }
-            if (!(prop in validatorLatestResultObj[group].get(obj))) {
-                validatorLatestResultObj[group].get(obj)[prop] = Object.create(null);
-            }
-            for (const eventName of eventList) {
-                if (!(eventName in validatorLatestResultObj[group].get(obj)[prop])) {
-                    validatorLatestResultObj[group].get(obj)[prop][eventName] = true;
+            if (group !== null) {
+                if (typeof group === 'string') {
+                    if (!(group in validatorLatestResultObj)) {
+                        validatorLatestResultObj[group] = new Map();
+                    }
+                    if (!(validatorLatestResultObj[group].has(obj))) {
+                        validatorLatestResultObj[group].set(obj, Object.create(null));
+                    }
+                    if (!(prop in validatorLatestResultObj[group].get(obj))) {
+                        validatorLatestResultObj[group].get(obj)[prop] = Object.create(null);
+                    }
+                    for (const eventName of eventList) {
+                        if (!(eventName in validatorLatestResultObj[group].get(obj)[prop])) {
+                            validatorLatestResultObj[group].get(obj)[prop][eventName] = true;
+                        }
+                    }
+                } else if (typeof group === 'object') {
+                    if (!(validatorLatestResultWeakMap.has(group))) {
+                        validatorLatestResultWeakMap.set(group, new Map());
+                    }
+                    if (!(validatorLatestResultWeakMap.get(group).has(obj))) {
+                        validatorLatestResultWeakMap.get(group).set(obj, Object.create(null));
+                    }
+                    if (!(prop in validatorLatestResultWeakMap.get(group).get(obj))) {
+                        validatorLatestResultWeakMap.get(group).get(obj)[prop] = Object.create(null);
+                    }
+                    for (const eventName of eventList) {
+                        if (!(eventName in validatorLatestResultWeakMap.get(group).get(obj)[prop])) {
+                            validatorLatestResultWeakMap.get(group).get(obj)[prop][eventName] = true;
+                        }
+                    }
                 }
             }
-            
+
             let equalFlg = false;
             this.preValueInit(preValueHolder, eventList, obj[prop]);
             let eventFunc = null;
@@ -4268,7 +4312,7 @@ function ___fairysupport(){
                             return protoPropertyDescriptor.get.call(obj);
                         }
                     })(protoPropertyDescriptor, obj);
-                    let setFunc = (function(protoPropertyDescriptor, obj, funcList, funcArg, prop, fs, preValueHolder, eventList, finishFunc, validatorLatestResultObj, group){
+                    let setFunc = (function(protoPropertyDescriptor, obj, funcList, funcArg, prop, fs, preValueHolder, eventList, finishFunc, validatorLatestResultObj, validatorLatestResultWeakMap, group){
                         return function(arg){
                             let valid = true;
                             let newReplaceFlg = false;
@@ -4283,8 +4327,12 @@ function ___fairysupport(){
                                 }
                                 errorObj[funcResult].push(func.name);
                             }
-                            
-                            validatorLatestResultObj[group].get(obj)[prop][null] = valid;
+
+                            if (typeof group === 'string') {
+                                validatorLatestResultObj[group].get(obj)[prop][null] = valid;
+                            } else if (typeof group === 'object') {
+                                validatorLatestResultWeakMap.get(group).get(obj)[prop][null] = valid;
+                            }
                             
                             if (finishFunc) {
                                 let finishResult = finishFunc(obj, prop, arg, preValueHolder.preVal[null], funcArg, null, valid, errorObj);
@@ -4323,7 +4371,7 @@ function ___fairysupport(){
                             }
                             
                         }
-                    })(protoPropertyDescriptor, obj, funcList, funcArg, prop, this, preValueHolder, eventList, finishFunc, validatorLatestResultObj, group);
+                    })(protoPropertyDescriptor, obj, funcList, funcArg, prop, this, preValueHolder, eventList, finishFunc, validatorLatestResultObj, validatorLatestResultWeakMap, group);
             
                     Object.defineProperty(obj, prop, {
                         enumerable: true,
@@ -4331,7 +4379,6 @@ function ___fairysupport(){
                         get: getFunc,
                         set : setFunc
                     });
-                    
                     
                     let initValid = true;
                     let newReplaceFlg = false;
@@ -4347,8 +4394,14 @@ function ___fairysupport(){
                         }
                         errorObj[funcResult].push(func.name);
                     }
-                    
-                    validatorLatestResultObj[group].get(obj)[prop][eventName] = initValid;
+
+                    if (group !== null) {
+                        if (typeof group === 'string') {
+                            validatorLatestResultObj[group].get(obj)[prop][eventName] = initValid;
+                        } else if (typeof group === 'object') {
+                            validatorLatestResultWeakMap.get(group).get(obj)[prop][eventName] = initValid;
+                        }
+                    }
                     
                     let finishResult = null;
                     if (finishFunc) {
@@ -4411,7 +4464,7 @@ function ___fairysupport(){
                                                     fs.preValueInit(preValueHolder, eventList, obj[prop]);
                                                 };
                                              })(preValueHolder, obj, prop, eventList, this), false);
-                        eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, fs, validatorLatestResultObj, group){
+                        eventFunc = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, fs, validatorLatestResultObj, validatorLatestResultWeakMap, group){
                             return function (event) {
                                 if (!(event.type in preValueHolder.preVal)) {
                                     fs.preValueEventInit(preValueHolder, event.type, obj[prop]);
@@ -4430,8 +4483,12 @@ function ___fairysupport(){
                                     }
                                     errorObj[funcResult].push(func.name);
                                 }
-                                
-                                validatorLatestResultObj[group].get(obj)[prop][event.type] = valid;
+
+                                if (typeof group === 'string') {
+                                    validatorLatestResultObj[group].get(obj)[prop][event.type] = valid;
+                                } else if (typeof group === 'object') {
+                                    validatorLatestResultWeakMap.get(group).get(obj)[prop][event.type] = valid;
+                                }
                                 
                                 if (finishFunc) {
                                     let finishResult = finishFunc(obj, prop, newVal, preValueHolder.preVal[event.type], funcArg, event, valid, errorObj);
@@ -4470,7 +4527,7 @@ function ___fairysupport(){
                                 }
                                 
                             };
-                        })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, this, validatorLatestResultObj, group);
+                        })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, this, validatorLatestResultObj, validatorLatestResultWeakMap, group);
                     }
                     obj.addEventListener(eventName, eventFunc, true);
                 }
@@ -4498,15 +4555,27 @@ function ___fairysupport(){
                 
             }
             
-            if (!(group in validatorGroupObj)) {
-                validatorGroupObj[group] = new Map();
+            if (group !== null) {
+                if (typeof group === 'string') {
+                    if (!(group in validatorGroupObj)) {
+                        validatorGroupObj[group] = new Map();
+                    }
+                    if (!(validatorGroupObj[group].has(obj))) {
+                        validatorGroupObj[group].set(obj, []);
+                    }
+                } else if (typeof group === 'object') {
+                    if (!(validatorGroupWeakMap.has(group))) {
+                        validatorGroupWeakMap.set(group, new Map());
+                    }
+                    if (!(validatorGroupWeakMap.get(group).has(obj))) {
+                        validatorGroupWeakMap.get(group).set(obj, []);
+                    }
+                }
             }
-            if (!(validatorGroupObj[group].has(obj))) {
-                validatorGroupObj[group].set(obj, []);
-            }
+            
             let validatorContent = Object.create(null);
             validatorContent['prop'] = prop;
-            validatorContent['validator'] = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, fs, validatorLatestResultObj, group){
+            validatorContent['validator'] = (function (funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, fs, validatorLatestResultObj, validatorLatestResultWeakMap, group){
                 return function (newValFlg) {
                     let valid = true;
                     let newReplaceFlg = false;
@@ -4522,8 +4591,12 @@ function ___fairysupport(){
                         }
                         errorObj[funcResult].push(func.name);
                     }
-                    
-                    validatorLatestResultObj[group].get(obj)[prop][undefined] = valid;
+
+                    if (typeof group === 'string') {
+                        validatorLatestResultObj[group].get(obj)[prop][undefined] = valid;
+                    } else if (typeof group === 'object') {
+                        validatorLatestResultWeakMap.get(group).get(obj)[prop][undefined] = valid;
+                    }
                     
                     if (finishFunc) {
                         let finishResult = finishFunc(obj, prop, newVal, obj[prop], funcArg, undefined, valid, errorObj);
@@ -4563,15 +4636,28 @@ function ___fairysupport(){
                     return valid;
                     
                 };
-            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, this, validatorLatestResultObj, group);
-            
-            validatorGroupObj[group].get(obj).push(validatorContent);
-            
-            if (!(validatorReverseMap.has(obj))) {
-                validatorReverseMap.set(obj, []);
+            })(funcList, obj, prop, preValueHolder, funcArg, protoPropertyDescriptor, finishFunc, eventList, this, validatorLatestResultObj, validatorLatestResultWeakMap, group);
+
+            if (group !== null) {
+                if (typeof group === 'string') {
+                    validatorGroupObj[group].get(obj).push(validatorContent);
+                    
+                    if (!(validatorReverseMap.has(obj))) {
+                        validatorReverseMap.set(obj, []);
+                    }
+                    validatorReverseMap.get(obj).push(group);
+
+                } else if (typeof group === 'object') {
+                    validatorGroupWeakMap.get(group).get(obj).push(validatorContent);
+
+                    if (!(validatorReverseWeakMap.has(obj))) {
+                        validatorReverseWeakMap.set(obj, []);
+                    }
+                    validatorReverseWeakMap.get(obj).push(group);
+
+                }
             }
-            validatorReverseMap.get(obj).push(group);
-            
+
         }
 
     };
@@ -4588,7 +4674,14 @@ function ___fairysupport(){
     
     this.execValidator = function (group, obj, newValFlg){
         let result = true;
-        let validatorList = validatorGroupObj[group].get(obj);
+        let validatorList = null;
+
+        if (typeof group === 'string') {
+            validatorList = validatorGroupObj[group].get(obj);
+        } else if (typeof group === 'object') {
+            validatorList = validatorGroupWeakMap.get(group).get(obj);
+        }
+        
         for (let objValidator of validatorList) {
             let valid = objValidator['validator'](newValFlg);
             if (!valid) {
@@ -4600,7 +4693,14 @@ function ___fairysupport(){
 
     this.execGroupValidator = function (group, newValFlg){
         let result = true;
-        let validatorMap = validatorGroupObj[group];
+        let validatorMap = null;
+
+        if (typeof group === 'string') {
+            validatorMap = validatorGroupObj[group];
+        } else if (typeof group === 'object') {
+            validatorMap = validatorGroupWeakMap.get(group);
+        }
+
         for (let obj of validatorMap.keys()) {
             let valid = this.execValidator(group, obj, newValFlg);
             if (!valid) {
@@ -4611,6 +4711,9 @@ function ___fairysupport(){
     };
 
     this.getValidateLatestResult = function (group, obj, prop, eventName){
+        if (group !== null && (typeof group === 'object')) {
+            return validatorLatestResultWeakMap.get(group).get(obj)[prop][eventName];
+        }
         return validatorLatestResultObj[group].get(obj)[prop][eventName];
     };
     
@@ -4689,14 +4792,14 @@ function ___fairysupport(){
         return confLang;
     };
 
-	this.getLang = function () {
-		if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
-			return reqLang;
-		} else if (confLang !== null && confLang !== undefined && confLang !== '') {
-			return confLang;
-		}
-	    return '';
-	};
+    this.getLang = function () {
+        if (reqLang !== null && reqLang !== undefined && reqLang !== '') {
+            return reqLang;
+        } else if (confLang !== null && confLang !== undefined && confLang !== '') {
+            return confLang;
+        }
+        return '';
+    };
 
     this.storeClass = class FairysupportStore {
         #data;
