@@ -33,7 +33,7 @@ try {
             
         }
     }
-    fs.writeFileSync(lockFilePath, "");
+    fs.writeFileSync(lockFilePath, "", { 'encoding': 'utf8' });
 
     function createDir(parentDir, dir) {
         const newDir = path.join(parentDir, dir);
@@ -72,6 +72,7 @@ try {
     }
     
     const src = path.join(curDir, "src");
+    const distTsWork = path.join(curDir, "distTsWork");
     rmAll(path.join(outputDir, "distWork"));
     const distWork = createDir(outputDir, "distWork");
     
@@ -80,7 +81,7 @@ try {
         fileList.forEach((fileName) => {
             const fullFileNamePath = path.join(src, fileName);
             const fileStas = fs.statSync(fullFileNamePath);
-            if (fileStas.isFile()) {
+            if (fileStas.isFile() && !fileName.endsWith('.ts')) {
                 const distWorkFilePath = path.join(distWork, fileName);
                 fs.copyFileSync(fullFileNamePath, distWorkFilePath);
             } else if (fileStas.isDirectory()) {
@@ -100,6 +101,54 @@ try {
     }
     
     allCopy(src, distWork);
+    allCopy(distTsWork, distWork);
+    
+    function replaceImport(curDir, dir, prefix) {
+
+        const importReplaceFilePath = path.join(curDir, 'importReplace.json');
+        const importReplaceFileStas = fs.statSync(importReplaceFilePath);
+        if (!importReplaceFileStas.isFile()) {
+            return;
+        }
+        const importReplaceJsonStr = fs.readFileSync(importReplaceFilePath, { 'encoding': 'utf8' });
+        const importReplaceJson = JSON.parse(importReplaceJsonStr);
+
+        const fileList = fs.readdirSync(dir);
+        fileList.forEach((fileName) => {
+            const fullFileNamePath = path.join(dir, fileName);
+            const fileStas = fs.statSync(fullFileNamePath);
+            if (fileStas.isFile() && fileName.endsWith('.js')) {
+                
+                const jsonKeyList = Object.keys(importReplaceJson);
+                for (const jsonKey of jsonKeyList) {
+                    const jsonValue = importReplaceJson[jsonKey];
+
+                    let jsContaintsStr = fs.readFileSync(fullFileNamePath, { 'encoding': 'utf8' });
+                    let replaceFunc = getImportReplaceFunc(jsonKey, (prefix === "" ? "./" : prefix) + jsonValue);
+                    let re = new RegExp('(^|\\s|;)import(\\s)(.+)(\\s)from(\\s+)(\'|\\")(.+)(\'|\\")', "g");
+                    jsContaintsStr = jsContaintsStr.replace(re, replaceFunc);
+                    fs.writeFileSync(fullFileNamePath, jsContaintsStr, { 'encoding': 'utf8' });
+
+                }
+                
+            } else if (fileStas.isDirectory()) {
+                replaceImport(curDir, fullFileNamePath, '../' + prefix);
+            }
+        });
+    }
+
+    function getImportReplaceFunc(before, after) {
+        return (function (before, after) {
+            return function (match, p1, p2, p3, p4, p5, p6, p7, p8, offset, string) {
+                if (before === p7) {
+                    return 'import ' + p3 + ' from ' + p6 + after + p8;
+                }
+                return match;
+            };
+        })(before, after);
+    }
+
+    replaceImport(curDir, distWork, "");
     
     function bundleEnvJson(envTxt, envValueDestObj, distWorkModules, distWorkEnv) {
         let first = true;
@@ -110,10 +159,10 @@ try {
                 const objEnvValuePath = path.join(distWorkEnv, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath, { 'encoding': 'utf8' })));
                 }
                 if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath, { 'encoding': 'utf8' })));
                 }
             }
             first = false;
@@ -132,10 +181,10 @@ try {
                 const objEndEnvValuePath = path.join(distWorkEnv, fileNameOnly, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objEndDefaultPath) && fs.statSync(objEndDefaultPath).isFile()) {
-                    Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndDefaultPath)));
+                    Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndDefaultPath, { 'encoding': 'utf8' })));
                 }
                 if (fs.existsSync(objEndEnvValuePath) && fs.statSync(objEndEnvValuePath).isFile()) {
-                    Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndEnvValuePath)));
+                    Object.assign(envValueParentObj, JSON.parse(fs.readFileSync(objEndEnvValuePath, { 'encoding': 'utf8' })));
                 }
                 
                 fs.appendFileSync(moduleFilePath, " \n\n export const __fairysupport__envTxt = '" + envTxt + "';" + " \n\n export const __fairysupport__envValueObj = " + JSON.stringify(envValueParentObj) + ";\n");
@@ -168,20 +217,20 @@ try {
                 if (!('' in msgDestObjList)) {
                     msgDestObjList[''] = Object.create(null);
                 }
-                Object.assign(msgDestObjList[''], JSON.parse(fs.readFileSync(msgFilePath)));
+                Object.assign(msgDestObjList[''], JSON.parse(fs.readFileSync(msgFilePath, { 'encoding': 'utf8' })));
             } else if (fileName.startsWith('msg.') && fileName.endsWith('.json') && msgFileStat.isFile()) {
                 const langStr = fileName.substring(4, fileName.length - 5);
                 if (!(langStr in msgDestObjList)) {
                     msgDestObjList[langStr] = Object.create(null);
                 }
-                Object.assign(msgDestObjList[langStr], JSON.parse(fs.readFileSync(msgFilePath)));
+                Object.assign(msgDestObjList[langStr], JSON.parse(fs.readFileSync(msgFilePath, { 'encoding': 'utf8' })));
             }
         };
         for (const langStr in msgDestObjList) {
             if ('' === langStr) {
-                fs.writeFileSync(path.join(distWorkMsg, 'msg.json'), JSON.stringify(msgDestObjList['']));
+                fs.writeFileSync(path.join(distWorkMsg, 'msg.json'), JSON.stringify(msgDestObjList['']), { 'encoding': 'utf8' });
             } else {
-                fs.writeFileSync(path.join(distWorkMsg, 'msg.' + langStr + '.json'), JSON.stringify(msgDestObjList[langStr]));
+                fs.writeFileSync(path.join(distWorkMsg, 'msg.' + langStr + '.json'), JSON.stringify(msgDestObjList[langStr]), { 'encoding': 'utf8' });
             }
         }
         const moduleFileList = fs.readdirSync(distWorkModules);
@@ -204,20 +253,20 @@ try {
                         if (!('' in msgDestObjParentList)) {
                             msgDestObjParentList[''] = Object.create(null);
                         }
-                        Object.assign(msgDestObjParentList[''], JSON.parse(fs.readFileSync(msgEndDirFilePath)));
+                        Object.assign(msgDestObjParentList[''], JSON.parse(fs.readFileSync(msgEndDirFilePath, { 'encoding': 'utf8' })));
                     } else if (msgEndDirFile.startsWith('msg.') && msgEndDirFile.endsWith('.json') && msgEndDirFileStat.isFile()) {
                         const langStr = msgEndDirFile.substring(4, msgEndDirFile.length - 5);
                         if (!(langStr in msgDestObjParentList)) {
                             msgDestObjParentList[langStr] = Object.create(null);
                         }
-                        Object.assign(msgDestObjParentList[langStr], JSON.parse(fs.readFileSync(msgEndDirFilePath)));
+                        Object.assign(msgDestObjParentList[langStr], JSON.parse(fs.readFileSync(msgEndDirFilePath, { 'encoding': 'utf8' })));
                     }
                 };
                 for (const langStr in msgDestObjParentList) {
                     if ('' === langStr) {
-                        fs.writeFileSync(path.join(msgEndDirPath, 'msg.json'), JSON.stringify(msgDestObjParentList['']));
+                        fs.writeFileSync(path.join(msgEndDirPath, 'msg.json'), JSON.stringify(msgDestObjParentList['']), { 'encoding': 'utf8' });
                     } else {
-                        fs.writeFileSync(path.join(msgEndDirPath, 'msg.' + langStr + '.json'), JSON.stringify(msgDestObjParentList[langStr]));
+                        fs.writeFileSync(path.join(msgEndDirPath, 'msg.' + langStr + '.json'), JSON.stringify(msgDestObjParentList[langStr]), { 'encoding': 'utf8' });
                     }
                 }
                 
@@ -244,10 +293,10 @@ try {
                 const objEnvValuePath = path.join(distWorkComponents, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath)));
+                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objDefaultPath, { 'encoding': 'utf8' })));
                 }
                 if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath)));
+                    Object.assign(envValueDestObj, JSON.parse(fs.readFileSync(objEnvValuePath, { 'encoding': 'utf8' })));
                 }
             }
             first = false;
@@ -264,7 +313,7 @@ try {
                     let viewContent = '';
                     const viewPath = path.join(distWorkComponents, "view.html");
                     if (fs.existsSync(viewPath) && fs.statSync(viewPath).isFile()) {
-                        viewContent = fs.readFileSync(viewPath);
+                        viewContent = fs.readFileSync(viewPath, { 'encoding': 'utf8' });
                         let re = new RegExp('`', "g");
                         viewContent = viewContent.toString().replace(re, '\\`');
                         fs.unlinkSync(viewPath);
@@ -297,20 +346,20 @@ try {
                 if (!('' in msgDestObjList)) {
                     msgDestObjList[''] = Object.create(null);
                 }
-                Object.assign(msgDestObjList[''], JSON.parse(fs.readFileSync(msgFilePath)));
+                Object.assign(msgDestObjList[''], JSON.parse(fs.readFileSync(msgFilePath, { 'encoding': 'utf8' })));
             } else if (fileName.startsWith('msg.') && fileName.endsWith('.json') && msgFileStat.isFile()) {
                 const langStr = fileName.substring(4, fileName.length - 5);
                 if (!(langStr in msgDestObjList)) {
                     msgDestObjList[langStr] = Object.create(null);
                 }
-                Object.assign(msgDestObjList[langStr], JSON.parse(fs.readFileSync(msgFilePath)));
+                Object.assign(msgDestObjList[langStr], JSON.parse(fs.readFileSync(msgFilePath, { 'encoding': 'utf8' })));
             }
         };
         for (const langStr in msgDestObjList) {
             if ('' === langStr) {
-                fs.writeFileSync(path.join(distWorkComponents, 'msg.json'), JSON.stringify(msgDestObjList['']));
+                fs.writeFileSync(path.join(distWorkComponents, 'msg.json'), JSON.stringify(msgDestObjList['']), { 'encoding': 'utf8' });
             } else {
-                fs.writeFileSync(path.join(distWorkComponents, 'msg.' + langStr + '.json'), JSON.stringify(msgDestObjList[langStr]));
+                fs.writeFileSync(path.join(distWorkComponents, 'msg.' + langStr + '.json'), JSON.stringify(msgDestObjList[langStr]), { 'encoding': 'utf8' });
             }
         }
         const componentFileList = fs.readdirSync(distWorkComponents);
@@ -335,7 +384,7 @@ try {
         let curCssContent = '';
         const appCssFilePath = path.join(distWorkCss, "app.css");
         if (fs.existsSync(appCssFilePath) && fs.statSync(appCssFilePath).isFile()) {
-            curCssContent = fs.readFileSync(appCssFilePath);
+            curCssContent = fs.readFileSync(appCssFilePath, { 'encoding': 'utf8' });
         }
         let writeCssContent = null;
         if (curCssContent === '') {
@@ -347,7 +396,7 @@ try {
                 writeCssContent = cssContent + "\n\n" + curCssContent;
             }
         }
-        fs.writeFileSync(appCssFilePath, writeCssContent);
+        fs.writeFileSync(appCssFilePath, writeCssContent, { 'encoding': 'utf8' });
         
         const fileList = fs.readdirSync(distWorkCss);
         for (const fileName of fileList) {
@@ -366,9 +415,9 @@ try {
             const parentCppCssFilePath = path.join(parentDir, "app.css");
             let curCssContent = '';
             if (fs.existsSync(parentCppCssFilePath)) {
-                curCssContent = fs.readFileSync(parentCppCssFilePath);
+                curCssContent = fs.readFileSync(parentCppCssFilePath, { 'encoding': 'utf8' });
             }
-            fs.writeFileSync(curAppCssFilePath, curCssContent);
+            fs.writeFileSync(curAppCssFilePath, curCssContent, { 'encoding': 'utf8' });
         }
         
         if (!fs.existsSync(distWorkModules) || fs.statSync(distWorkModules).isFile()) {
@@ -397,9 +446,9 @@ try {
             const parentCppCssFilePath = path.join(parentDir, "app.css");
             let curCssContent = '';
             if (fs.existsSync(parentCppCssFilePath)) {
-                curCssContent = fs.readFileSync(parentCppCssFilePath);
+                curCssContent = fs.readFileSync(parentCppCssFilePath, { 'encoding': 'utf8' });
             }
-            fs.writeFileSync(curAppCssFilePath, curCssContent);
+            fs.writeFileSync(curAppCssFilePath, curCssContent, { 'encoding': 'utf8' });
         }
         
         if (!fs.existsSync(distWorkPage) || fs.statSync(distWorkPage).isFile()) {
@@ -467,7 +516,7 @@ try {
             framePathSplit[framePathSplit.length - 1] = framePathSplit[framePathSplit.length - 1] + '.html';
             const framePath = path.join(frameDirPath, ...framePathSplit);
             if (fs.existsSync(framePath) && fs.statSync(framePath).isFile()) {
-                let frameContent = fs.readFileSync(framePath);
+                let frameContent = fs.readFileSync(framePath, { 'encoding': 'utf8' });
                 let replacedContent = bundleToolReplace(frameContent.toString(), pageContent.toString().trim(), 'page', '');
                 replacedContent = escapeReplace(replacedContent, 'frame');
                 replacedContent = escapeReplace(replacedContent, 'page');
@@ -491,9 +540,9 @@ try {
             const pageFilePath = path.join(distWorkPage, fileName);
             const pageFileStat = fs.statSync(pageFilePath);
             if (pageFileStat.isFile()) {
-                let pageContent = fs.readFileSync(pageFilePath);
+                let pageContent = fs.readFileSync(pageFilePath, { 'encoding': 'utf8' });
                 let framePageContent = bundleToolReplaceForFrame(pageContent.toString(), distWorkFrame, pageFilePath);
-                fs.writeFileSync(pageFilePath, framePageContent);
+                fs.writeFileSync(pageFilePath, framePageContent, { 'encoding': 'utf8' });
             } else if (pageFileStat.isDirectory()) {
                 bundlePageFrame(pageFilePath, distWorkFrame);
             }
@@ -521,7 +570,7 @@ try {
             embedPathSplit[embedPathSplit.length - 1] = embedPathSplit[embedPathSplit.length - 1] + '.html';
             const embedPath = path.join(useEmbedObj['embedDirPath'], ...embedPathSplit);
             if (fs.existsSync(embedPath) && fs.statSync(embedPath).isFile()) {
-                let embedContent = fs.readFileSync(embedPath);
+                let embedContent = fs.readFileSync(embedPath, { 'encoding': 'utf8' });
                 return embedContent;
             } else {
                 console.error('Error');
@@ -553,10 +602,10 @@ try {
             const pageFilePath = path.join(distWorkPage, fileName);
             const pageFileStat = fs.statSync(pageFilePath);
             if (pageFileStat.isFile()) {
-                let pageContent = fs.readFileSync(pageFilePath);
+                let pageContent = fs.readFileSync(pageFilePath, { 'encoding': 'utf8' });
                 let embedPageContent = bundleToolReplaceForEmbed(pageContent.toString(), distWorkEmbed, pageFilePath);
                 embedPageContent = escapeReplace(embedPageContent, 'embed');
-                fs.writeFileSync(pageFilePath, embedPageContent);
+                fs.writeFileSync(pageFilePath, embedPageContent, { 'encoding': 'utf8' });
             } else if (pageFileStat.isDirectory()) {
                 bundlePageEmbed(pageFilePath, distWorkEmbed);
             }
@@ -612,10 +661,10 @@ try {
                 const objEnvValuePath = path.join(distWorkPageEnv, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-                    Object.assign(envValueDestObj,  eval("(" + fs.readFileSync(objDefaultPath) + ")"));
+                    Object.assign(envValueDestObj,  eval("(" + fs.readFileSync(objDefaultPath, { 'encoding': 'utf8' }) + ")"));
                 }
                 if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-                    Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath) + ")"));
+                    Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath, { 'encoding': 'utf8' }) + ")"));
                 }
             }
             first = false;
@@ -634,15 +683,15 @@ try {
                 const objEndEnvValuePath = path.join(distWorkPageEnv, fileNameOnly, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objEndDefaultPath) && fs.statSync(objEndDefaultPath).isFile()) {
-                    Object.assign(envValueParentObj, eval("(" + fs.readFileSync(objEndDefaultPath) + ")"));
+                    Object.assign(envValueParentObj, eval("(" + fs.readFileSync(objEndDefaultPath, { 'encoding': 'utf8' }) + ")"));
                 }
                 if (fs.existsSync(objEndEnvValuePath) && fs.statSync(objEndEnvValuePath).isFile()) {
-                    Object.assign(envValueParentObj, eval("(" + fs.readFileSync(objEndEnvValuePath) + ")"));
+                    Object.assign(envValueParentObj, eval("(" + fs.readFileSync(objEndEnvValuePath, { 'encoding': 'utf8' }) + ")"));
                 }
                 
-                let content = fs.readFileSync(pageFilePath).toString();
+                let content = fs.readFileSync(pageFilePath, { 'encoding': 'utf8' }).toString();
                 content = bundleToolReplaceForEnvValue(content, envValueParentObj, pageFilePath);
-                fs.writeFileSync(pageFilePath, content);
+                fs.writeFileSync(pageFilePath, content, { 'encoding': 'utf8' });
                 
             }
             
@@ -657,10 +706,10 @@ try {
                 const objEnvValuePath = path.join(distWorkPageEnv, "envValue." + envTxt + ".json");
                 
                 if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-                    Object.assign(envValueDestObj,  eval("(" + fs.readFileSync(objDefaultPath) + ")"));
+                    Object.assign(envValueDestObj,  eval("(" + fs.readFileSync(objDefaultPath, { 'encoding': 'utf8' }) + ")"));
                 }
                 if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-                    Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath) + ")"));
+                    Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath, { 'encoding': 'utf8' }) + ")"));
                 }
             }
             first = false;
@@ -672,9 +721,9 @@ try {
                 bundleCssEnvJson(envTxt, JSON.parse(JSON.stringify(envValueDestObj)), pageFilePath, envFilePath);
             } else if (pageFileStat.isFile() && 'app.css' === fileName.toString()) {
                 
-                let content = fs.readFileSync(pageFilePath).toString();
+                let content = fs.readFileSync(pageFilePath, { 'encoding': 'utf8' }).toString();
                 content = bundleToolReplaceForEnvValue(content, envValueDestObj, pageFilePath);
-                fs.writeFileSync(pageFilePath, content);
+                fs.writeFileSync(pageFilePath, content, { 'encoding': 'utf8' });
                 
             }
             
@@ -686,10 +735,10 @@ try {
         const objEnvValuePath = path.join(distWorkCommonEnv, "envValue." + envTxt + ".json");
         
         if (fs.existsSync(objDefaultPath) && fs.statSync(objDefaultPath).isFile()) {
-            Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objDefaultPath) + ")"));
+            Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objDefaultPath, { 'encoding': 'utf8' }) + ")"));
         }
         if (fs.existsSync(objEnvValuePath) && fs.statSync(objEnvValuePath).isFile()) {
-            Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath) + ")"));
+            Object.assign(envValueDestObj, eval("(" + fs.readFileSync(objEnvValuePath, { 'encoding': 'utf8' }) + ")"));
         }
         return envValueDestObj;
     }
@@ -711,10 +760,10 @@ try {
         if (fs.statSync(distWorkPage).isFile()) {
             const curAppCssFilePath = path.join(distWorkCss, "app.css");
             if (fs.existsSync(curAppCssFilePath) && fs.statSync(curAppCssFilePath).isFile()) {
-                let curPageContent = fs.readFileSync(distWorkPage).toString();
-                let curCssContent = fs.readFileSync(curAppCssFilePath);
+                let curPageContent = fs.readFileSync(distWorkPage, { 'encoding': 'utf8' }).toString();
+                let curCssContent = fs.readFileSync(curAppCssFilePath, { 'encoding': 'utf8' });
                 curPageContent = curPageContent.replace('</head>', '<style type="text/css">' + "\n" + curCssContent + "\n" + '</style>' + "\n" + '</head>');
-                fs.writeFileSync(distWorkPage, curPageContent);
+                fs.writeFileSync(distWorkPage, curPageContent, { 'encoding': 'utf8' });
             }
             return;
         }
@@ -772,7 +821,7 @@ try {
         }
         let domainStr = null;
         if (fs.existsSync(domainPath) && fs.statSync(domainPath).isFile()) {
-            domainStr = fs.readFileSync(domainPath).toString().trim();
+            domainStr = fs.readFileSync(domainPath, { 'encoding': 'utf8' }).toString().trim();
         }
         
         let maxSizePath = null;
@@ -786,7 +835,7 @@ try {
         }
         let maxSizeStr = null;
         if (fs.existsSync(maxSizePath) && fs.statSync(maxSizePath).isFile()) {
-            maxSizeStr = fs.readFileSync(maxSizePath).toString().trim();
+            maxSizeStr = fs.readFileSync(maxSizePath, { 'encoding': 'utf8' }).toString().trim();
             maxSizeStr = maxSizeStr - 0;
         }
         
@@ -860,8 +909,8 @@ try {
             const pageFilePath = path.join(distWorkPage, fileName);
             const pageFileStat = fs.statSync(pageFilePath);
             if (pageFileStat.isFile()) {
-                let replaceContent = replaceImgEncode(fs.readFileSync(pageFilePath).toString(), pageFilePath, imgEncodeInfo, distWorkImg);
-                fs.writeFileSync(pageFilePath, replaceContent);
+                let replaceContent = replaceImgEncode(fs.readFileSync(pageFilePath, { 'encoding': 'utf8' }).toString(), pageFilePath, imgEncodeInfo, distWorkImg);
+                fs.writeFileSync(pageFilePath, replaceContent, { 'encoding': 'utf8' });
             } else if (pageFileStat.isDirectory()) {
                 replaceImgEncodeDir(imgEncodeInfo, pageFilePath, distWorkImg);
             }
@@ -883,15 +932,12 @@ try {
     console.log('end replace img in page and css and js');
     
     
+    //console.log('start create fairysupport.js');
     
-    console.log('start create fairysupport.js');
+    //const fsFilePath = path.join(__dirname, 'fairysupport.min.js');
+    //fs.copyFileSync(fsFilePath, path.join(distWorkJs, 'fairysupport.min.js'));
     
-    
-    const fsFilePath = path.join(__dirname, 'fairysupport.min.js');
-    fs.copyFileSync(fsFilePath, path.join(distWorkJs, 'fairysupport.min.js'));
-    
-    console.log('end create fairysupport.js');
-    
+    //console.log('end create fairysupport.js');
     
     
     console.log((new Date()).toLocaleString());

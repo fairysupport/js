@@ -1,4 +1,9 @@
-function ___fairysupport(){
+function FairysupportJs(){
+
+    if ('$f' in globalThis) {
+        return;
+    }
+    globalThis.$f = this;
 
     let scriptObj = document.getElementById("fs-js");
 
@@ -597,7 +602,12 @@ function ___fairysupport(){
                                             };
                                         }
                             )(s, bindStr, beforeMet, afterMet, fairysupportClear);
-            Object.defineProperty(this.clazz.obj, bindStr, {
+            const bindStrSplit = bindStr.split('.');
+            let targetObj = this.clazz.obj;
+            for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                targetObj = targetObj[bindStrSplit[i]];
+            }
+            Object.defineProperty(targetObj, bindStrSplit[bindStrSplit.length - 1], {
                 enumerable: true,
                 configurable: true,
                 get: getFunc,
@@ -609,14 +619,21 @@ function ___fairysupport(){
 
     this.bindControllerSingleList = function (dom, bindList){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
+            const bindStrSplit = bindList.split('.');
+            let targetObj = this.clazz.obj;
             if (this.clazz.obj[bindList] === null || this.clazz.obj[bindList] === undefined) {
                 let beforeMet = this.getControllerMethodInputArgs(this, 'beforeRemoveList');
                 let afterMet = this.getControllerMethodInputArgs(this, 'afterRemoveList');
                 let addBeforeFn = this.getControllerMethodInputArgs(this, 'beforeBindList');
                 let addAfterFn = this.getControllerMethodInputArgs(this, 'afterBindList');
-                this.clazz.obj[bindList] = new this.elementList(bindList, beforeMet, afterMet, addBeforeFn, addAfterFn, fairysupportClear);
+                
+                for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                    targetObj = targetObj[bindStrSplit[i]];
+                }
+                
+                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet, addBeforeFn, addAfterFn, fairysupportClear);
             }
-            this.clazz.obj[bindList].add(dom);
+            targetObj[bindStrSplit[bindStrSplit.length - 1]].add(dom);
         }
     }
 
@@ -1196,7 +1213,14 @@ function ___fairysupport(){
                                             };
                                         }
                             )(s, bindStr, beforeMet, afterMet, fairysupportClear);
-            Object.defineProperty(this.componentControllerList[componentPath], bindStr, {
+            
+            const bindStrSplit = bindStr.split('.');
+            let targetObj = this.componentControllerList[componentPath];
+            for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                targetObj = targetObj[bindStrSplit[i]];
+            }
+            
+            Object.defineProperty(targetObj, bindStrSplit[bindStrSplit.length - 1], {
                 enumerable: true,
                 configurable: true,
                 get: getFunc,
@@ -1208,14 +1232,21 @@ function ___fairysupport(){
 
     this.bindComponentSingleList = function (dom, bindList, componentPath){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
+            const bindStrSplit = bindList.split('.');
+            let targetObj = this.componentControllerList[componentPath];
             if (this.componentControllerList[componentPath][bindList] === null || this.componentControllerList[componentPath][bindList] === undefined) {
                 let beforeMet = this.getComponentMethodInputArgs(this, componentPath, 'beforeRemoveList');
                 let afterMet = this.getComponentMethodInputArgs(this, componentPath, 'afterRemoveList');
                 let addBeforeFn = this.getComponentMethodInputArgs(this, componentPath, 'beforeBindList');
                 let addAfterFn = this.getComponentMethodInputArgs(this, componentPath, 'afterBindList');
-                this.componentControllerList[componentPath][bindList] = new this.elementList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn, fairysupportClear);
+                
+                for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                    targetObj = targetObj[bindStrSplit[i]];
+                }
+                
+                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn, fairysupportClear);
             }
-            this.componentControllerList[componentPath][bindList].add(dom);
+            targetObj[bindStrSplit[bindStrSplit.length - 1]].add(dom);
         }
     }
 
@@ -1306,82 +1337,6 @@ function ___fairysupport(){
             let targetInfo = this.targetDomMap.get(dom)
             targetInfo[componentValueMap['componentPackeage']] = componentValueMap;
             this.componentPackageList[componentValueMap['componentPackeage']] = componentValueMap;
-        }
-    };
-
-    this.elementList = class FairysupportObjList {
-        #objMap;
-        #bindListStr;
-        #beforeMet;
-        #afterMet;
-        #addBeforeMet;
-        #addAfterMet;
-        #fairysupportClear;
-        constructor(bindList, beforeFn, afterFn, addBeforeFn, addAfterFn, fairysupportClear) {
-            this.#objMap = new Map();
-            this.#bindListStr = bindList;
-            this.#beforeMet = beforeFn;
-            this.#afterMet = afterFn;
-            this.#addBeforeMet = addBeforeFn;
-            this.#addAfterMet = addAfterFn;
-            this.#fairysupportClear = fairysupportClear;
-        }
-        size() {
-            return this.#objMap.size;
-        }
-        has(element) {
-            return this.#objMap.has(element);
-        }
-        add(element) {
-            this.#addBeforeMet({'name': this.#bindListStr, 'value': element});
-            this.#objMap.set(element, element);
-            this.#addAfterMet({'name': this.#bindListStr, 'value': element});
-            return this;
-        }
-        replace(oldElement, newElement) {
-            this.#beforeMet({'name': this.#bindListStr, 'value': oldElement});
-            this.#objMap.delete(oldElement);
-            if (oldElement) {
-                if (oldElement.parentNode && !(newElement instanceof fairysupportClear)) {
-                    if (newElement === null || newElement=== undefined) {
-                        oldElement.parentNode.removeChild(oldElement);
-                    } else if (newElement instanceof Node) {
-                        oldElement.parentNode.replaceChild(newElement, oldElement);
-                    }
-                }
-            }
-            this.#afterMet({'name': this.#bindListStr, 'value': oldElement});
-            return this;
-        }
-        remove(element) {
-            this.#beforeMet({'name': this.#bindListStr, 'value': element});
-            this.#objMap.delete(element);
-            if (element && element.parentNode && !(element instanceof fairysupportClear)) {
-                element.parentNode.removeChild(element);
-            }
-            this.#afterMet({'name': this.#bindListStr, 'value': element});
-            return this;
-        }
-        values() {
-            return this.#objMap.values();
-        }
-        forEach(fn, arg = null){
-            if (arg === null) {
-                for (let value of this.#objMap.values()) {
-                    fn(value);
-                }
-            } else {
-                for (let value of this.#objMap.values()) {
-                    fn(value, arg);
-                }
-            }
-        }
-        toArray(){
-            let ret = [];
-            for (let value of this.#objMap.values()) {
-                ret.push(value);
-            }
-            return ret;
         }
     };
 
@@ -3209,7 +3164,14 @@ function ___fairysupport(){
                                             };
                                         }
                             )(s, bindStr, beforeMet, afterMet, fairysupportClear);
-            Object.defineProperty(controllerObj, bindStr, {
+            
+            const bindStrSplit = bindStr.split('.');
+            let targetObj = controllerObj;
+            for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                targetObj = targetObj[bindStrSplit[i]];
+            }
+            
+            Object.defineProperty(targetObj, bindStrSplit[bindStrSplit.length - 1], {
                 enumerable: true,
                 configurable: true,
                 get: getFunc,
@@ -3221,14 +3183,21 @@ function ___fairysupport(){
 
     this.bindUniqueComponentSingleList = function (dom, bindList, controllerObj, methodList){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
+            const bindStrSplit = bindList.split('.');
+            let targetObj = controllerObj;
             if (controllerObj[bindList] === null || controllerObj[bindList] === undefined) {
                 let beforeMet = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'beforeRemoveList');
                 let afterMet = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'afterRemoveList');
                 let addBeforeFn = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'beforeBindList');
                 let addAfterFn = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'afterBindList');
-                controllerObj[bindList] = new this.elementList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn, fairysupportClear);
+                
+                for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                    targetObj = targetObj[bindStrSplit[i]];
+                }
+
+                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn, fairysupportClear);
             }
-            controllerObj[bindList].add(dom);
+            targetObj[bindStrSplit[bindStrSplit.length - 1]].add(dom);
         }
     }
 
@@ -3536,7 +3505,7 @@ function ___fairysupport(){
             paramStr = null;
         }
 
-        let req = new this.fairysupportAjaxObj(null, null, reqUrl, paramStr, null, null, null, 'ajax', null);
+        let req = new FairysupportAjaxObj(null, null, reqUrl, paramStr, null, null, null, 'ajax', null);
         req.open(met, reqUrl, true, user, password);
         return req;
 
@@ -3578,7 +3547,7 @@ function ___fairysupport(){
 
     this.emptyAjaxByForm = function (reqUrl, formObj, user = null, password = null){
 
-        let req = new this.fairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
+        let req = new FairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
         req.open('POST', reqUrl, true, user, password);
 
         return req;
@@ -3605,467 +3574,6 @@ function ___fairysupport(){
 
         return req;
 
-    };
-
-    this.fairysupportAjaxObj = class FairysupportAjaxObj {
-        
-        #dom;
-        #componentPackeage;
-        #viewUrl;
-        #paramObj;
-        #argObj;
-        #cb;
-        #position;
-        #metName;
-        #componentRoot;
-
-        #xhr;
-        
-        #__resFunc;
-        
-        constructor(dom, componentPackeage, viewUrl, paramObj, argObj, cb, position, metName, componentRoot) {
-
-            this.#dom = dom;
-            this.#componentPackeage = componentPackeage;
-            this.#viewUrl = viewUrl;
-            this.#paramObj = paramObj;
-            this.#argObj = argObj;
-            this.#cb = cb;
-            this.#position = position;
-            this.#metName = metName;
-            this.#componentRoot = componentRoot;
-            this.#__resFunc = Object.create(null);
-
-            this.#xhr = new XMLHttpRequest();
-            let getFunc = (function(xhr){return function(){return xhr.onreadystatechange;};})(this.#xhr);
-            let setFunc = (function(xhr){return function(newFunc){xhr.onreadystatechange = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'onreadystatechange', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.readyState;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.readyState = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'readyState', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.response;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.response = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'response', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.responseText;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.responseText = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'responseText', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.responseType;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.responseType = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'responseType', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.responseURL;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.responseURL = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'responseURL', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.responseXML;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.responseXML = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'responseXML', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.status;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.status = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'status', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.statusText;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.statusText = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'statusText', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.timeout;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.timeout = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'timeout', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.upload;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.upload = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'upload', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.withCredentials;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newValue){xhr.withCredentials = newValue;};})(this.#xhr);
-            Object.defineProperty(this, 'withCredentials', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.onabort;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newFunc){xhr.onabort = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'onabort', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.onerror;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newFunc){xhr.onerror = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'onerror', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.onload;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newFunc){xhr.onload = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'onload', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.onloadend;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newFunc){xhr.onloadend = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'onloadend', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.onloadstart;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newFunc){xhr.onloadstart = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'onloadstart', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.onprogress;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newFunc){xhr.onprogress = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'onprogress', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-            getFunc = (function(xhr){return function(){return xhr.ontimeout;};})(this.#xhr);
-            setFunc = (function(xhr){return function(newFunc){xhr.ontimeout = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
-            Object.defineProperty(this, 'ontimeout', {
-                enumerable: true,
-                configurable: false,
-                get: getFunc,
-                set : setFunc
-            });
-        }
-        setResponseType(val) {
-            this.responseType = val;
-            return this;
-        }
-        abort() {
-            this.#xhr.abort();
-            return this;
-        }
-        getAllResponseHeaders() {
-            return this.#xhr.getAllResponseHeaders();
-        }
-        getResponseHeader(headerName) {
-            return this.#xhr.getResponseHeader(headerName);
-        }
-        open(method, url, async = true, user = null, password = null) {
-            this.#xhr.open(method, url, async, user, password);
-            return this;
-        }
-        overrideMimeType(mimeType) {
-            this.#xhr.overrideMimeType(mimeType);
-            return this;
-        }
-        send(body) {
-            if (this.#paramObj !== null && this.#paramObj !== undefined) {
-                this.#xhr.send(this.#paramObj);
-            } else {
-                this.#xhr.send(body);
-            }
-            return this;
-        }
-        sendPromise(body) {
-            return new Promise((function(req, body){
-                return function (resolve, reject) {
-                    req.onloadend = (function(resolve, reject){
-                            return function (e, xhr) {
-                                if (200 === xhr.status) {
-                                    resolve(xhr);
-                                } else {
-                                    reject(xhr);
-                                }
-                            };
-                    })(resolve, reject);
-                    req.send(body);
-                };
-            })(this, body));
-        }
-        setRequestHeader(header, value) {
-            return this.#xhr.setRequestHeader(header, value);
-        }
-        setOnreadystatechange(fn) {
-            this.onreadystatechange = fn;
-            return this;
-        }
-        setWithCredentials(val) {
-            this.withCredentials = val;
-            return this;
-        }
-        setOnabort(fn) {
-            this.onabort = fn;
-            return this;
-        }
-        setOnerror(fn) {
-            this.onerror = fn;
-            return this;
-        }
-        setOnload(fn) {
-            this.onload = fn;
-            return this;
-        }
-        setOnloadend(fn) {
-            this.onloadend = fn;
-            return this;
-        }
-        setOnloadstart(fn) {
-            this.onloadstart = fn;
-            return this;
-        }
-        setOnprogress(fn) {
-            this.onprogress = fn;
-            return this;
-        }
-        setOntimeout(fn) {
-            this.ontimeout = fn;
-            return this;
-        }
-        setReadystatechange(state, status, fn) {
-            if (!('readystatechange' in this.#__resFunc)) {
-                this.#__resFunc['readystatechange'] = Object.create(null);
-            }
-            if (state === null && status === null) {
-                this.#__resFunc['readystatechange']['default'] = fn;
-            } else if (state !== null && status === null) {
-                if (!('statusDefault' in this.#__resFunc['readystatechange'])) {
-                    this.#__resFunc['readystatechange']['statusDefault'] = Object.create(null);
-                }
-                this.#__resFunc['readystatechange']['statusDefault'][String(state)] = fn;
-            } else if (state === null && status !== null) {
-                if (!('stateDefault' in this.#__resFunc['readystatechange'])) {
-                    this.#__resFunc['readystatechange']['stateDefault'] = Object.create(null);
-                }
-                this.#__resFunc['readystatechange']['stateDefault'][String(status)] = fn;
-            } else {
-                if (!('fn' in this.#__resFunc['readystatechange'])) {
-                    this.#__resFunc['readystatechange']['fn'] = Object.create(null);
-                }
-                if (!(state in this.#__resFunc['readystatechange']['fn'])) {
-                    this.#__resFunc['readystatechange']['fn'][String(state)] = Object.create(null);
-                }
-                this.#__resFunc['readystatechange']['fn'][String(state)][String(status)] = fn;
-            }
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    let status = String(xhr.status);
-                                    let readyState = String(xhr.readyState);
-
-                                    if ('fn' in resFunc && readyState in resFunc['fn'] && status in resFunc['fn'][readyState]) {
-                                        resFunc['fn'][readyState][status](e, xhr);
-                                    } else {
-                                        let execSomething = false;
-                                        if ('statusDefault' in resFunc && readyState in resFunc['statusDefault']) {
-                                            resFunc['statusDefault'][readyState](e, xhr);
-                                            execSomething = true;
-                                        }
-                                        if ('stateDefault' in resFunc && status in resFunc['stateDefault']) {
-                                            resFunc['stateDefault'][status](e, xhr);
-                                            execSomething = true;
-                                        }
-                                        if (execSomething === false && 'default' in resFunc) {
-                                            resFunc['default'](e, xhr);
-                                        }
-                                    }
-                                };
-                           })(this.#__resFunc['readystatechange']);
-            this.onreadystatechange = useFunc;
-            return this;
-        }
-        setAbort(fn) {
-            if (!('abort' in this.#__resFunc)) {
-                this.#__resFunc['abort'] = Object.create(null);
-            }
-            this.#__resFunc['abort']['default'] = fn;
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                };
-                           })(this.#__resFunc['abort']);
-            this.onabort = useFunc;
-            return this;
-        }
-        setError(fn) {
-            if (!('error' in this.#__resFunc)) {
-                this.#__resFunc['error'] = Object.create(null);
-            }
-            this.#__resFunc['error']['default'] = fn;
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                };
-                           })(this.#__resFunc['error']);
-            this.onerror = useFunc;
-            return this;
-        }
-        setLoad(status, fn) {
-            if (!('load' in this.#__resFunc)) {
-                this.#__resFunc['load'] = Object.create(null);
-            }
-            if (status === null) {
-                this.#__resFunc['load']['default'] = fn;
-            } else {
-                if (!('fn' in this.#__resFunc['load'])) {
-                    this.#__resFunc['load']['fn'] = Object.create(null);
-                }
-                this.#__resFunc['load']['fn'][String(status)] = fn;
-            }
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    let status = String(xhr.status);
-                                    if ('fn' in resFunc && status in resFunc['fn']) {
-                                        resFunc['fn'][status](e, xhr);
-                                    } else if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                };
-                           })(this.#__resFunc['load']);
-            this.onload = useFunc;
-            return this;
-        }
-        setLoadend(status, fn) {
-            if (!('loadend' in this.#__resFunc)) {
-                this.#__resFunc['loadend'] = Object.create(null);
-            }
-            if (status === null) {
-                this.#__resFunc['loadend']['default'] = fn;
-            } else {
-                if (!('fn' in this.#__resFunc['loadend'])) {
-                    this.#__resFunc['loadend']['fn'] = Object.create(null);
-                }
-                this.#__resFunc['loadend']['fn'][String(status)] = fn;
-            }
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    let status = String(xhr.status);
-                                    if ('fn' in resFunc && status in resFunc['fn']) {
-                                        resFunc['fn'][status](e, xhr);
-                                    } else if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                };
-                           })(this.#__resFunc['loadend']);
-            this.onloadend = useFunc;
-            return this;
-        }
-        setLoadstart(fn) {
-            if (!('loadstart' in this.#__resFunc)) {
-                this.#__resFunc['loadstart'] = Object.create(null);
-            }
-            this.#__resFunc['loadstart']['default'] = fn;
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                };
-                           })(this.#__resFunc['loadstart']);
-            this.onloadstart = useFunc;
-            return this;
-        }
-        setProgress(status, fn) {
-            if (!('progress' in this.#__resFunc)) {
-                this.#__resFunc['progress'] = Object.create(null);
-            }
-            if (status === null) {
-                this.#__resFunc['progress']['default'] = fn;
-            } else {
-                if (!('fn' in this.#__resFunc['progress'])) {
-                    this.#__resFunc['progress']['fn'] = Object.create(null);
-                }
-                this.#__resFunc['progress']['fn'][String(status)] = fn;
-            }
-            let useFunc = (function (resFunc) {
-                                return function (e, xhr) {
-                                    let status = String(xhr.status);
-                                    if ('fn' in resFunc && status in resFunc['fn']) {
-                                        resFunc['fn'][status](e, xhr);
-                                    } else if ('default' in resFunc) {
-                                        resFunc['default'](e, xhr);
-                                    }
-                                };
-                           })(this.#__resFunc['progress']);
-            this.onprogress = useFunc;
-            return this;
-        }
-        setTimeout(fn) {
-            if (typeof fn === 'function') {
-                if (!('timeout' in this.#__resFunc)) {
-                    this.#__resFunc['timeout'] = Object.create(null);
-                }
-                this.#__resFunc['timeout']['default'] = fn;
-                let useFunc = (function (resFunc) {
-                                    return function (e, xhr) {
-                                        if ('default' in resFunc) {
-                                            resFunc['default'](e, xhr);
-                                        }
-                                    };
-                               })(this.#__resFunc['timeout']);
-                this.ontimeout = useFunc;
-                return this;
-            } else {
-                this.timeout = fn;
-                return this;
-            }
-        }
     };
 
     this.getComponentController = function (componentPackeage){
@@ -4109,44 +3617,6 @@ function ___fairysupport(){
         }
     };
 
-    this.timeLineClass =  class FairysupportTimeLineClass {
-        
-        #fs;
-        #timelinePropList;
-        #preClazz;
-        #props;
-        #ms;
-        
-        constructor(fs, timelinePropList, preClazz, props, ms) {
-            this.#fs = fs;
-            this.#timelinePropList = timelinePropList;
-            this.#preClazz = preClazz;
-            this.#props = props;
-            this.#ms = ms;
-        }
-        execTimer() {
-            if (this.#preClazz !== null && this.#preClazz !== undefined && this.#preClazz.timerId !== null && this.#preClazz.timerId !== undefined) {
-                this.#preClazz.clerTimer();
-            }
-            if (this.timerId !== null && this.timerId !== undefined) {
-                let propsValues = this.#props.values();
-                for (let propsVal of propsValues) {
-                    this.#fs.setTimeLineProp(propsVal.obj, propsVal.value);
-                }
-            }
-            let timelineProp = this.#timelinePropList.shift();
-            if (timelineProp !== null && timelineProp !== undefined) {
-                let timeLineClazz = new this.#fs.timeLineClass(this.#fs, this.#timelinePropList, this, timelineProp.prop, timelineProp.ms);
-                timeLineClazz.timerId = window.setTimeout(timeLineClazz.execTimer.bind(timeLineClazz), timelineProp.ms - this.#ms);
-            } else {
-                this.clerTimer();
-            }
-        }
-        clerTimer() {
-            window.clearTimeout(this.timerId);
-        }
-    };
-
     this.timeline = function (argTimelinePropList){
 
         let timelinePropList = [].concat(argTimelinePropList);
@@ -4160,7 +3630,7 @@ function ___fairysupport(){
             }
         });
 
-        let timeLineClazz = new this.timeLineClass(this, timelinePropList, null, null, 0);
+        let timeLineClazz = new FairysupportTimeLineClass(this, timelinePropList, null, null, 0);
         timeLineClazz.execTimer();
     };
 
@@ -4801,7 +4271,662 @@ function ___fairysupport(){
         return '';
     };
 
-    this.storeClass = class FairysupportStore {
+    let storeInstance = new FairysupportStore();
+
+    this.store = function () {
+        return storeInstance;
+    };
+
+    this.singleStore = function (func, initValue) {
+        return new FairysupportSingleStore(initValue, func);
+    };
+
+    this.getCamelCb = function () {
+        return function (match) {
+            return match.substring(match.length - 1, match.length).toUpperCase();
+        };
+    };
+    this.getCamel = function (str){
+        let re = new RegExp("[_\\-].", "g");
+        str = str.replace(re, this.getCamelCb());
+        str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
+        return str;
+
+    };
+
+    this.init();
+
+}
+
+const $___fairysupport_param = function(v, l, tpl) {
+    let returnVal = null;
+    try {
+        returnVal = eval(tpl);
+    } catch (e) {
+        throw new Error(tpl + "\n" + e.toString());
+    }
+    return returnVal;
+}
+
+class FairysupportObjList {
+        #objMap;
+        #bindListStr;
+        #beforeMet;
+        #afterMet;
+        #addBeforeMet;
+        #addAfterMet;
+        #fairysupportClear;
+        constructor(bindList, beforeFn, afterFn, addBeforeFn, addAfterFn, fairysupportClear) {
+            this.#objMap = new Map();
+            this.#bindListStr = bindList;
+            this.#beforeMet = beforeFn;
+            this.#afterMet = afterFn;
+            this.#addBeforeMet = addBeforeFn;
+            this.#addAfterMet = addAfterFn;
+            this.#fairysupportClear = fairysupportClear;
+        }
+        size() {
+            return this.#objMap.size;
+        }
+        has(element) {
+            return this.#objMap.has(element);
+        }
+        add(element) {
+            this.#addBeforeMet({'name': this.#bindListStr, 'value': element});
+            this.#objMap.set(element, element);
+            this.#addAfterMet({'name': this.#bindListStr, 'value': element});
+            return this;
+        }
+        replace(oldElement, newElement) {
+            this.#beforeMet({'name': this.#bindListStr, 'value': oldElement});
+            this.#objMap.delete(oldElement);
+            if (oldElement) {
+                if (oldElement.parentNode && !(newElement instanceof fairysupportClear)) {
+                    if (newElement === null || newElement=== undefined) {
+                        oldElement.parentNode.removeChild(oldElement);
+                    } else if (newElement instanceof Node) {
+                        oldElement.parentNode.replaceChild(newElement, oldElement);
+                    }
+                }
+            }
+            this.#afterMet({'name': this.#bindListStr, 'value': oldElement});
+            return this;
+        }
+        remove(element) {
+            this.#beforeMet({'name': this.#bindListStr, 'value': element});
+            this.#objMap.delete(element);
+            if (element && element.parentNode && !(element instanceof fairysupportClear)) {
+                element.parentNode.removeChild(element);
+            }
+            this.#afterMet({'name': this.#bindListStr, 'value': element});
+            return this;
+        }
+        values() {
+            return this.#objMap.values();
+        }
+        forEach(fn, arg = null){
+            if (arg === null) {
+                for (let value of this.#objMap.values()) {
+                    fn(value);
+                }
+            } else {
+                for (let value of this.#objMap.values()) {
+                    fn(value, arg);
+                }
+            }
+        }
+        toArray(){
+            let ret = [];
+            for (let value of this.#objMap.values()) {
+                ret.push(value);
+            }
+            return ret;
+        }
+        getStringList(propertNameList, conditionFunc = null){
+            if (!Array.isArray(propertNameList)) {
+                propertNameList = [propertNameList];
+            }
+            let objChild = null;
+            let ret = [];
+            for (let value of this.#objMap.values()) {
+                objChild = value;
+                for (let i = 0; i + 1 < propertNameList.length; i++) {
+                    objChild = objChild[propertNameList[i]];
+                }
+                if (conditionFunc !== undefined && conditionFunc !== null && conditionFunc(value)) {
+                    ret.push(objChild[propertNameList[propertNameList.length - 1]] + '');
+                } else if (conditionFunc === undefined || conditionFunc === null) {
+                    ret.push(objChild[propertNameList[propertNameList.length - 1]] + '');
+                }
+            }
+            return ret;
+        }
+        getNumberList(propertNameList, conditionFunc = null){
+            if (!Array.isArray(propertNameList)) {
+                propertNameList = [propertNameList];
+            }
+            let objChild = null;
+            let ret = [];
+            for (let value of this.#objMap.values()) {
+                objChild = value;
+                for (let i = 0; i + 1 < propertNameList.length; i++) {
+                    objChild = objChild[propertNameList[i]];
+                }
+                if (conditionFunc !== undefined && conditionFunc !== null && conditionFunc(value)) {
+                    ret.push(objChild[propertNameList[propertNameList.length - 1]] - 0);
+                } else if (conditionFunc === undefined || conditionFunc === null) {
+                    ret.push(objChild[propertNameList[propertNameList.length - 1]] - 0);
+                }
+            }
+            return ret;
+        }
+        getBooleanList(propertNameList, conditionFunc = null){
+            if (!Array.isArray(propertNameList)) {
+                propertNameList = [propertNameList];
+            }
+            let objChild = null;
+            let ret = [];
+            for (let value of this.#objMap.values()) {
+                objChild = value;
+                for (let i = 0; i + 1 < propertNameList.length; i++) {
+                    objChild = objChild[propertNameList[i]];
+                }
+                if (conditionFunc !== undefined && conditionFunc !== null && conditionFunc(value)) {
+                    ret.push(Boolean(objChild[propertNameList[propertNameList.length - 1]]));
+                } else if (conditionFunc === undefined || conditionFunc === null) {
+                    ret.push(Boolean(objChild[propertNameList[propertNameList.length - 1]]));
+                }
+            }
+            return ret;
+        }
+}
+
+class FairysupportAjaxObj {
+        
+        #dom;
+        #componentPackeage;
+        #viewUrl;
+        #paramObj;
+        #argObj;
+        #cb;
+        #position;
+        #metName;
+        #componentRoot;
+
+        #xhr;
+        
+        #__resFunc;
+        
+        constructor(dom, componentPackeage, viewUrl, paramObj, argObj, cb, position, metName, componentRoot) {
+
+            this.#dom = dom;
+            this.#componentPackeage = componentPackeage;
+            this.#viewUrl = viewUrl;
+            this.#paramObj = paramObj;
+            this.#argObj = argObj;
+            this.#cb = cb;
+            this.#position = position;
+            this.#metName = metName;
+            this.#componentRoot = componentRoot;
+            this.#__resFunc = Object.create(null);
+
+            this.#xhr = new XMLHttpRequest();
+            let getFunc = (function(xhr){return function(){return xhr.onreadystatechange;};})(this.#xhr);
+            let setFunc = (function(xhr){return function(newFunc){xhr.onreadystatechange = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'onreadystatechange', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.readyState;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.readyState = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'readyState', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.response;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.response = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'response', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.responseText;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseText = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'responseText', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.responseType;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseType = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'responseType', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.responseURL;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseURL = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'responseURL', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.responseXML;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.responseXML = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'responseXML', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.status;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.status = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'status', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.statusText;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.statusText = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'statusText', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.timeout;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.timeout = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'timeout', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.upload;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.upload = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'upload', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.withCredentials;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newValue){xhr.withCredentials = newValue;};})(this.#xhr);
+            Object.defineProperty(this, 'withCredentials', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.onabort;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onabort = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'onabort', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.onerror;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onerror = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'onerror', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.onload;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onload = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'onload', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.onloadend;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onloadend = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'onloadend', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.onloadstart;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onloadstart = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'onloadstart', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.onprogress;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.onprogress = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'onprogress', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+            getFunc = (function(xhr){return function(){return xhr.ontimeout;};})(this.#xhr);
+            setFunc = (function(xhr){return function(newFunc){xhr.ontimeout = (function(xhr, newFunc){return function(e){newFunc(e, xhr);};})(xhr, newFunc);};})(this.#xhr);
+            Object.defineProperty(this, 'ontimeout', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+        }
+        setResponseType(val) {
+            this.responseType = val;
+            return this;
+        }
+        abort() {
+            this.#xhr.abort();
+            return this;
+        }
+        getAllResponseHeaders() {
+            return this.#xhr.getAllResponseHeaders();
+        }
+        getResponseHeader(headerName) {
+            return this.#xhr.getResponseHeader(headerName);
+        }
+        open(method, url, asyncFlg = true, user = null, password = null) {
+            this.#xhr.open(method, url, asyncFlg, user, password);
+            return this;
+        }
+        overrideMimeType(mimeType) {
+            this.#xhr.overrideMimeType(mimeType);
+            return this;
+        }
+        send(body) {
+            if (this.#paramObj !== null && this.#paramObj !== undefined) {
+                this.#xhr.send(this.#paramObj);
+            } else {
+                this.#xhr.send(body);
+            }
+            return this;
+        }
+        sendPromise(body) {
+            return new Promise((function(req, body){
+                return function (resolve, reject) {
+                    req.onloadend = (function(resolve, reject){
+                            return function (e, xhr) {
+                                if (200 === xhr.status) {
+                                    resolve(xhr);
+                                } else {
+                                    reject(xhr);
+                                }
+                            };
+                    })(resolve, reject);
+                    req.send(body);
+                };
+            })(this, body));
+        }
+        setRequestHeader(header, value) {
+            this.#xhr.setRequestHeader(header, value);
+            return this;
+        }
+        setOnreadystatechange(fn) {
+            this.onreadystatechange = fn;
+            return this;
+        }
+        setWithCredentials(val) {
+            this.withCredentials = val;
+            return this;
+        }
+        setOnabort(fn) {
+            this.onabort = fn;
+            return this;
+        }
+        setOnerror(fn) {
+            this.onerror = fn;
+            return this;
+        }
+        setOnload(fn) {
+            this.onload = fn;
+            return this;
+        }
+        setOnloadend(fn) {
+            this.onloadend = fn;
+            return this;
+        }
+        setOnloadstart(fn) {
+            this.onloadstart = fn;
+            return this;
+        }
+        setOnprogress(fn) {
+            this.onprogress = fn;
+            return this;
+        }
+        setOntimeout(fn) {
+            this.ontimeout = fn;
+            return this;
+        }
+        setReadystatechange(state, status, fn) {
+            if (!('readystatechange' in this.#__resFunc)) {
+                this.#__resFunc['readystatechange'] = Object.create(null);
+            }
+            if (state === null && status === null) {
+                this.#__resFunc['readystatechange']['default'] = fn;
+            } else if (state !== null && status === null) {
+                if (!('statusDefault' in this.#__resFunc['readystatechange'])) {
+                    this.#__resFunc['readystatechange']['statusDefault'] = Object.create(null);
+                }
+                this.#__resFunc['readystatechange']['statusDefault'][String(state)] = fn;
+            } else if (state === null && status !== null) {
+                if (!('stateDefault' in this.#__resFunc['readystatechange'])) {
+                    this.#__resFunc['readystatechange']['stateDefault'] = Object.create(null);
+                }
+                this.#__resFunc['readystatechange']['stateDefault'][String(status)] = fn;
+            } else {
+                if (!('fn' in this.#__resFunc['readystatechange'])) {
+                    this.#__resFunc['readystatechange']['fn'] = Object.create(null);
+                }
+                if (!(String(state) in this.#__resFunc['readystatechange']['fn'])) {
+                    this.#__resFunc['readystatechange']['fn'][String(state)] = Object.create(null);
+                }
+                this.#__resFunc['readystatechange']['fn'][String(state)][String(status)] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    let status = String(xhr.status);
+                                    let readyState = String(xhr.readyState);
+
+                                    if ('fn' in resFunc && readyState in resFunc['fn'] && status in resFunc['fn'][readyState]) {
+                                        resFunc['fn'][readyState][status](e, xhr);
+                                    } else {
+                                        let execSomething = false;
+                                        if ('statusDefault' in resFunc && readyState in resFunc['statusDefault']) {
+                                            resFunc['statusDefault'][readyState](e, xhr);
+                                            execSomething = true;
+                                        }
+                                        if ('stateDefault' in resFunc && status in resFunc['stateDefault']) {
+                                            resFunc['stateDefault'][status](e, xhr);
+                                            execSomething = true;
+                                        }
+                                        if (execSomething === false && 'default' in resFunc) {
+                                            resFunc['default'](e, xhr);
+                                        }
+                                    }
+                                };
+                           })(this.#__resFunc['readystatechange']);
+            this.onreadystatechange = useFunc;
+            return this;
+        }
+        setAbort(fn) {
+            if (!('abort' in this.#__resFunc)) {
+                this.#__resFunc['abort'] = Object.create(null);
+            }
+            this.#__resFunc['abort']['default'] = fn;
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.#__resFunc['abort']);
+            this.onabort = useFunc;
+            return this;
+        }
+        setError(fn) {
+            if (!('error' in this.#__resFunc)) {
+                this.#__resFunc['error'] = Object.create(null);
+            }
+            this.#__resFunc['error']['default'] = fn;
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.#__resFunc['error']);
+            this.onerror = useFunc;
+            return this;
+        }
+        setLoad(status, fn) {
+            if (!('load' in this.#__resFunc)) {
+                this.#__resFunc['load'] = Object.create(null);
+            }
+            if (status === null) {
+                this.#__resFunc['load']['default'] = fn;
+            } else {
+                if (!('fn' in this.#__resFunc['load'])) {
+                    this.#__resFunc['load']['fn'] = Object.create(null);
+                }
+                this.#__resFunc['load']['fn'][String(status)] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    let status = String(xhr.status);
+                                    if ('fn' in resFunc && status in resFunc['fn']) {
+                                        resFunc['fn'][status](e, xhr);
+                                    } else if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.#__resFunc['load']);
+            this.onload = useFunc;
+            return this;
+        }
+        setLoadend(status, fn) {
+            if (!('loadend' in this.#__resFunc)) {
+                this.#__resFunc['loadend'] = Object.create(null);
+            }
+            if (status === null) {
+                this.#__resFunc['loadend']['default'] = fn;
+            } else {
+                if (!('fn' in this.#__resFunc['loadend'])) {
+                    this.#__resFunc['loadend']['fn'] = Object.create(null);
+                }
+                this.#__resFunc['loadend']['fn'][String(status)] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    let status = String(xhr.status);
+                                    if ('fn' in resFunc && status in resFunc['fn']) {
+                                        resFunc['fn'][status](e, xhr);
+                                    } else if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.#__resFunc['loadend']);
+            this.onloadend = useFunc;
+            return this;
+        }
+        setLoadstart(fn) {
+            if (!('loadstart' in this.#__resFunc)) {
+                this.#__resFunc['loadstart'] = Object.create(null);
+            }
+            this.#__resFunc['loadstart']['default'] = fn;
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.#__resFunc['loadstart']);
+            this.onloadstart = useFunc;
+            return this;
+        }
+        setProgress(status, fn) {
+            if (!('progress' in this.#__resFunc)) {
+                this.#__resFunc['progress'] = Object.create(null);
+            }
+            if (status === null) {
+                this.#__resFunc['progress']['default'] = fn;
+            } else {
+                if (!('fn' in this.#__resFunc['progress'])) {
+                    this.#__resFunc['progress']['fn'] = Object.create(null);
+                }
+                this.#__resFunc['progress']['fn'][String(status)] = fn;
+            }
+            let useFunc = (function (resFunc) {
+                                return function (e, xhr) {
+                                    let status = String(xhr.status);
+                                    if ('fn' in resFunc && status in resFunc['fn']) {
+                                        resFunc['fn'][status](e, xhr);
+                                    } else if ('default' in resFunc) {
+                                        resFunc['default'](e, xhr);
+                                    }
+                                };
+                           })(this.#__resFunc['progress']);
+            this.onprogress = useFunc;
+            return this;
+        }
+        setTimeout(fn) {
+            if (typeof fn === 'function') {
+                if (!('timeout' in this.#__resFunc)) {
+                    this.#__resFunc['timeout'] = Object.create(null);
+                }
+                this.#__resFunc['timeout']['default'] = fn;
+                let useFunc = (function (resFunc) {
+                                    return function (e, xhr) {
+                                        if ('default' in resFunc) {
+                                            resFunc['default'](e, xhr);
+                                        }
+                                    };
+                               })(this.#__resFunc['timeout']);
+                this.ontimeout = useFunc;
+                return this;
+            } else {
+                this.timeout = fn;
+                return this;
+            }
+        }
+}
+
+class FairysupportSingleStore {
+        #data;
+        #listener;
+        constructor(d, l) {
+            this.#data = d;
+            this.#listener = l;
+            let getFunc = (function(storeObj){return function(newValue){storeObj.set(newValue);};})(this);
+            let setFunc = (function(){return function(){throw new Error("can't set the wrong type");};})();
+            Object.defineProperty(this, 'store', {
+                enumerable: true,
+                configurable: false,
+                get: getFunc,
+                set : setFunc
+            });
+        }
+        set(value) {
+            this.#data = this.#listener(value);
+        }
+        get() {
+            return this.#data;
+        }
+}
+
+class FairysupportStore {
         #data;
         #listener;
         constructor() {
@@ -4838,37 +4963,49 @@ function ___fairysupport(){
             }
             this.#listener.get(k).delete(l);
         }
-    };
-
-    let storeInstance = new this.storeClass();
-
-    this.store = function () {
-        return storeInstance;
-    };
-
-    this.getCamelCb = function () {
-        return function (match) {
-            return match.substring(match.length - 1, match.length).toUpperCase();
-        };
-    };
-    this.getCamel = function (str){
-        let re = new RegExp("[_\\-].", "g");
-        str = str.replace(re, this.getCamelCb());
-        str = str.substring(0, 1).toUpperCase() + str.substring(1, str.length);
-        return str;
-
-    };
-
-    this.init();
-
 }
-const $___fairysupport_param = function(v, l, tpl) {
-    let returnVal = null;
-    try {
-        returnVal = eval(tpl);
-    } catch (e) {
-        throw new Error(tpl + "\n" + e.toString());
-    }
-    return returnVal;
+
+class FairysupportTimeLineClass {
+        
+        #fs;
+        #timelinePropList;
+        #preClazz;
+        #props;
+        #ms;
+        
+        constructor(fs, timelinePropList, preClazz, props, ms) {
+            this.#fs = fs;
+            this.#timelinePropList = timelinePropList;
+            this.#preClazz = preClazz;
+            this.#props = props;
+            this.#ms = ms;
+        }
+        execTimer() {
+            if (this.#preClazz !== null && this.#preClazz !== undefined && this.#preClazz.timerId !== null && this.#preClazz.timerId !== undefined) {
+                this.#preClazz.clearTimer();
+            }
+            if (this.timerId !== null && this.timerId !== undefined) {
+                let propsValues = this.#props.values();
+                for (let propsVal of propsValues) {
+                    this.#fs.setTimeLineProp(propsVal.obj, propsVal.value);
+                }
+            }
+            let timelineProp = this.#timelinePropList.shift();
+            if (timelineProp !== null && timelineProp !== undefined) {
+                let timeLineClazz = new FairysupportTimeLineClass(this.#fs, this.#timelinePropList, this, timelineProp.prop, timelineProp.ms);
+                timeLineClazz.timerId = window.setTimeout(timeLineClazz.execTimer.bind(timeLineClazz), timelineProp.ms - this.#ms);
+            } else {
+                this.clearTimer();
+            }
+        }
+        clearTimer() {
+            window.clearTimeout(this.timerId);
+        }
 }
-const $f = new ___fairysupport();
+
+const $f = '$f' in globalThis ? globalThis.$f : new FairysupportJs();
+if (!('$f' in globalThis)) {
+    globalThis.$f = $f;
+}
+
+export {$f, FairysupportJs, FairysupportObjList, FairysupportAjaxObj, FairysupportSingleStore, FairysupportStore, FairysupportTimeLineClass};
