@@ -126,7 +126,7 @@ export declare class FairysupportJs {
 }
 
 export declare class FairysupportObjList<T extends HTMLElement> {
-    constructor(bindList: string, beforeFn: object, afterFn: object, addBeforeFn: object, addAfterFn: object, fairysupportClear: object);
+    constructor(bindList: string, beforeFn: object, afterFn: object, addBeforeFn: object, addAfterFn: object);
     size(): number;
     has(element: T | null | undefined): boolean;
     add(element: T): FairysupportObjList<T>;

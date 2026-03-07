@@ -93,11 +93,6 @@ function FairysupportJs(){
         }
     }
 
-    let fairysupportClear = class FairysupportClear {
-        constructor() {
-        }
-    };
-
     this.getEnv = function () {
         return envTxt;
     };
@@ -580,9 +575,9 @@ function FairysupportJs(){
                                             };
                                         }
                            )(s);
-            let setFunc = (function(s, bindStr, beforeMet, afterMet, fairysupportClear){
+            let setFunc = (function(s, bindStr, beforeMet, afterMet){
                                             return function(newElement){
-                                                currentElement = null;
+                                                let currentElement = null;
                                                 for (let value of s.values()) {
                                                     currentElement = value;
                                                     break;
@@ -590,7 +585,7 @@ function FairysupportJs(){
                                                 if (currentElement) {
                                                     beforeMet({'name': bindStr, 'value': currentElement});
                                                     s.clear();
-                                                    if (currentElement.parentNode && !(newElement instanceof fairysupportClear)) {
+                                                    if (currentElement.parentNode && !(newElement instanceof FairysupportClear)) {
                                                         if (newElement === null || newElement=== undefined) {
                                                             currentElement.parentNode.removeChild(currentElement);
                                                         } else {
@@ -601,7 +596,7 @@ function FairysupportJs(){
                                                 }
                                             };
                                         }
-                            )(s, bindStr, beforeMet, afterMet, fairysupportClear);
+                            )(s, bindStr, beforeMet, afterMet);
             const bindStrSplit = bindStr.split('.');
             let targetObj = this.clazz.obj;
             for (let i = 0; i + 1 < bindStrSplit.length; i++) {
@@ -631,7 +626,7 @@ function FairysupportJs(){
                     targetObj = targetObj[bindStrSplit[i]];
                 }
                 
-                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet, addBeforeFn, addAfterFn, fairysupportClear);
+                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet, addBeforeFn, addAfterFn);
             }
             targetObj[bindStrSplit[bindStrSplit.length - 1]].add(dom);
         }
@@ -862,7 +857,7 @@ function FairysupportJs(){
 
     this.removeControllerSingleObjOnlyValue = function (dom, bindStr){
         if (dom !== null && dom !== undefined && bindStr !== null && bindStr !== undefined && this.clazz.obj[bindStr] === dom) {
-            this.clazz.obj[bindStr] = new fairysupportClear();
+            this.clazz.obj[bindStr] = new FairysupportClear();
         }
     };
 
@@ -875,7 +870,7 @@ function FairysupportJs(){
     this.removeControllerSingleListOnlyValue = function (dom, bindList){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
             if (this.clazz.obj[bindList] !== undefined && this.clazz.obj[bindList].has && this.clazz.obj[bindList].has(dom)) {
-                this.clazz.obj[bindList].replace(dom, new fairysupportClear());
+                this.clazz.obj[bindList].replace(dom, new FairysupportClear());
             }
         }
     };
@@ -1191,9 +1186,9 @@ function FairysupportJs(){
                                             };
                                         }
                            )(s);
-            let setFunc = (function(s, bindStr, beforeMet, afterMet, fairysupportClear){
+            let setFunc = (function(s, bindStr, beforeMet, afterMet){
                                             return function(newElement){
-                                                currentElement = null;
+                                                let currentElement = null;
                                                 for (let value of s.values()) {
                                                     currentElement = value;
                                                     break;
@@ -1201,7 +1196,7 @@ function FairysupportJs(){
                                                 if (currentElement) {
                                                     beforeMet({'name': bindStr, 'value': currentElement});
                                                     s.clear();
-                                                    if (currentElement.parentNode && !(newElement instanceof fairysupportClear)) {
+                                                    if (currentElement.parentNode && !(newElement instanceof FairysupportClear)) {
                                                         if (newElement === null || newElement=== undefined) {
                                                             currentElement.parentNode.removeChild(currentElement);
                                                         } else if (newElement instanceof Node) {
@@ -1212,7 +1207,7 @@ function FairysupportJs(){
                                                 }
                                             };
                                         }
-                            )(s, bindStr, beforeMet, afterMet, fairysupportClear);
+                            )(s, bindStr, beforeMet, afterMet);
             
             const bindStrSplit = bindStr.split('.');
             let targetObj = this.componentControllerList[componentPath];
@@ -1244,7 +1239,7 @@ function FairysupportJs(){
                     targetObj = targetObj[bindStrSplit[i]];
                 }
                 
-                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn, fairysupportClear);
+                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn);
             }
             targetObj[bindStrSplit[bindStrSplit.length - 1]].add(dom);
         }
@@ -1276,7 +1271,7 @@ function FairysupportJs(){
 
     this.removeComponentSingleObjOnlyValue = function (dom, bindStr, componentPath){
         if (dom !== null && dom !== undefined && bindStr !== null && bindStr !== undefined && this.componentControllerList[componentPath] !== undefined && this.componentControllerList[componentPath][bindStr] === dom) {
-            this.componentControllerList[componentPath][bindStr] = new fairysupportClear();
+            this.componentControllerList[componentPath][bindStr] = new FairysupportClear();
         }
     };
 
@@ -1289,7 +1284,7 @@ function FairysupportJs(){
     this.removeComponentSingleListOnlyValue = function (dom, bindList, componentPath){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
             if (this.componentControllerList[componentPath] !== undefined && this.componentControllerList[componentPath][bindList] !== undefined && this.componentControllerList[componentPath][bindList].has && this.componentControllerList[componentPath][bindList].has(dom)) {
-                this.componentControllerList[componentPath][bindList].replace(dom, new fairysupportClear());
+                this.componentControllerList[componentPath][bindList].replace(dom, new FairysupportClear());
             }
         }
     };
@@ -3142,9 +3137,9 @@ function FairysupportJs(){
                                             };
                                         }
                            )(s);
-            let setFunc = (function(s, bindStr, beforeMet, afterMet, fairysupportClear){
+            let setFunc = (function(s, bindStr, beforeMet, afterMet){
                                             return function(newElement){
-                                                currentElement = null;
+                                                let currentElement = null;
                                                 for (let value of s.values()) {
                                                     currentElement = value;
                                                     break;
@@ -3152,7 +3147,7 @@ function FairysupportJs(){
                                                 if (currentElement) {
                                                     beforeMet({'name': bindStr, 'value': currentElement});
                                                     s.clear();
-                                                    if (currentElement.parentNode && !(newElement instanceof fairysupportClear)) {
+                                                    if (currentElement.parentNode && !(newElement instanceof FairysupportClear)) {
                                                         if (newElement === null || newElement=== undefined) {
                                                             currentElement.parentNode.removeChild(currentElement);
                                                         } else if (newElement instanceof Node) {
@@ -3163,7 +3158,7 @@ function FairysupportJs(){
                                                 }
                                             };
                                         }
-                            )(s, bindStr, beforeMet, afterMet, fairysupportClear);
+                            )(s, bindStr, beforeMet, afterMet);
             
             const bindStrSplit = bindStr.split('.');
             let targetObj = controllerObj;
@@ -3195,7 +3190,7 @@ function FairysupportJs(){
                     targetObj = targetObj[bindStrSplit[i]];
                 }
 
-                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn, fairysupportClear);
+                targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn);
             }
             targetObj[bindStrSplit[bindStrSplit.length - 1]].add(dom);
         }
@@ -4315,15 +4310,13 @@ class FairysupportObjList {
         #afterMet;
         #addBeforeMet;
         #addAfterMet;
-        #fairysupportClear;
-        constructor(bindList, beforeFn, afterFn, addBeforeFn, addAfterFn, fairysupportClear) {
+        constructor(bindList, beforeFn, afterFn, addBeforeFn, addAfterFn) {
             this.#objMap = new Map();
             this.#bindListStr = bindList;
             this.#beforeMet = beforeFn;
             this.#afterMet = afterFn;
             this.#addBeforeMet = addBeforeFn;
             this.#addAfterMet = addAfterFn;
-            this.#fairysupportClear = fairysupportClear;
         }
         size() {
             return this.#objMap.size;
@@ -4341,7 +4334,7 @@ class FairysupportObjList {
             this.#beforeMet({'name': this.#bindListStr, 'value': oldElement});
             this.#objMap.delete(oldElement);
             if (oldElement) {
-                if (oldElement.parentNode && !(newElement instanceof fairysupportClear)) {
+                if (oldElement.parentNode && !(newElement instanceof FairysupportClear)) {
                     if (newElement === null || newElement=== undefined) {
                         oldElement.parentNode.removeChild(oldElement);
                     } else if (newElement instanceof Node) {
@@ -4355,7 +4348,7 @@ class FairysupportObjList {
         remove(element) {
             this.#beforeMet({'name': this.#bindListStr, 'value': element});
             this.#objMap.delete(element);
-            if (element && element.parentNode && !(element instanceof fairysupportClear)) {
+            if (element && element.parentNode && !(element instanceof FairysupportClear)) {
                 element.parentNode.removeChild(element);
             }
             this.#afterMet({'name': this.#bindListStr, 'value': element});
@@ -5001,6 +4994,11 @@ class FairysupportTimeLineClass {
         clearTimer() {
             window.clearTimeout(this.timerId);
         }
+}
+
+class FairysupportClear {
+    constructor() {
+    }
 }
 
 const $f = '$f' in globalThis ? globalThis.$f : new FairysupportJs();
