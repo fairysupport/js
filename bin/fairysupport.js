@@ -616,15 +616,18 @@ function FairysupportJs(){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
             const bindStrSplit = bindList.split('.');
             let targetObj = this.clazz.obj;
-            if (this.clazz.obj[bindList] === null || this.clazz.obj[bindList] === undefined) {
+            for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                if (!(targetObj[bindStrSplit[i]])) {
+                    targetObj[bindStrSplit[i]] = Object.create(null);
+                }
+                targetObj = targetObj[bindStrSplit[i]];
+            }
+
+            if (targetObj[bindStrSplit[bindStrSplit.length - 1]] === null || targetObj[bindStrSplit[bindStrSplit.length - 1]] === undefined) {
                 let beforeMet = this.getControllerMethodInputArgs(this, 'beforeRemoveList');
                 let afterMet = this.getControllerMethodInputArgs(this, 'afterRemoveList');
                 let addBeforeFn = this.getControllerMethodInputArgs(this, 'beforeBindList');
                 let addAfterFn = this.getControllerMethodInputArgs(this, 'afterBindList');
-                
-                for (let i = 0; i + 1 < bindStrSplit.length; i++) {
-                    targetObj = targetObj[bindStrSplit[i]];
-                }
                 
                 targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet, addBeforeFn, addAfterFn);
             }
@@ -1229,15 +1232,18 @@ function FairysupportJs(){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
             const bindStrSplit = bindList.split('.');
             let targetObj = this.componentControllerList[componentPath];
-            if (this.componentControllerList[componentPath][bindList] === null || this.componentControllerList[componentPath][bindList] === undefined) {
+            for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                if (!(targetObj[bindStrSplit[i]])) {
+                    targetObj[bindStrSplit[i]] = Object.create(null);
+                }
+                targetObj = targetObj[bindStrSplit[i]];
+            }
+            
+            if (targetObj[bindStrSplit[bindStrSplit.length - 1]] === null || targetObj[bindStrSplit[bindStrSplit.length - 1]] === undefined) {
                 let beforeMet = this.getComponentMethodInputArgs(this, componentPath, 'beforeRemoveList');
                 let afterMet = this.getComponentMethodInputArgs(this, componentPath, 'afterRemoveList');
                 let addBeforeFn = this.getComponentMethodInputArgs(this, componentPath, 'beforeBindList');
                 let addAfterFn = this.getComponentMethodInputArgs(this, componentPath, 'afterBindList');
-                
-                for (let i = 0; i + 1 < bindStrSplit.length; i++) {
-                    targetObj = targetObj[bindStrSplit[i]];
-                }
                 
                 targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn);
             }
@@ -3196,16 +3202,19 @@ function FairysupportJs(){
         if (dom !== null && dom !== undefined && bindList !== null && bindList !== undefined) {
             const bindStrSplit = bindList.split('.');
             let targetObj = controllerObj;
-            if (controllerObj[bindList] === null || controllerObj[bindList] === undefined) {
+            for (let i = 0; i + 1 < bindStrSplit.length; i++) {
+                if (!(targetObj[bindStrSplit[i]])) {
+                    targetObj[bindStrSplit[i]] = Object.create(null);
+                }
+                targetObj = targetObj[bindStrSplit[i]];
+            }
+            
+            if (targetObj[bindStrSplit[bindStrSplit.length - 1]] === null || targetObj[bindStrSplit[bindStrSplit.length - 1]] === undefined) {
                 let beforeMet = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'beforeRemoveList');
                 let afterMet = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'afterRemoveList');
                 let addBeforeFn = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'beforeBindList');
                 let addAfterFn = this.getUniqueComponentMethodInputArgs(this, controllerObj, methodList, 'afterBindList');
                 
-                for (let i = 0; i + 1 < bindStrSplit.length; i++) {
-                    targetObj = targetObj[bindStrSplit[i]];
-                }
-
                 targetObj[bindStrSplit[bindStrSplit.length - 1]] = new FairysupportObjList(bindList, beforeMet, afterMet ,addBeforeFn ,addAfterFn);
             }
             targetObj[bindStrSplit[bindStrSplit.length - 1]].add(dom);
@@ -4399,12 +4408,13 @@ class FairysupportObjList {
             }
             return ret;
         }
-        getStringList(propertNameList, conditionFunc = null){
+        getStringList(propertNameList, emptyAlternative = [], conditionFunc = null){
             if (!Array.isArray(propertNameList)) {
                 propertNameList = [propertNameList];
             }
             let objChild = null;
             let ret = [];
+            let emptyFlg = true;
             for (let value of this.#objMap.values()) {
                 objChild = value;
                 for (let i = 0; i + 1 < propertNameList.length; i++) {
@@ -4412,18 +4422,24 @@ class FairysupportObjList {
                 }
                 if (conditionFunc !== undefined && conditionFunc !== null && conditionFunc(value)) {
                     ret.push(objChild[propertNameList[propertNameList.length - 1]] + '');
+                    emptyFlg = false;
                 } else if (conditionFunc === undefined || conditionFunc === null) {
                     ret.push(objChild[propertNameList[propertNameList.length - 1]] + '');
+                    emptyFlg = false;
                 }
+            }
+            if (emptyFlg) {
+                return emptyAlternative;
             }
             return ret;
         }
-        getNumberList(propertNameList, conditionFunc = null){
+        getNumberList(propertNameList, emptyAlternative = [], conditionFunc = null){
             if (!Array.isArray(propertNameList)) {
                 propertNameList = [propertNameList];
             }
             let objChild = null;
             let ret = [];
+            let emptyFlg = true;
             for (let value of this.#objMap.values()) {
                 objChild = value;
                 for (let i = 0; i + 1 < propertNameList.length; i++) {
@@ -4431,18 +4447,24 @@ class FairysupportObjList {
                 }
                 if (conditionFunc !== undefined && conditionFunc !== null && conditionFunc(value)) {
                     ret.push(objChild[propertNameList[propertNameList.length - 1]] - 0);
+                    emptyFlg = false;
                 } else if (conditionFunc === undefined || conditionFunc === null) {
                     ret.push(objChild[propertNameList[propertNameList.length - 1]] - 0);
+                    emptyFlg = false;
                 }
+            }
+            if (emptyFlg) {
+                return emptyAlternative;
             }
             return ret;
         }
-        getBooleanList(propertNameList, conditionFunc = null){
+        getBooleanList(propertNameList, emptyAlternative = [], conditionFunc = null){
             if (!Array.isArray(propertNameList)) {
                 propertNameList = [propertNameList];
             }
             let objChild = null;
             let ret = [];
+            let emptyFlg = true;
             for (let value of this.#objMap.values()) {
                 objChild = value;
                 for (let i = 0; i + 1 < propertNameList.length; i++) {
@@ -4450,9 +4472,14 @@ class FairysupportObjList {
                 }
                 if (conditionFunc !== undefined && conditionFunc !== null && conditionFunc(value)) {
                     ret.push(Boolean(objChild[propertNameList[propertNameList.length - 1]]));
+                    emptyFlg = false;
                 } else if (conditionFunc === undefined || conditionFunc === null) {
                     ret.push(Boolean(objChild[propertNameList[propertNameList.length - 1]]));
+                    emptyFlg = false;
                 }
+            }
+            if (emptyFlg) {
+                return emptyAlternative;
             }
             return ret;
         }

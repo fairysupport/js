@@ -135,9 +135,9 @@ export declare class FairysupportObjList<T extends HTMLElement> {
     values(): Iterator<T>;
     forEach(fn: Function, arg?: any): void;
     toArray(): T[];
-    getStringList(propertNameList: string | Array<string>, conditionFunc?: Function): Array<string>;
-    getNumberList(propertNameList: string | Array<string>, conditionFunc?: Function): Array<number>;
-    getBooleanList(propertNameList: string | Array<string>, conditionFunc?: Function): Array<boolean>;
+    getStringList<R>(propertNameList: string | Array<string>, emptyAlternative?: R, conditionFunc?: Function): Array<string> | R;
+    getNumberList<R>(propertNameList: string | Array<string>, emptyAlternative?: R, conditionFunc?: Function): Array<number> | R;
+    getBooleanList<R>(propertNameList: string | Array<string>, emptyAlternative?: R, conditionFunc?: Function): Array<boolean> | R;
 }
 
 export declare class FairysupportAjaxObj {
