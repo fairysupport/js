@@ -2414,25 +2414,29 @@ function FairysupportJs(){
 
     };
 
-    this.appendResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, 'append');
+    this.appendResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, sendMethod, 'append');
     };
-    this.beforeResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, 'before');
+    this.beforeResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, sendMethod, 'before');
     };
-    this.afterResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, 'after');
+    this.afterResJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonTemplate(dom, templatePackeage, reqUrl, paramObj, withCredentials, sendMethod, 'after');
     };
 
-    this.resJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing){
+    this.resJsonTemplate = function (dom, templatePackeage, reqUrl, paramObj, withCredentials, sendMethod, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing){
+        if (sendMethod === undefined || sendMethod === null) {
+            sendMethod = 'POST';
+        }
+
+        return new Promise((function(fs, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing, sendMethod){
             return function (resolve, reject) {
-                let req = fs.ajax(reqUrl, paramObj);
+                let req = fs.ajax(reqUrl, paramObj, sendMethod);
                 req.timeout = fsTimeout;
                 if (withCredentials) {
                     req.withCredentials = true;
@@ -2460,7 +2464,7 @@ function FairysupportJs(){
                 req.send();
 
             };
-        })(this, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing));
+        })(this, dom, templatePackeage, reqUrl, paramObj, withCredentials, position, retryCount, timing, sendMethod));
 
     };
 
@@ -2515,25 +2519,29 @@ function FairysupportJs(){
 
     };
 
-    this.appendResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, 'append');
+    this.appendResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'append');
     };
-    this.beforeResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, 'before');
+    this.beforeResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'before');
     };
-    this.afterResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, 'after');
+    this.afterResHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlTemplate(dom, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'after');
     };
 
-    this.resHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing){
+    this.resHtmlTemplate = function (dom, viewUrl, paramObj, argObj, withCredentials, sendMethod, position, retryCount, timing){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing){
+        if (sendMethod === undefined || sendMethod === null) {
+            sendMethod = 'POST';
+        }
+
+        return new Promise((function(fs, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing, sendMethod){
             return function (resolve, reject) {
-                let req = fs.emptyAjax(viewUrl, paramObj);
+                let req = fs.emptyAjax(viewUrl, paramObj, sendMethod);
                 req.timeout = fsTimeout;
                 req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 req.setRequestHeader('Accept', 'text/*');
@@ -2565,7 +2573,7 @@ function FairysupportJs(){
                 req.send();
 
             };
-        })(this, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing));
+        })(this, dom, viewUrl, paramObj, argObj, withCredentials, position, retryCount, timing, sendMethod));
 
     };
 
@@ -2704,25 +2712,29 @@ function FairysupportJs(){
 
     };
 
-    this.appendResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'append');
+    this.appendResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, 'append');
     };
-    this.beforeResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'before');
+    this.beforeResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, 'before');
     };
-    this.afterResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'after');
+    this.afterResJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonUniqueComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, 'after');
     };
 
-    this.resJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
+    this.resJsonUniqueComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
+        if (sendMethod === undefined || sendMethod === null) {
+            sendMethod = 'POST';
+        }
+
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount, sendMethod){
             return function (resolve, reject) {
-                let req = fs.ajax(reqUrl, paramObj);
+                let req = fs.ajax(reqUrl, paramObj, sendMethod);
                 req.timeout = fsTimeout;
                 if (withCredentials) {
                     req.withCredentials = true;
@@ -2750,7 +2762,7 @@ function FairysupportJs(){
                 req.send();
 
             };
-        })(this, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount));
+        })(this, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount, sendMethod));
 
     };
 
@@ -2805,25 +2817,29 @@ function FairysupportJs(){
 
     };
 
-    this.appendResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'append');
+    this.appendResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'append');
     };
-    this.beforeResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'before');
+    this.beforeResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'before');
     };
-    this.afterResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'after');
+    this.afterResHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlUniqueComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'after');
     };
 
-    this.resHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount){
+    this.resHtmlUniqueComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot){
+        if (sendMethod === undefined || sendMethod === null) {
+            sendMethod = 'POST';
+        }
+
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot, sendMethod){
             return function (resolve, reject) {
-                let req = fs.emptyAjax(viewUrl, paramObj);
+                let req = fs.emptyAjax(viewUrl, paramObj, sendMethod);
                 req.timeout = fsTimeout;
                 req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 req.setRequestHeader('Accept', 'text/*');
@@ -2859,7 +2875,7 @@ function FairysupportJs(){
                 req.send();
 
             };
-        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot));
+        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot, sendMethod));
 
     };
 
@@ -3233,25 +3249,29 @@ function FairysupportJs(){
 
     };
 
-    this.appendResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'append');
+    this.appendResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, 'append');
     };
-    this.beforeResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'before');
+    this.beforeResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, 'before');
     };
-    this.afterResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials){
-        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, 'after');
+    this.afterResJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod = 'POST'){
+        return this.resJsonSingleComponent(dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, 'after');
     };
 
-    this.resJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
+    this.resJsonSingleComponent = function (dom, componentPackeage, reqUrl, paramObj, withCredentials, sendMethod, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount){
+        if (sendMethod === undefined || sendMethod === null) {
+            sendMethod = 'POST';
+        }
+
+        return new Promise((function(fs, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount, sendMethod){
             return function (resolve, reject) {
-                let req = fs.ajax(reqUrl, paramObj);
+                let req = fs.ajax(reqUrl, paramObj, sendMethod);
                 req.timeout = fsTimeout;
                 if (withCredentials) {
                     req.withCredentials = true;
@@ -3279,7 +3299,7 @@ function FairysupportJs(){
                 req.send();
 
             };
-        })(this, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount));
+        })(this, dom, componentPackeage, reqUrl, paramObj, withCredentials, position, retryCount, sendMethod));
 
     };
 
@@ -3334,25 +3354,29 @@ function FairysupportJs(){
 
     };
 
-    this.appendResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'append');
+    this.appendResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'append');
     };
-    this.beforeResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'before');
+    this.beforeResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'before');
     };
-    this.afterResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials){
-        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, 'after');
+    this.afterResHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod = 'POST'){
+        return this.resHtmlSingleComponent(dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, 'after');
     };
 
-    this.resHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount){
+    this.resHtmlSingleComponent = function (dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, sendMethod, position, retryCount){
 
         if (retryCount === undefined || retryCount === null) {
             retryCount = 0;
         }
 
-        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot){
+        if (sendMethod === undefined || sendMethod === null) {
+            sendMethod = 'POST';
+        }
+
+        return new Promise((function(fs, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot, sendMethod){
             return function (resolve, reject) {
-                let req = fs.emptyAjax(viewUrl, paramObj);
+                let req = fs.emptyAjax(viewUrl, paramObj, sendMethod);
                 req.timeout = fsTimeout;
                 req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 req.setRequestHeader('Accept', 'text/*');
@@ -3388,7 +3412,7 @@ function FairysupportJs(){
                 req.send();
 
             };
-        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot));
+        })(this, dom, componentPackeage, viewUrl, paramObj, argObj, withCredentials, position, retryCount, componentRoot, sendMethod));
 
     };
 
@@ -3543,7 +3567,7 @@ function FairysupportJs(){
     this.emptyAjaxByForm = function (reqUrl, formObj, user = null, password = null){
 
         let req = new FairysupportAjaxObj(null, null, reqUrl, new FormData(formObj), null, null, null, 'ajaxByForm', null);
-        req.open('POST', reqUrl, true, user, password);
+        req.open(formObj.method, reqUrl, true, user, password);
 
         return req;
 
